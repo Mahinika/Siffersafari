@@ -13,6 +13,7 @@ import '../services/achievement_service.dart';
 import '../services/adaptive_difficulty_service.dart';
 import '../services/audio_service.dart';
 import '../services/feedback_service.dart';
+import '../services/quest_progression_service.dart';
 import '../services/question_generator_service.dart';
 import '../services/spaced_repetition_service.dart';
 
@@ -98,6 +99,14 @@ Future<void> initializeDependencies({
     _perf('getIt.register(SpacedRepetitionService)', () {
       getIt.registerLazySingleton<SpacedRepetitionService>(
         () => SpacedRepetitionService(),
+      );
+    });
+  }
+
+  if (!getIt.isRegistered<QuestProgressionService>()) {
+    _perf('getIt.register(QuestProgressionService)', () {
+      getIt.registerLazySingleton<QuestProgressionService>(
+        () => const QuestProgressionService(),
       );
     });
   }
