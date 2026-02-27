@@ -1,0 +1,65 @@
+name: math_game_app
+description: An educational math game app for children to learn basic arithmetic operations.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  flutter_riverpod: ^2.4.0
+  riverpod_annotation: ^2.3.0
+  
+  # Local Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.0
+  
+  # Audio
+  audioplayers: ^5.2.0
+  just_audio: ^0.9.36
+  
+  # Animations & Graphics
+  flutter_animate: ^4.5.0
+  lottie: ^2.7.0
+  
+  # UI & Design
+  google_fonts: ^6.1.0
+  flutter_screenutil: ^5.9.0
+  animations: ^2.0.11
+  
+  # Utilities
+  intl: ^0.19.0
+  equatable: ^2.0.5
+  get_it: ^7.6.4
+  uuid: ^4.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  
+  # Code Generation
+  build_runner: ^2.4.7
+  riverpod_generator: ^2.3.0
+  hive_generator: ^2.0.1
+  
+  # Testing
+  mocktail: ^1.0.1
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/sounds/
+    - assets/animations/
+    - assets/images/
+    - assets/images/themes/space/
+    - assets/images/themes/jungle/
