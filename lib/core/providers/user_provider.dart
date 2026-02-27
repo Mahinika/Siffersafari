@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/di/injection.dart';
 import '../../core/services/achievement_service.dart';
 import '../../core/services/audio_service.dart';
-import '../../core/utils/daily_goal_utils.dart';
+import '../../core/services/quest_progression_service.dart';
 import '../../data/repositories/local_storage_repository.dart';
+import '../../domain/entities/quest.dart';
 import '../../domain/entities/quiz_session.dart';
 import '../../domain/entities/user_progress.dart';
 import '../../domain/enums/age_group.dart';
@@ -16,8 +17,8 @@ class UserState {
     this.isLoading = false,
     this.errorMessage,
     this.lastReward,
-    this.dailyGoalTarget = defaultDailyGoalTarget,
-    this.dailyGoalProgressToday = 0,
+    this.questStatus,
+    this.questNotice,
   });
 
   final UserProgress? activeUser;
@@ -25,8 +26,10 @@ class UserState {
   final bool isLoading;
   final String? errorMessage;
   final AchievementReward? lastReward;
-  final int dailyGoalTarget;
-  final int dailyGoalProgressToday;
+  final QuestStatus? questStatus;
+  final String? questNotice;
+
+  static const Object _unset = Object();
 
   UserState copyWith({
     UserProgress? activeUser,
@@ -34,8 +37,8 @@ class UserState {
     bool? isLoading,
     String? errorMessage,
     AchievementReward? lastReward,
-    int? dailyGoalTarget,
-    int? dailyGoalProgressToday,
+    QuestStatus? questStatus,
+    Object? questNotice = _unset,
   }) {
     return UserState(
       activeUser: activeUser ?? this.activeUser,
@@ -43,45 +46,98 @@ class UserState {
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
       lastReward: lastReward,
-      dailyGoalTarget: dailyGoalTarget ?? this.dailyGoalTarget,
-      dailyGoalProgressToday:
-          dailyGoalProgressToday ?? this.dailyGoalProgressToday,
+      questStatus: questStatus ?? this.questStatus,
+      questNotice:
+          questNotice == _unset ? this.questNotice : questNotice as String?,
     );
   }
 }
 
 class UserNotifier extends StateNotifier<UserState> {
-  UserNotifier(this._repository, this._achievementService, this._audioService)
-      : super(const UserState());
+  UserNotifier(
+    this._repository,
+    this._achievementService,
+    this._audioService,
+    this._questProgressionService,
+  ) : super(const UserState());
 
   static const String _activeUserIdKey = 'active_user_id';
   static const String _legacyDemoUserName = 'Demo Användare';
   static String _onboardingDoneKey(String userId) => 'onboarding_done_$userId';
   static String _allowedOpsKey(String userId) => 'allowed_ops_$userId';
-
-  int _readDailyGoalTarget(String userId) {
-    final raw = _repository.getSetting(
-      dailyGoalTargetKey(userId),
-      defaultValue: defaultDailyGoalTarget,
-    );
-    if (raw is int) return raw;
-    if (raw is num) return raw.toInt();
-    return defaultDailyGoalTarget;
-  }
-
-  int _readDailyGoalProgressToday(String userId, DateTime now) {
-    final raw = _repository.getSetting(
-      dailyGoalProgressKey(userId, now),
-      defaultValue: 0,
-    );
-    if (raw is int) return raw;
-    if (raw is num) return raw.toInt();
-    return 0;
-  }
+  static String _questCurrentKey(String userId) => 'quest_current_$userId';
+  static String _questCompletedKey(String userId) => 'quest_completed_$userId';
 
   final LocalStorageRepository _repository;
   final AchievementService _achievementService;
   final AudioService _audioService;
+  final QuestProgressionService _questProgressionService;
+
+  Set<String> _readCompletedQuestIds(String userId) {
+    final raw = _repository.getSetting(_questCompletedKey(userId));
+    if (raw is List) {
+      return raw.map((e) => e.toString()).toSet();
+    }
+    return <String>{};
+  }
+
+  String? _readCurrentQuestId(String userId) {
+    final raw = _repository.getSetting(_questCurrentKey(userId));
+    if (raw is String && raw.isNotEmpty) return raw;
+    return null;
+  }
+
+  Future<void> _ensureQuestInitialized(UserProgress user) async {
+    final current = _readCurrentQuestId(user.userId);
+    if (current != null) return;
+    await _repository.saveSetting(
+      _questCurrentKey(user.userId),
+      _questProgressionService.firstQuestId(user),
+    );
+    await _repository.saveSetting(_questCompletedKey(user.userId), <String>[]);
+  }
+
+  Future<void> _setQuestState({
+    required String userId,
+    required String currentQuestId,
+    required Set<String> completedQuestIds,
+  }) async {
+    await _repository.saveSetting(_questCurrentKey(userId), currentQuestId);
+    await _repository.saveSetting(
+      _questCompletedKey(userId),
+      completedQuestIds.toList(growable: false),
+    );
+  }
+
+  /// Ensures the persisted quest pointer is valid for the user's current
+  /// quest path (grade/age-group) and not already completed.
+  Future<void> _reconcileQuestPointer(UserProgress user) async {
+    await _ensureQuestInitialized(user);
+
+    final completed = _readCompletedQuestIds(user.userId);
+    final current = _readCurrentQuestId(user.userId);
+    final status = _questProgressionService.getCurrentStatus(
+      user: user,
+      currentQuestId: current,
+      completedQuestIds: completed,
+    );
+
+    if (current != status.quest.id) {
+      await _repository.saveSetting(
+          _questCurrentKey(user.userId), status.quest.id);
+      final label = user.gradeLevel != null
+          ? 'Årskurs ${user.gradeLevel}'
+          : user.ageGroup.displayName;
+      state = state.copyWith(
+        questNotice: 'Uppdrag anpassat till $label.',
+      );
+    }
+  }
+
+  void clearQuestNotice() {
+    if (state.questNotice == null) return;
+    state = state.copyWith(questNotice: null);
+  }
 
   void _syncAudioSettings(UserProgress user) {
     _audioService.setSoundEnabled(user.soundEnabled);
@@ -140,23 +196,23 @@ class UserNotifier extends StateNotifier<UserState> {
             : null) ??
         (users.isNotEmpty ? users.first : null);
 
-    final now = DateTime.now();
-    final dailyGoalTarget =
-        activeUser != null ? _readDailyGoalTarget(activeUser.userId) : 0;
-    final dailyGoalProgressToday = activeUser != null
-        ? _readDailyGoalProgressToday(activeUser.userId, now)
-        : 0;
-
     if (activeUser != null) {
       _syncAudioSettings(activeUser);
+      await _reconcileQuestPointer(activeUser);
     }
+
+    final questStatus = activeUser == null
+        ? null
+        : _questProgressionService.getCurrentStatus(
+            user: activeUser,
+            currentQuestId: _readCurrentQuestId(activeUser.userId),
+            completedQuestIds: _readCompletedQuestIds(activeUser.userId),
+          );
 
     state = state.copyWith(
       allUsers: users,
       activeUser: activeUser,
-      dailyGoalTarget:
-          dailyGoalTarget > 0 ? dailyGoalTarget : defaultDailyGoalTarget,
-      dailyGoalProgressToday: dailyGoalProgressToday,
+      questStatus: questStatus,
       isLoading: false,
     );
   }
@@ -174,8 +230,14 @@ class UserNotifier extends StateNotifier<UserState> {
     if (user == null) return;
 
     _syncAudioSettings(user);
+    await _reconcileQuestPointer(user);
+    final questStatus = _questProgressionService.getCurrentStatus(
+      user: user,
+      currentQuestId: _readCurrentQuestId(user.userId),
+      completedQuestIds: _readCompletedQuestIds(user.userId),
+    );
     await _repository.saveSetting(_activeUserIdKey, userId);
-    state = state.copyWith(activeUser: user);
+    state = state.copyWith(activeUser: user, questStatus: questStatus);
   }
 
   Future<void> createUser({
@@ -193,6 +255,7 @@ class UserNotifier extends StateNotifier<UserState> {
 
     await _repository.saveUserProgress(newUser);
     await _repository.saveSetting(_activeUserIdKey, userId);
+    await _reconcileQuestPointer(newUser);
     await loadUsers();
     _syncAudioSettings(newUser);
     state = state.copyWith(activeUser: newUser);
@@ -201,6 +264,7 @@ class UserNotifier extends StateNotifier<UserState> {
   Future<void> saveUser(UserProgress user) async {
     await _repository.saveUserProgress(user);
     await _repository.saveSetting(_activeUserIdKey, user.userId);
+    await _reconcileQuestPointer(user);
     await loadUsers();
     _syncAudioSettings(user);
     state = state.copyWith(activeUser: user);
@@ -214,13 +278,6 @@ class UserNotifier extends StateNotifier<UserState> {
 
     final now = DateTime.now();
 
-    // Update "daily goal" progress (questions answered today).
-    final progressKey = dailyGoalProgressKey(user.userId, now);
-    final currentProgress = _readDailyGoalProgressToday(user.userId, now);
-    await _repository.saveSetting(
-      progressKey,
-      currentProgress + session.totalQuestions,
-    );
     final updatedStreak = _calculateStreak(
       currentStreak: user.currentStreak,
       lastSessionDate: user.lastSessionDate,
@@ -260,6 +317,45 @@ class UserNotifier extends StateNotifier<UserState> {
       achievements: updatedAchievements,
     );
 
+    await _reconcileQuestPointer(user);
+    final completedQuestIds = _readCompletedQuestIds(user.userId);
+    final currentQuestId = _readCurrentQuestId(user.userId) ??
+        _questProgressionService.firstQuestId(user);
+
+    final beforeQuestStatus = _questProgressionService.getCurrentStatus(
+      user: updatedUser,
+      currentQuestId: currentQuestId,
+      completedQuestIds: completedQuestIds,
+    );
+
+    // If current quest is completed, mark it done and advance.
+    if (beforeQuestStatus.isCompleted &&
+        !completedQuestIds.contains(beforeQuestStatus.quest.id)) {
+      final updatedCompleted = {
+        ...completedQuestIds,
+        beforeQuestStatus.quest.id
+      };
+      final nextId = _questProgressionService.nextQuestId(
+        user: updatedUser,
+        currentQuestId: beforeQuestStatus.quest.id,
+      );
+      await _setQuestState(
+        userId: user.userId,
+        currentQuestId: nextId ?? beforeQuestStatus.quest.id,
+        completedQuestIds: updatedCompleted,
+      );
+    }
+
+    // If grade/age-group changed earlier, ensure the quest pointer still
+    // matches the user's current path.
+    await _reconcileQuestPointer(updatedUser);
+
+    final questStatus = _questProgressionService.getCurrentStatus(
+      user: updatedUser,
+      currentQuestId: _readCurrentQuestId(user.userId),
+      completedQuestIds: _readCompletedQuestIds(user.userId),
+    );
+
     // Save a lightweight quiz history record (for parent/teacher dashboard).
     await _repository.saveQuizSession({
       'sessionId': session.sessionId,
@@ -282,6 +378,7 @@ class UserNotifier extends StateNotifier<UserState> {
     state = state.copyWith(
       activeUser: updatedUser,
       lastReward: reward,
+      questStatus: questStatus,
     );
   }
 
@@ -327,5 +424,11 @@ final userProvider = StateNotifierProvider<UserNotifier, UserState>((ref) {
   final repository = getIt<LocalStorageRepository>();
   final achievementService = getIt<AchievementService>();
   final audioService = getIt<AudioService>();
-  return UserNotifier(repository, achievementService, audioService);
+  final questProgressionService = getIt<QuestProgressionService>();
+  return UserNotifier(
+    repository,
+    achievementService,
+    audioService,
+    questProgressionService,
+  );
 });

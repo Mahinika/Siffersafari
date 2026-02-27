@@ -13,6 +13,30 @@ void main() {
     final debugLogs = Platform.environment['TAP_COUNT_DEBUG'] == '1';
     var taps = 0;
 
+    Finder _preferTappable(Finder finder) {
+      // When a Finder targets a Text/Icon inside a button, tapping the leaf can
+      // miss hit-testing depending on layout/overlays. Prefer tapping the
+      // nearest tappable ancestor.
+      final base = finder.first;
+
+      final candidates = <Finder>[
+        find.ancestor(of: base, matching: find.byType(IconButton)),
+        find.ancestor(of: base, matching: find.byType(ElevatedButton)),
+        find.ancestor(of: base, matching: find.byType(FilledButton)),
+        find.ancestor(of: base, matching: find.byType(OutlinedButton)),
+        find.ancestor(of: base, matching: find.byType(TextButton)),
+        find.ancestor(of: base, matching: find.byType(InkWell)),
+        find.ancestor(of: base, matching: find.byType(InkResponse)),
+        find.ancestor(of: base, matching: find.byType(GestureDetector)),
+        find.ancestor(of: base, matching: find.byType(ListTile)),
+      ];
+
+      for (final candidate in candidates) {
+        if (candidate.evaluate().isNotEmpty) return candidate;
+      }
+      return finder;
+    }
+
     Future<void> settle(
         [Duration duration = const Duration(milliseconds: 700)]) async {
       await tester.pumpAndSettle(duration);
@@ -21,10 +45,11 @@ void main() {
     Future<void> tap(Finder finder,
         {Duration settle = const Duration(milliseconds: 600)}) async {
       expect(finder, findsWidgets);
-      await tester.ensureVisible(finder.first);
+      final tappable = _preferTappable(finder);
+      await tester.ensureVisible(tappable.first);
       await tester.pumpAndSettle(const Duration(milliseconds: 200));
       taps++;
-      await tester.tap(finder.first);
+      await tester.tap(tappable.first);
       await tester.pumpAndSettle(settle);
     }
 
@@ -77,6 +102,15 @@ void main() {
       // Each question: 1 tap on an AnswerButton + 1 tap on "Fortsätt".
       for (var i = 0; i < 20; i++) {
         if (find.byType(AnswerButton).evaluate().isEmpty) {
+          // If a feedback dialog is still open, dismiss it first.
+          if (find.byType(Dialog).evaluate().isNotEmpty &&
+              find.text('Fortsätt').evaluate().isNotEmpty) {
+            await tap(find.text('Fortsätt'),
+                settle: const Duration(milliseconds: 500));
+            if (find.text('Tillbaka till Start').evaluate().isNotEmpty) return;
+            continue;
+          }
+
           // Likely already on Results.
           return;
         }
@@ -186,11 +220,6 @@ void main() {
       expect(find.text('Välj räknesätt').evaluate().isNotEmpty, isTrue,
           reason:
               'Expected ops onboarding step. Visible texts: ${_visibleTexts(tester).take(40).toList()}');
-      await tap(find.text('Nästa'), settle: const Duration(milliseconds: 700));
-
-      // Daily goal page
-      expect(find.text('Dagens mål').evaluate().isNotEmpty, isTrue,
-          reason: 'Expected daily-goal onboarding step.');
       await tap(find.text('Klar'), settle: const Duration(seconds: 1));
 
       await settle(const Duration(seconds: 1));
@@ -252,8 +281,15 @@ void main() {
       await answerAllQuestionsInSession();
 
       // On Results, tap recommended "Öva på det svåraste (2 min)".
-      if (find.text('Öva på det svåraste (2 min)').evaluate().isNotEmpty) {
-        await tap(find.text('Öva på det svåraste (2 min)'),
+      const practiceLabel = 'Öva på det svåraste (2 min)';
+      final practiceButton = find.widgetWithText(ElevatedButton, practiceLabel);
+
+      if (practiceButton.evaluate().isNotEmpty ||
+          find.text(practiceLabel).evaluate().isNotEmpty) {
+        await tap(
+            practiceButton.evaluate().isNotEmpty
+                ? practiceButton
+                : find.text(practiceLabel),
             settle: const Duration(seconds: 1));
         expect(find.textContaining('Fråga '), findsOneWidget);
       }

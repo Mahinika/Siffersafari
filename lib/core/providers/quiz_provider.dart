@@ -203,6 +203,11 @@ class QuizNotifier extends StateNotifier<QuizState> {
     );
   }
 
+  void clearFeedback() {
+    if (state.feedback == null) return;
+    state = state.copyWith(feedback: null);
+  }
+
   int _calculatePoints({
     required bool isCorrect,
     required Duration responseTime,

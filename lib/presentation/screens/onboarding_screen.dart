@@ -5,7 +5,6 @@ import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/user_provider.dart';
-import '../../core/utils/daily_goal_utils.dart';
 import '../../data/repositories/local_storage_repository.dart';
 import '../../domain/enums/operation_type.dart';
 
@@ -27,12 +26,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   int? _gradeLevel;
   Set<OperationType> _allowedOps = const {OperationType.multiplication};
-  int _dailyGoalTarget = defaultDailyGoalTarget;
 
   static String _doneKey(String userId) => 'onboarding_done_$userId';
   static String _allowedOpsKey(String userId) => 'allowed_ops_$userId';
-
-  static const _dailyGoalItems = <int>[5, 10, 20, 30];
 
   OperationType? _operationFromName(String name) {
     for (final op in OperationType.values) {
@@ -69,21 +65,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ? ops
           : const <OperationType>{OperationType.multiplication};
 
-      final rawTarget = repo.getSetting(
-        dailyGoalTargetKey(widget.userId),
-        defaultValue: defaultDailyGoalTarget,
-      );
-      final target = rawTarget is int
-          ? rawTarget
-          : rawTarget is num
-              ? rawTarget.toInt()
-              : defaultDailyGoalTarget;
-
       if (!mounted) return;
       setState(() {
         _gradeLevel = user?.gradeLevel;
         _allowedOps = allowedOps;
-        _dailyGoalTarget = target > 0 ? target : defaultDailyGoalTarget;
       });
 
       // If grade is already set (often chosen during user creation), start on
@@ -110,11 +95,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final repo = getIt<LocalStorageRepository>();
 
     // Persist settings chosen during onboarding.
-    await repo.saveSetting(
-      dailyGoalTargetKey(widget.userId),
-      _dailyGoalTarget > 0 ? _dailyGoalTarget : defaultDailyGoalTarget,
-    );
-
     await repo.saveSetting(
       _allowedOpsKey(widget.userId),
       _allowedOps.isNotEmpty
@@ -147,7 +127,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _next() {
-    if (_pageIndex >= 2) {
+    if (_pageIndex >= 1) {
       _finish();
       return;
     }
@@ -160,7 +140,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final progress = (_pageIndex + 1) / 3;
+    final progress = (_pageIndex + 1) / 2;
 
     return PopScope(
       canPop: false,
@@ -185,7 +165,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                     ),
                     Text(
-                      '${_pageIndex + 1}/3',
+                      '${_pageIndex + 1}/2',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.white70,
                             fontWeight: FontWeight.w600,
@@ -225,13 +205,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           _allowedOps = updated;
                         }),
                       ),
-                      _OnboardingDailyGoalPage(
-                        dailyGoalTarget: _dailyGoalTarget,
-                        items: _dailyGoalItems,
-                        onChanged: (value) => setState(() {
-                          _dailyGoalTarget = value;
-                        }),
-                      ),
                     ],
                   ),
                 ),
@@ -247,7 +220,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
                   child: Text(
-                    _pageIndex >= 2 ? 'Klar' : 'Nästa',
+                    _pageIndex >= 1 ? 'Klar' : 'Nästa',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -462,73 +435,6 @@ class _OnboardingOpsPage extends StatelessWidget {
               ),
             );
           }),
-        ],
-      ),
-    );
-  }
-}
-
-class _OnboardingDailyGoalPage extends StatelessWidget {
-  const _OnboardingDailyGoalPage({
-    required this.dailyGoalTarget,
-    required this.items,
-    required this.onChanged,
-  });
-
-  final int dailyGoalTarget;
-  final List<int> items;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final normalizedValue =
-        items.contains(dailyGoalTarget) ? dailyGoalTarget : items.first;
-
-    return _OnboardingCard(
-      icon: Icons.flag,
-      title: 'Dagens mål',
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Hur många frågor vill du göra per dag?',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
-                  fontWeight: FontWeight.w600,
-                ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppConstants.defaultPadding),
-          DropdownButton<int>(
-            value: normalizedValue,
-            dropdownColor: AppColors.spaceBackground,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-            underline: const SizedBox.shrink(),
-            items: items
-                .map(
-                  (v) => DropdownMenuItem<int>(
-                    value: v,
-                    child: Text('$v frågor'),
-                  ),
-                )
-                .toList(growable: false),
-            onChanged: (value) {
-              if (value == null) return;
-              onChanged(value);
-            },
-          ),
-          const SizedBox(height: AppConstants.defaultPadding),
-          Text(
-            'Du kan se din progress på startsidan.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
-                  fontWeight: FontWeight.w600,
-                ),
-            textAlign: TextAlign.center,
-          ),
         ],
       ),
     );

@@ -5,3 +5,8 @@ kids game background, jungle clearing, big leaves framing, soft sun rays, minima
 kids game background, playful vines and foliage border, bright greens, simple shapes, 2D illustration, no text
 kids game background, jungle river bend, smooth stones, leaves, warm palette, 2D illustration, no text
 kids game background, bamboo and leaf pattern, gentle depth, 2D illustration, clean shapes, no text
+
+# Quest hero candidates (for assets/images/themes/jungle/quest_hero.png)
+kids game mission card art, friendly jungle explorer path, clear center area, bright green leaves, warm sunlight, 2D illustration, no text
+kids game quest hero banner, jungle trail with treasure map vibe, soft depth, simple shapes, vibrant but calm colors, 2D illustration, no text
+kids educational app hero image, playful jungle camp with wooden sign silhouette, framing leaves, clean composition, 2D illustration, no text

@@ -13,6 +13,7 @@ import '../../core/services/achievement_service.dart';
 import '../../core/services/audio_service.dart';
 import '../../domain/entities/question.dart';
 import '../../domain/entities/quiz_session.dart';
+import '../../domain/enums/app_theme.dart';
 import '../../domain/enums/operation_type.dart';
 import '../widgets/star_rating.dart';
 import 'home_screen.dart';
@@ -163,6 +164,15 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final session = quizState.session;
     final reward = userState.lastReward;
 
+    final selectedTheme =
+        userState.activeUser?.selectedTheme ?? AppTheme.space;
+    final backgroundAsset = switch (selectedTheme) {
+      AppTheme.jungle => 'assets/images/themes/jungle/background.png',
+      _ => 'assets/images/themes/space/background.png',
+    };
+    final baseBackgroundColor =
+        selectedTheme == AppTheme.jungle ? AppColors.jungleBackground : AppColors.spaceBackground;
+
     if (session == null) {
       return const Scaffold(
         body: Center(
@@ -178,17 +188,39 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final hardest = _getHardestQuestions(session);
 
     return Scaffold(
-      backgroundColor: AppColors.spaceBackground,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: EdgeInsets.all(AppConstants.largePadding.w),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+      backgroundColor: baseBackgroundColor,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              backgroundAsset,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  'assets/images/splash_background.png',
+                  fit: BoxFit.cover,
+                );
+              },
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: baseBackgroundColor.withOpacity(0.76),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  padding: EdgeInsets.all(AppConstants.largePadding.w),
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
                     // Title
                     Text(
                       _getTitle(stars),
@@ -246,12 +278,14 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                             'Poäng',
                             session.totalPoints.toString(),
                           ),
-                          SizedBox(height: AppConstants.defaultPadding.h),
-                          _buildStatRow(
-                            context,
-                            'Ditt mål idag',
-                            '${userState.dailyGoalProgressToday}/${userState.dailyGoalTarget}',
-                          ),
+                          if (userState.questStatus != null) ...[
+                            SizedBox(height: AppConstants.defaultPadding.h),
+                            _buildStatRow(
+                              context,
+                              'Uppdrag',
+                              '${(userState.questStatus!.progress * 100).round()}%',
+                            ),
+                          ],
                           if (reward != null && reward.bonusPoints > 0) ...[
                             SizedBox(height: AppConstants.defaultPadding.h),
                             _buildStatRow(
@@ -465,12 +499,14 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                             ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

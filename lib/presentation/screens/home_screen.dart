@@ -11,6 +11,7 @@ import '../../core/providers/user_provider.dart';
 import '../../data/repositories/local_storage_repository.dart';
 import '../../domain/entities/user_progress.dart';
 import '../../domain/enums/age_group.dart';
+import '../../domain/enums/app_theme.dart';
 import '../../domain/enums/difficulty_level.dart';
 import '../../domain/enums/operation_type.dart';
 import 'onboarding_screen.dart';
@@ -215,6 +216,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
+    ref.read(userProvider.notifier).clearQuestNotice();
+
     final effectiveAgeGroup = DifficultyConfig.effectiveAgeGroup(
       fallback: user.ageGroup,
       gradeLevel: user.gradeLevel,
@@ -240,6 +243,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
     final user = userState.activeUser;
+
+    final selectedTheme = user?.selectedTheme ?? AppTheme.space;
+    final backgroundAsset = switch (selectedTheme) {
+      AppTheme.jungle => 'assets/images/themes/jungle/background.png',
+      _ => 'assets/images/themes/space/background.png',
+    };
+    final questHeroAsset = switch (selectedTheme) {
+      AppTheme.jungle => 'assets/images/themes/jungle/quest_hero.png',
+      _ => 'assets/images/themes/space/quest_hero.png',
+    };
+    final baseBackgroundColor = selectedTheme == AppTheme.jungle
+        ? AppColors.jungleBackground
+        : AppColors.spaceBackground;
 
     if (user != null && _loadedAllowedOpsForUserId != user.userId) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -330,320 +346,517 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final recommendedOperation = _recommendedOperation(allowedOps);
 
     return Scaffold(
-      backgroundColor: AppColors.spaceBackground,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.defaultPadding),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                // App Title + Settings
-                Row(
+      backgroundColor: baseBackgroundColor,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              backgroundAsset,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  'assets/images/splash_background.png',
+                  fit: BoxFit.cover,
+                );
+              },
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: baseBackgroundColor.withOpacity(0.72),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.defaultPadding),
+              child: SingleChildScrollView(
+                child: Column(
                   children: [
-                    Expanded(
-                      child: Text(
-                        AppConstants.appName,
-                        style:
-                            Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    // App Title + Settings
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            AppConstants.appName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineLarge
+                                ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
-                      ),
+                          ),
+                        ),
+                        if (user != null)
+                          IconButton(
+                            tooltip: 'Föräldraläge',
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const ParentPinScreen(),
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.lock,
+                              color: Colors.white70,
+                            ),
+                          ),
+                      ],
                     ),
-                    if (user != null)
-                      IconButton(
-                        tooltip: 'Föräldraläge',
+                    const SizedBox(height: AppConstants.defaultPadding),
+
+                    // Welcome Message
+                    Text(
+                      user != null
+                          ? '👋 Hej ${user.name}!'
+                          : '🚀 Välkommen till mattespelet! 🚀',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Colors.white70,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    if (user != null) ...[
+                      const SizedBox(height: AppConstants.smallPadding),
+                      Text(
+                        user.gradeLevel != null
+                            ? 'Årskurs ${user.gradeLevel}'
+                            : user.ageGroup.displayName,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.white54,
+                            ),
+                      ),
+                    ],
+
+                    const SizedBox(height: AppConstants.largePadding * 2),
+
+                    if (user == null) ...[
+                      ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const ParentPinScreen(),
-                            ),
-                          );
+                          _showCreateUserDialog();
                         },
-                        icon: const Icon(
-                          Icons.lock,
-                          color: Colors.white70,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.spacePrimary,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 56),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                AppConstants.borderRadius),
+                          ),
                         ),
+                        child: const Text('Skapa användare'),
                       ),
-                  ],
-                ),
-                const SizedBox(height: AppConstants.defaultPadding),
+                      const SizedBox(height: AppConstants.largePadding),
+                    ],
 
-                // Welcome Message
-                Text(
-                  user != null
-                      ? '👋 Hej ${user.name}!'
-                      : '🚀 Välkommen till mattespelet! 🚀',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.white70,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-
-                if (user != null) ...[
-                  const SizedBox(height: AppConstants.smallPadding),
-                  Text(
-                    user.gradeLevel != null
-                        ? 'Årskurs ${user.gradeLevel}'
-                        : user.ageGroup.displayName,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white54,
+                    // Stats card
+                    if (user != null)
+                      Container(
+                        padding:
+                            const EdgeInsets.all(AppConstants.defaultPadding),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.borderRadius),
                         ),
-                  ),
-                ],
-
-                const SizedBox(height: AppConstants.largePadding * 2),
-
-                if (user == null) ...[
-                  ElevatedButton(
-                    onPressed: () {
-                      _showCreateUserDialog();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.spacePrimary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppConstants.borderRadius),
-                      ),
-                    ),
-                    child: const Text('Skapa användare'),
-                  ),
-                  const SizedBox(height: AppConstants.largePadding),
-                ],
-
-                // Stats card
-                if (user != null)
-                  Container(
-                    padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius:
-                          BorderRadius.circular(AppConstants.borderRadius),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            _buildStatItem(
-                              context,
-                              'Totala Poäng',
-                              user.totalPoints.toString(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _buildStatItem(
+                                  context,
+                                  'Totala Poäng',
+                                  user.totalPoints.toString(),
+                                ),
+                                _buildStatItem(
+                                  context,
+                                  'Streak',
+                                  '${user.currentStreak} 🔥',
+                                ),
+                                _buildStatItem(
+                                  context,
+                                  'Quiz',
+                                  user.totalQuizzesTaken.toString(),
+                                ),
+                              ],
                             ),
-                            _buildStatItem(
-                              context,
-                              'Streak',
-                              '${user.currentStreak} 🔥',
+                            const SizedBox(height: AppConstants.defaultPadding),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Nivå ${user.level}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                Text(
+                                  '${user.pointsIntoLevel}/${UserProgress.pointsPerLevel}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
+                                        color: Colors.white54,
+                                      ),
+                                ),
+                              ],
                             ),
-                            _buildStatItem(
-                              context,
-                              'Quiz',
-                              user.totalQuizzesTaken.toString(),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppConstants.defaultPadding),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Nivå ${user.level}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    color: Colors.white70,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            Text(
-                              '${user.pointsIntoLevel}/${UserProgress.pointsPerLevel}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    color: Colors.white54,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppConstants.smallPadding),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Titel: ${user.levelTitle}',
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                            const SizedBox(height: AppConstants.smallPadding),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Titel: ${user.levelTitle}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
                                       color: Colors.white54,
                                       fontWeight: FontWeight.w600,
                                     ),
-                          ),
-                        ),
-                        const SizedBox(height: AppConstants.smallPadding),
-                        ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(AppConstants.borderRadius),
-                          child: LinearProgressIndicator(
-                            value: user.levelProgress.clamp(0.0, 1.0),
-                            minHeight: 10,
-                            backgroundColor: Colors.white.withOpacity(0.15),
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                              AppColors.spaceAccent,
+                              ),
                             ),
-                          ),
-                        ),
+                            const SizedBox(height: AppConstants.smallPadding),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.borderRadius),
+                              child: LinearProgressIndicator(
+                                value: user.levelProgress.clamp(0.0, 1.0),
+                                minHeight: 10,
+                                backgroundColor: Colors.white.withOpacity(0.15),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  AppColors.spaceAccent,
+                                ),
+                              ),
+                            ),
 
-                        const SizedBox(height: AppConstants.defaultPadding),
+                            const SizedBox(height: AppConstants.defaultPadding),
 
-                        // Daily goal
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Aktivt uppdrag',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                Text(
+                                  userState.questStatus == null
+                                      ? '-'
+                                      : '${(userState.questStatus!.progress * 100).round()}%',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppConstants.smallPadding),
                             Text(
-                              'Ditt mål idag',
+                              userState.questStatus?.quest.title ??
+                                  'Inget uppdrag valt ännu',
                               style: Theme.of(context)
                                   .textTheme
-                                  .titleSmall
+                                  .bodySmall
                                   ?.copyWith(
                                     color: Colors.white70,
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),
+                            const SizedBox(height: AppConstants.smallPadding),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.borderRadius),
+                              child: LinearProgressIndicator(
+                                value:
+                                    (userState.questStatus?.progress ?? 0.0)
+                                        .clamp(0.0, 1.0),
+                                minHeight: 10,
+                                backgroundColor: Colors.white.withOpacity(0.15),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  AppColors.spaceAccent,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: AppConstants.defaultPadding),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.emoji_events,
+                                  color: AppColors.spaceAccent,
+                                ),
+                                const SizedBox(
+                                    width: AppConstants.smallPadding),
+                                Expanded(
+                                  child: Text(
+                                    'Medalj: ${_medalLabelForLevel(user.level)}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(
+                                          color: Colors.white70,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                ),
+                                Row(
+                                  children: List.generate(3, (index) {
+                                    final filled =
+                                        index < _medalStarsForLevel(user.level);
+                                    return Icon(
+                                      filled ? Icons.star : Icons.star_border,
+                                      size: 18,
+                                      color: filled
+                                          ? AppColors.spaceAccent
+                                          : Colors.white38,
+                                    );
+                                  }),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppConstants.smallPadding),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                _nextGoalMessage(user),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Colors.white54,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    if (user != null &&
+                        userState.questStatus != null &&
+                        allowedOps
+                            .contains(userState.questStatus!.quest.operation))
+                      Container(
+                        margin: const EdgeInsets.only(
+                            top: AppConstants.defaultPadding),
+                        padding:
+                            const EdgeInsets.all(AppConstants.defaultPadding),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.borderRadius),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.borderRadius,
+                              ),
+                              child: SizedBox(
+                                height: 110,
+                                child: Image.asset(
+                                  questHeroAsset,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Image.asset(
+                                      backgroundAsset,
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: AppConstants.defaultPadding),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.flag,
+                                  color: AppColors.spaceAccent,
+                                ),
+                                const SizedBox(
+                                    width: AppConstants.smallPadding),
+                                Text(
+                                  'Nästa uppdrag',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppConstants.smallPadding),
                             Text(
-                              '${userState.dailyGoalProgressToday}/${userState.dailyGoalTarget}',
+                              userState.questStatus!.quest.title,
                               style: Theme.of(context)
                                   .textTheme
-                                  .titleSmall
+                                  .titleMedium
                                   ?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: AppConstants.smallPadding),
-                        ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(AppConstants.borderRadius),
-                          child: LinearProgressIndicator(
-                            value: userState.dailyGoalTarget <= 0
-                                ? 0.0
-                                : (userState.dailyGoalProgressToday /
-                                        userState.dailyGoalTarget)
-                                    .clamp(0.0, 1.0),
-                            minHeight: 10,
-                            backgroundColor: Colors.white.withOpacity(0.15),
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                              AppColors.spaceAccent,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: AppConstants.defaultPadding),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.emoji_events,
-                              color: AppColors.spaceAccent,
-                            ),
-                            const SizedBox(width: AppConstants.smallPadding),
-                            Expanded(
-                              child: Text(
-                                'Medalj: ${_medalLabelForLevel(user.level)}',
+                            if (userState.questNotice != null) ...[
+                              const SizedBox(height: AppConstants.smallPadding),
+                              Text(
+                                userState.questNotice!,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .titleSmall
+                                    .bodySmall
                                     ?.copyWith(
                                       color: Colors.white70,
                                       fontWeight: FontWeight.w600,
                                     ),
                               ),
+                            ],
+                            const SizedBox(height: AppConstants.smallPadding),
+                            Text(
+                              userState.questStatus!.quest.description,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Colors.white54,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
+                            const SizedBox(height: AppConstants.defaultPadding),
                             Row(
-                              children: List.generate(3, (index) {
-                                final filled =
-                                    index < _medalStarsForLevel(user.level);
-                                return Icon(
-                                  filled ? Icons.star : Icons.star_border,
-                                  size: 18,
-                                  color: filled
-                                      ? AppColors.spaceAccent
-                                      : Colors.white38,
-                                );
-                              }),
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Framsteg',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Colors.white54,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                Text(
+                                  '${(userState.questStatus!.progress * 100).round()}%',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppConstants.smallPadding),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.borderRadius),
+                              child: LinearProgressIndicator(
+                                value: userState.questStatus!.progress,
+                                minHeight: 10,
+                                backgroundColor: Colors.white.withOpacity(0.15),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  AppColors.spaceAccent,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: AppConstants.defaultPadding),
+                            ElevatedButton(
+                              onPressed: () => _startQuiz(
+                                operationType:
+                                    userState.questStatus!.quest.operation,
+                                difficulty:
+                                    userState.questStatus!.quest.difficulty,
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.spacePrimary,
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size(double.infinity, 48),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppConstants.borderRadius,
+                                  ),
+                                ),
+                              ),
+                              child: const Text('Starta uppdrag'),
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppConstants.smallPadding),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            _nextGoalMessage(user),
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.white54,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                      ),
+
+                    const SizedBox(height: AppConstants.largePadding * 2),
+
+                    if (user != null) ...[
+                      ElevatedButton(
+                        onPressed: () => _startQuiz(
+                          operationType: recommendedOperation,
+                          difficulty: DifficultyLevel.easy,
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.spacePrimary,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 56),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                AppConstants.borderRadius),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-
-                const SizedBox(height: AppConstants.largePadding * 2),
-
-                if (user != null) ...[
-                  ElevatedButton(
-                    onPressed: () => _startQuiz(
-                      operationType: recommendedOperation,
-                      difficulty: DifficultyLevel.easy,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.spacePrimary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppConstants.borderRadius),
+                        child: Text(
+                          'Starta ${recommendedOperation.displayName}',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
                       ),
+                      const SizedBox(height: AppConstants.largePadding),
+                    ],
+
+                    // Operation selection
+                    GridView.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: AppConstants.defaultPadding,
+                      mainAxisSpacing: AppConstants.defaultPadding,
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      children: operationCards,
                     ),
-                    child: Text(
-                      'Starta ${recommendedOperation.displayName}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+
+                    const SizedBox(height: AppConstants.defaultPadding),
+
+                    // Version Info
+                    Text(
+                      'Version ${AppConstants.appVersion}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white38,
                           ),
                     ),
-                  ),
-                  const SizedBox(height: AppConstants.largePadding),
-                ],
-
-                // Operation selection
-                GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: AppConstants.defaultPadding,
-                  mainAxisSpacing: AppConstants.defaultPadding,
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  children: operationCards,
+                  ],
                 ),
-
-                const SizedBox(height: AppConstants.defaultPadding),
-
-                // Version Info
-                Text(
-                  'Version ${AppConstants.appVersion}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white38,
-                      ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

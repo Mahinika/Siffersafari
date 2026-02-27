@@ -7,6 +7,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../domain/entities/question.dart';
+import '../../domain/enums/app_theme.dart';
 import '../widgets/answer_button.dart';
 import '../widgets/feedback_dialog.dart';
 import '../widgets/progress_indicator_bar.dart';
@@ -63,6 +64,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
     final nextIndex = session.currentQuestionIndex + 1;
     if (nextIndex >= session.totalQuestions) {
+      // Ensure feedback is cleared so the post-frame dialog hook doesn't reopen
+      // a dialog while we transition to Results.
+      ref.read(quizProvider.notifier).clearFeedback();
+      setState(() {
+        _selectedAnswer = null;
+      });
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => const ResultsScreen(),
@@ -83,6 +90,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final quizState = ref.watch(quizProvider);
     final session = quizState.session;
     final feedback = quizState.feedback;
+
+    final user = ref.watch(userProvider).activeUser;
+    final selectedTheme = user?.selectedTheme ?? AppTheme.space;
+    final backgroundAsset = switch (selectedTheme) {
+      AppTheme.jungle => 'assets/images/themes/jungle/background.png',
+      _ => 'assets/images/themes/space/background.png',
+    };
+    final baseBackgroundColor =
+        selectedTheme == AppTheme.jungle ? AppColors.jungleBackground : AppColors.spaceBackground;
 
     if (session == null || session.currentQuestion == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -119,7 +135,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.spaceBackground,
+      backgroundColor: baseBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -132,31 +148,54 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Progress bar
-            Padding(
-              padding: EdgeInsets.all(AppConstants.defaultPadding.w),
-              child: ProgressIndicatorBar(progress: progress),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              backgroundAsset,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  'assets/images/splash_background.png',
+                  fit: BoxFit.cover,
+                );
+              },
             ),
-
-            SizedBox(height: AppConstants.largePadding.h),
-
-            // Question card
-            Expanded(
-              child: QuestionCard(question: question),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: baseBackgroundColor.withOpacity(0.76),
+              ),
             ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                // Progress bar
+                Padding(
+                  padding: EdgeInsets.all(AppConstants.defaultPadding.w),
+                  child: ProgressIndicatorBar(progress: progress),
+                ),
 
-            // Answer buttons
-            Padding(
-              padding: EdgeInsets.all(AppConstants.defaultPadding.w),
-              child: _buildAnswerButtons(question),
+                SizedBox(height: AppConstants.largePadding.h),
+
+                // Question card
+                Expanded(
+                  child: QuestionCard(question: question),
+                ),
+
+                // Answer buttons
+                Padding(
+                  padding: EdgeInsets.all(AppConstants.defaultPadding.w),
+                  child: _buildAnswerButtons(question),
+                ),
+
+                SizedBox(height: AppConstants.defaultPadding.h),
+              ],
             ),
-
-            SizedBox(height: AppConstants.defaultPadding.h),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
