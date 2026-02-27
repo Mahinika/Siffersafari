@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -8,7 +10,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('QA tap count: key flows', (tester) async {
-    const debugLogs = false;
+    final debugLogs = Platform.environment['TAP_COUNT_DEBUG'] == '1';
     var taps = 0;
 
     Future<void> settle(
@@ -67,7 +69,7 @@ void main() {
             'No operation cards on Home. Visible texts: ${_visibleTexts(tester).take(80).toList()}');
       }
 
-      await tap(chosenOperation!, settle: const Duration(seconds: 1));
+      await tap(chosenOperation, settle: const Duration(seconds: 1));
       expect(find.textContaining('Fråga '), findsOneWidget);
     }
 

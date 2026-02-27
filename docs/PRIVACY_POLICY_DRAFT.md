@@ -3,7 +3,7 @@
 > Draft only. Review before publishing.
 
 ## Summary
-Math Game App is designed to work offline-first and store progress locally on the device.
+Siffersafari is designed to work offline-first and store progress locally on the device.
 
 ## Data we store
 - User profiles (name, selected grade, progress, stats)

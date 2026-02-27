@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="128" y1="128" x2="896" y2="896" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF7E8"/>
+      <stop offset="1" stop-color="#EAF3FF"/>
+    </linearGradient>
+    <linearGradient id="board" x1="220" y1="250" x2="804" y2="724" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2A7A4C"/>
+      <stop offset="1" stop-color="#1E5B39"/>
+    </linearGradient>
+    <filter id="soft" x="0" y="0" width="1024" height="1024" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.18 0" result="shadow"/>
+      <feBlend mode="normal" in="shadow" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+
+  <!-- Background (rounded app-icon style) -->
+  <rect x="64" y="64" width="896" height="896" rx="190" fill="url(#bg)"/>
+
+  <!-- Chalkboard + stand -->
+  <g filter="url(#soft)">
+    <!-- Board frame -->
+    <rect x="196" y="220" width="632" height="520" rx="56" fill="#2B2B2B"/>
+    <rect x="226" y="250" width="572" height="460" rx="44" fill="url(#board)" stroke="#0F2E1D" stroke-width="14"/>
+
+    <!-- Chalk tray -->
+    <rect x="294" y="680" width="436" height="34" rx="16" fill="#3A2B21" opacity="0.9"/>
+
+    <!-- Chalk marks -->
+    <g stroke="#F3F6FF" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Big multiplication sign -->
+      <path d="M410 360 L530 480" stroke-width="34"/>
+      <path d="M530 360 L410 480" stroke-width="34"/>
+
+      <!-- Simple equation -->
+      <path d="M364 560 H660" stroke-width="10" opacity="0.25"/>
+      <path d="M340 610 H680" stroke-width="10" opacity="0.18"/>
+    </g>
+
+    <g font-family="Arial, Helvetica, sans-serif" fill="#F3F6FF">
+      <text x="330" y="600" font-size="92" font-weight="700" opacity="0.95">2×3=6</text>
+    </g>
+
+    <!-- Stand (wood) -->
+    <path d="M328 740 C360 820 420 870 512 892 C604 870 664 820 696 740" fill="none" stroke="#8A5A2E" stroke-width="44" stroke-linecap="round"/>
+    <path d="M392 748 L330 912" stroke="#8A5A2E" stroke-width="40" stroke-linecap="round"/>
+    <path d="M632 748 L694 912" stroke="#8A5A2E" stroke-width="40" stroke-linecap="round"/>
+  </g>
+
+  <!-- Pencil (bottom-right) -->
+  <g transform="translate(720 760) rotate(-18)">
+    <rect x="-140" y="-40" width="310" height="80" rx="36" fill="#F4C542" stroke="#A07A1D" stroke-width="10"/>
+    <rect x="-170" y="-40" width="64" height="80" rx="18" fill="#F08AA0" stroke="#9C4661" stroke-width="10"/>
+    <rect x="-110" y="-40" width="22" height="80" fill="#D8D8D8" opacity="0.9"/>
+    <path d="M170 -40 L240 0 L170 40 Z" fill="#EAD6C3" stroke="#A07A1D" stroke-width="10"/>
+    <path d="M210 -10 L240 0 L210 10 Z" fill="#3B2B22"/>
+  </g>
+
+  <!-- Apple (bottom-left) -->
+  <g transform="translate(280 792)">
+    <path d="M0 44 C-6 -12 28 -44 72 -44 C100 -44 124 -28 132 -6 C152 -34 186 -44 214 -44 C258 -44 292 -12 286 44 C278 124 214 170 144 170 C74 170 8 124 0 44 Z" fill="#E74C3C" stroke="#8B1F16" stroke-width="12"/>
+    <path d="M144 -70 C150 -40 140 -18 128 0" stroke="#5B3A23" stroke-width="16" stroke-linecap="round"/>
+    <path d="M168 -64 C214 -76 250 -52 252 -18 C226 -12 196 -18 168 -40 Z" fill="#2ECC71" stroke="#1B7F43" stroke-width="12" stroke-linejoin="round"/>
+    <circle cx="204" cy="32" r="10" fill="#FFFFFF" opacity="0.35"/>
+  </g>
+</svg>

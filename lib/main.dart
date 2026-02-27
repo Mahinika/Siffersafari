@@ -67,7 +67,7 @@ class MathGameApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp(
-          title: 'Math Game App',
+          title: 'Siffersafari',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             useMaterial3: true,

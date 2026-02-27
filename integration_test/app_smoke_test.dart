@@ -126,7 +126,7 @@ void main() {
       );
     }
 
-    await tester.tap(chosenOperation!);
+    await tester.tap(chosenOperation);
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     // Quiz screen should show a question title.

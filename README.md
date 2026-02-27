@@ -1,4 +1,4 @@
-# Math Game App
+# Siffersafari
 
 Ett pedagogiskt mattespel för barn (6-13+ år) som lär grundläggande matematik genom interaktiva övningar, quiz och progressionssystem.
 

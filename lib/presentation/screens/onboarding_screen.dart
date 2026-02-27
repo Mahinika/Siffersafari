@@ -32,7 +32,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static String _doneKey(String userId) => 'onboarding_done_$userId';
   static String _allowedOpsKey(String userId) => 'allowed_ops_$userId';
 
-  static const _gradeItems = <int>[1, 2, 3, 4, 5, 6];
   static const _dailyGoalItems = <int>[5, 10, 20, 30];
 
   OperationType? _operationFromName(String name) {

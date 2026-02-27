@@ -6,6 +6,7 @@ Denna mapp innehåller bildresurser för appen.
 
 ```
 images/
+├── app_icon.svg        # App-ikon (SVG)
 ├── themes/
 │   ├── space/          # Rymdtema-bilder
 │   │   ├── background.png

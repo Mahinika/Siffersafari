@@ -48,3 +48,6 @@ app.*.map.json
 # Hive
 *.hive
 *.lock
+
+# Artifacts (generated UI dumps)
+artifacts/ui*.xml

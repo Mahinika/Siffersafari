@@ -5,7 +5,7 @@ class AppConstants {
   AppConstants._();
 
   // App Info
-  static const String appName = 'Math Game App';
+  static const String appName = 'Siffersafari';
   static const String appVersion = '1.0.0';
 
   // Session Configuration

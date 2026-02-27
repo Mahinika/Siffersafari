@@ -24,3 +24,7 @@ Den här guiden beskriver ett minimalt och reproducerbart sätt att ta skärmbil
 ## Namngivning
 Föreslagen struktur:
 - `artifacts/screenshots/<device>_<screen>_<yyyy-mm-dd>.png`
+
+## Artifacts (repo-hygien)
+- `artifacts/screenshots/` kan versioneras (det är “riktiga” screenshots).
+- `artifacts/ui*.xml` är genererade UI-dumpar och ignoreras av git.

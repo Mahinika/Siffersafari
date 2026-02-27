@@ -1,5 +1,5 @@
 name: math_game_app
-description: An educational math game app for children to learn basic arithmetic operations.
+description: Siffersafari — an educational math game for children to practice basic arithmetic.
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -45,6 +45,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  image: ^4.2.0
   
   # Code Generation
   build_runner: ^2.4.7

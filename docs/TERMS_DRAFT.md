@@ -3,7 +3,7 @@
 > Draft only. Review before publishing.
 
 ## Scope
-These terms apply to the use of the Math Game App.
+These terms apply to the use of Siffersafari.
 
 ## Provided “as is”
 The app is provided on an “as is” basis without warranties.

@@ -1,6 +1,6 @@
 {
-    "name": "math_game_app",
-    "short_name": "math_game_app",
+    "name": "Siffersafari",
+    "short_name": "Siffersafari",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

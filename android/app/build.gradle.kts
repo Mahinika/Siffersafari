@@ -24,6 +24,8 @@ android {
         applicationId = "com.example.math_game_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
+        // Note: With Flutter 3.41.x, the effective minSdkVersion is currently 24 (Android 7.0).
+        // Keep using flutter.minSdkVersion so it stays aligned with the Flutter SDK requirements.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
