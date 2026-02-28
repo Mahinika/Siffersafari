@@ -30,6 +30,9 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Local design exports / experiments
+assets/images/app_logo_ideas/
+
 # Symbolication related
 app.*.symbols
 
