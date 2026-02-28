@@ -21,6 +21,8 @@ Denna fil samlar alla **oklara** checkboxar från TODO.md.
 - [ ] Skapa tema-bilder för rymd och djungel
 - [ ] Sätt upp custom font (om önskat)
 - [ ] Lägg till crashlytics/analytics (Firebase, optional)
+- [ ] Lägg till global felhantering i `main.dart` (`FlutterError.onError` + `PlatformDispatcher.instance.onError`)
+- [ ] Härda föräldra-PIN: hashad lagring + enkel rate-limit efter flera felaktiga försök
 
 ## Framtida Förbättringar (Post-MVP)
 - [ ] Fler teman (underwater, fantasy, etc.)
@@ -29,4 +31,4 @@ Denna fil samlar alla **oklara** checkboxar från TODO.md.
 
 ---
 
-**Senast uppdaterad:** 2026-02-27
+**Senast uppdaterad:** 2026-02-28
