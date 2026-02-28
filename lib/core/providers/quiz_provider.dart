@@ -4,15 +4,15 @@ import 'package:uuid/uuid.dart';
 import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
-import '../../core/services/adaptive_difficulty_service.dart';
 import '../../core/services/audio_service.dart';
-import '../../core/services/feedback_service.dart';
 import '../../core/services/question_generator_service.dart';
 import '../../domain/entities/question.dart';
 import '../../domain/entities/quiz_session.dart';
 import '../../domain/enums/age_group.dart';
 import '../../domain/enums/difficulty_level.dart';
 import '../../domain/enums/operation_type.dart';
+import '../../domain/services/adaptive_difficulty_service.dart';
+import '../../domain/services/feedback_service.dart';
 
 class QuizState {
   const QuizState({

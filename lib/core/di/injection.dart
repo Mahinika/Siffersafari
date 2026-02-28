@@ -9,14 +9,14 @@ import '../../domain/enums/app_theme.dart';
 import '../../domain/enums/difficulty_level.dart';
 import '../../domain/enums/mastery_level.dart';
 import '../../domain/enums/operation_type.dart';
+import '../../domain/services/adaptive_difficulty_service.dart';
+import '../../domain/services/feedback_service.dart';
 import '../../domain/services/parent_pin_service.dart';
+import '../../domain/services/spaced_repetition_service.dart';
 import '../services/achievement_service.dart';
-import '../services/adaptive_difficulty_service.dart';
 import '../services/audio_service.dart';
-import '../services/feedback_service.dart';
 import '../services/quest_progression_service.dart';
 import '../services/question_generator_service.dart';
-import '../services/spaced_repetition_service.dart';
 
 final getIt = GetIt.instance;
 

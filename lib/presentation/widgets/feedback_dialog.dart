@@ -3,7 +3,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../core/constants/app_constants.dart';
-import '../../core/services/feedback_service.dart';
+import '../../domain/services/feedback_service.dart';
 
 class FeedbackDialog extends StatefulWidget {
   const FeedbackDialog({

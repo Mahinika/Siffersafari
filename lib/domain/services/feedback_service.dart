@@ -1,5 +1,5 @@
-import '../../domain/entities/question.dart';
-import '../../domain/enums/age_group.dart';
+import '../entities/question.dart';
+import '../enums/age_group.dart';
 
 class FeedbackResult {
   const FeedbackResult({

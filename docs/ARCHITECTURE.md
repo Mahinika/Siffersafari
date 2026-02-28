@@ -2,6 +2,11 @@
 
 ## Arkitekturöversikt (hela appen)
 
+**Regel (enkel och praktisk):**
+- `domain/` ska vara Flutter-fritt (pedagogik, modeller, regler).
+- `core/` är tekniskt/Flutter-nära (DI, audio, UI-nära helpers).
+- Konstanter för lär-algoritmer ligger i `domain/constants/`.
+
 Det här är en “helikoptervy” som visar hur appen hänger ihop från bootstrap till UI/state/services och persistens.
 
 ```mermaid
@@ -47,9 +52,6 @@ flowchart TB
 
   subgraph Core[Core (Services + DI)]
     QGS[QuestionGeneratorService]
-    ADS[AdaptiveDifficultyService]
-    SRS[SpacedRepetitionService]
-    FS[FeedbackService]
     AS[AudioService]
     ACS[AchievementService]
     QPS[QuestProgressionService]
@@ -65,6 +67,9 @@ flowchart TB
 
   subgraph Domain[Domain]
     MODELS[Entities + Enums\n(t.ex. Question, QuizSession, UserProgress)]
+    ADS[AdaptiveDifficultyService]
+    SRS[SpacedRepetitionService]
+    FS[FeedbackService]
     PPS[ParentPinService]
   end
 
@@ -86,13 +91,15 @@ flowchart TB
 
   %% GetIt provides services and repositories
   GETIT --> QGS
-  GETIT --> ADS
-  GETIT --> SRS
-  GETIT --> FS
   GETIT --> AS
   GETIT --> ACS
   GETIT --> QPS
   GETIT --> LSR
+
+  %% Domain services are also resolved through GetIt
+  GETIT --> ADS
+  GETIT --> SRS
+  GETIT --> FS
 
   %% Services/repo persist to Hive
   LSR --> HIVE
@@ -205,11 +212,8 @@ lib/
 │   │   └── injection.dart
 │   ├── utils/                 # Små utilities
 │   │   └── page_transitions.dart
-│   └── services/              # Services
+│   └── services/              # Tekniska/apputrymmen (Flutter-nära)
 │       ├── question_generator_service.dart
-│       ├── adaptive_difficulty_service.dart
-│       ├── spaced_repetition_service.dart
-│       ├── feedback_service.dart
 │       ├── achievement_service.dart
 │       ├── quest_progression_service.dart
 │       └── audio_service.dart
@@ -217,6 +221,15 @@ lib/
 ├── data/                      # Dataskikt
 │   └── repositories/          # Repositories
 │       └── local_storage_repository.dart
+│
+├── domain/                    # Ren affärslogik (Flutter-fritt)
+│   ├── constants/
+│   │   └── learning_constants.dart
+│   └── services/
+│       ├── adaptive_difficulty_service.dart
+│       ├── spaced_repetition_service.dart
+│       ├── feedback_service.dart
+│       └── parent_pin_service.dart
 │
 ├── domain/                    # Domänlogik
 │   ├── entities/             # Entiteter

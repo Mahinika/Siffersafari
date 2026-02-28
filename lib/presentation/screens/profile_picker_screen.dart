@@ -60,7 +60,8 @@ class ProfilePickerScreen extends ConsumerWidget {
                                 u.userId,
                               );
                           if (!context.mounted) return;
-                          await context.pushReplacementSmooth(const HomeScreen());
+                          await context
+                              .pushReplacementSmooth(const HomeScreen());
                         },
                       );
                     },

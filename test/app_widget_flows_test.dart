@@ -259,7 +259,8 @@ void main() {
         ),
       );
 
-      final multiplication = find.byKey(const Key('operation_card_multiplication'));
+      final multiplication =
+          find.byKey(const Key('operation_card_multiplication'));
       await pumpUntilFound(tester, multiplication);
       expect(multiplication, findsOneWidget);
 
@@ -269,7 +270,7 @@ void main() {
       await pumpFor(
         tester,
         AppConstants.mediumAnimationDuration +
-        const Duration(milliseconds: 150),
+            const Duration(milliseconds: 150),
       );
       await tester.tap(multiplication);
       await pumpUntilFound(tester, find.textContaining('Fråga'));
@@ -327,7 +328,8 @@ void main() {
         ),
       );
 
-      final multiplication = find.byKey(const Key('operation_card_multiplication'));
+      final multiplication =
+          find.byKey(const Key('operation_card_multiplication'));
       await pumpUntilFound(tester, multiplication);
       expect(multiplication, findsOneWidget);
 
@@ -337,7 +339,7 @@ void main() {
       await pumpFor(
         tester,
         AppConstants.mediumAnimationDuration +
-        const Duration(milliseconds: 150),
+            const Duration(milliseconds: 150),
       );
       await tester.tap(multiplication);
       await pumpUntilFound(tester, find.textContaining('Fråga'));
@@ -388,7 +390,8 @@ void main() {
         ),
       );
 
-      final multiplication = find.byKey(const Key('operation_card_multiplication'));
+      final multiplication =
+          find.byKey(const Key('operation_card_multiplication'));
       await pumpUntilFound(tester, multiplication);
       expect(multiplication, findsOneWidget);
 
@@ -397,7 +400,7 @@ void main() {
       await pumpFor(
         tester,
         AppConstants.mediumAnimationDuration +
-        const Duration(milliseconds: 150),
+            const Duration(milliseconds: 150),
       );
       await tester.tap(multiplication);
       await pumpUntilFound(tester, find.textContaining('Fråga'));

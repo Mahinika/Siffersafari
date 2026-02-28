@@ -6,12 +6,26 @@ Det här dokumentet beskriver appens centrala “services” på en nivå som ä
 
 ```mermaid
 flowchart TB
-	UI[Presentation / UI] --> QS[QuestionGeneratorService]
-	UI --> ADS[AdaptiveDifficultyService]
-	UI --> SRS[SpacedRepetitionService]
-	UI --> FS[FeedbackService]
-	UI --> AS[AchievementService]
-	UI --> AU[AudioService]
+	UI[Presentation / UI]
+
+	subgraph Domain[Domain (Flutter-fritt)]
+		ADS[AdaptiveDifficultyService]
+		SRS[SpacedRepetitionService]
+		FS[FeedbackService]
+	end
+
+	subgraph Core[Core (tekniskt)]
+		QS[QuestionGeneratorService]
+		AS[AchievementService]
+		AU[AudioService]
+	end
+
+	UI --> QS
+	UI --> ADS
+	UI --> SRS
+	UI --> FS
+	UI --> AS
+	UI --> AU
 
 	QS --> LSR[LocalStorageRepository]
 	ADS --> LSR

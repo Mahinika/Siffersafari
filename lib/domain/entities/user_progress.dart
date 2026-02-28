@@ -199,7 +199,7 @@ class UserProgress extends Equatable {
         userId,
         name,
         ageGroup,
-      avatarEmoji,
+        avatarEmoji,
         gradeLevel,
         totalQuizzesTaken,
         totalQuestionsAnswered,

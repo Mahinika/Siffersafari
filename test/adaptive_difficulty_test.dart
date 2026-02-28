@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_game_app/core/services/adaptive_difficulty_service.dart';
 import 'package:math_game_app/domain/enums/difficulty_level.dart';
+import 'package:math_game_app/domain/services/adaptive_difficulty_service.dart';
 
 void main() {
   group('AdaptiveDifficultyService', () {

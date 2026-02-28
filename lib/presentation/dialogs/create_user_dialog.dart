@@ -195,7 +195,7 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
                   userId: const Uuid().v4(),
                   name: name,
                   ageGroup: ageGroup,
-              avatarEmoji: _selectedAvatar,
+                  avatarEmoji: _selectedAvatar,
                   gradeLevel: _selectedGrade,
                 );
 

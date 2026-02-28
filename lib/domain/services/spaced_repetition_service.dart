@@ -1,4 +1,4 @@
-import '../constants/app_constants.dart';
+import '../constants/learning_constants.dart';
 
 /// Represents a scheduled review for a question
 class ReviewSchedule {
@@ -41,7 +41,7 @@ class SpacedRepetitionService {
     final currentTime = now ?? DateTime.now();
 
     if (previous == null) {
-      const intervalDays = AppConstants.firstReviewInterval;
+      const intervalDays = LearningConstants.firstReviewInterval;
       return ReviewSchedule(
         questionId: questionId,
         nextReviewDate: currentTime.add(const Duration(days: intervalDays)),
@@ -51,7 +51,7 @@ class SpacedRepetitionService {
     }
 
     if (!wasCorrect) {
-      const intervalDays = AppConstants.firstReviewInterval;
+      const intervalDays = LearningConstants.firstReviewInterval;
       return previous.copyWith(
         nextReviewDate: currentTime.add(const Duration(days: intervalDays)),
         intervalDays: intervalDays,
@@ -71,9 +71,9 @@ class SpacedRepetitionService {
 
   /// Returns the next interval based on consecutive correct answers
   int _getNextInterval(int consecutiveCorrect) {
-    if (consecutiveCorrect >= 3) return AppConstants.thirdReviewInterval;
-    if (consecutiveCorrect == 2) return AppConstants.secondReviewInterval;
-    return AppConstants.firstReviewInterval;
+    if (consecutiveCorrect >= 3) return LearningConstants.thirdReviewInterval;
+    if (consecutiveCorrect == 2) return LearningConstants.secondReviewInterval;
+    return LearningConstants.firstReviewInterval;
   }
 
   /// Get question IDs that are due for review

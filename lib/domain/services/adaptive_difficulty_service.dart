@@ -1,5 +1,5 @@
-import '../../domain/enums/difficulty_level.dart';
-import '../constants/app_constants.dart';
+import '../constants/learning_constants.dart';
+import '../enums/difficulty_level.dart';
 
 /// Service for adaptive difficulty adjustments
 class AdaptiveDifficultyService {
@@ -15,17 +15,17 @@ class AdaptiveDifficultyService {
     required DifficultyLevel currentDifficulty,
     required List<bool> recentResults,
   }) {
-    if (recentResults.length < AppConstants.questionsBeforeAdjustment) {
+    if (recentResults.length < LearningConstants.questionsBeforeAdjustment) {
       return currentDifficulty;
     }
 
     final successRate = calculateSuccessRate(recentResults);
 
-    if (successRate >= AppConstants.difficultyIncreaseThreshold) {
+    if (successRate >= LearningConstants.difficultyIncreaseThreshold) {
       return _increaseDifficulty(currentDifficulty);
     }
 
-    if (successRate <= AppConstants.difficultyDecreaseThreshold) {
+    if (successRate <= LearningConstants.difficultyDecreaseThreshold) {
       return _decreaseDifficulty(currentDifficulty);
     }
 

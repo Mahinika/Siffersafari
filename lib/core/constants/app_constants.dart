@@ -1,4 +1,11 @@
-import 'package:flutter/material.dart';
+import '../../domain/constants/learning_constants.dart';
+import 'achievement_ids.dart';
+import 'storage_constants.dart';
+import 'ui_constants.dart';
+
+export 'achievement_ids.dart' show AchievementIds;
+export 'storage_constants.dart' show StorageConstants;
+export 'ui_constants.dart' show AppColors, UiConstants;
 
 /// App-wide constants
 class AppConstants {
@@ -19,67 +26,57 @@ class AppConstants {
   static const int streakBonusMultiplier = 2;
 
   // Spaced Repetition Intervals (in days)
-  static const int firstReviewInterval = 2;
-  static const int secondReviewInterval = 7;
-  static const int thirdReviewInterval = 14;
+  // Forwarded to domain constants to keep learning rules Flutter-free.
+  static const int firstReviewInterval = LearningConstants.firstReviewInterval;
+  static const int secondReviewInterval =
+      LearningConstants.secondReviewInterval;
+  static const int thirdReviewInterval = LearningConstants.thirdReviewInterval;
 
   // Adaptive Difficulty
-  static const int questionsBeforeAdjustment = 5;
-  static const double difficultyIncreaseThreshold = 0.85;
-  static const double difficultyDecreaseThreshold = 0.60;
+  // Forwarded to domain constants to keep learning rules Flutter-free.
+  static const int questionsBeforeAdjustment =
+      LearningConstants.questionsBeforeAdjustment;
+  static const double difficultyIncreaseThreshold =
+      LearningConstants.difficultyIncreaseThreshold;
+  static const double difficultyDecreaseThreshold =
+      LearningConstants.difficultyDecreaseThreshold;
 
   // UI Constants
-  static const double defaultPadding = 16.0;
-  static const double smallPadding = 8.0;
-  static const double largePadding = 24.0;
-  static const double borderRadius = 12.0;
-  static const double iconSize = 24.0;
-  static const double largeIconSize = 48.0;
-  static const double minTouchTargetSize = 56.0;
+  static const double defaultPadding = UiConstants.defaultPadding;
+  static const double smallPadding = UiConstants.smallPadding;
+  static const double largePadding = UiConstants.largePadding;
+  static const double borderRadius = UiConstants.borderRadius;
+  static const double iconSize = UiConstants.iconSize;
+  static const double largeIconSize = UiConstants.largeIconSize;
+  static const double minTouchTargetSize = UiConstants.minTouchTargetSize;
 
   // Animation Durations
-  static const Duration microAnimationDuration = Duration(milliseconds: 100);
-  static const Duration shortAnimationDuration = Duration(milliseconds: 200);
-  static const Duration mediumAnimationDuration = Duration(milliseconds: 400);
-  static const Duration longAnimationDuration = Duration(milliseconds: 600);
+  static const Duration microAnimationDuration =
+      UiConstants.microAnimationDuration;
+  static const Duration shortAnimationDuration =
+      UiConstants.shortAnimationDuration;
+  static const Duration mediumAnimationDuration =
+      UiConstants.mediumAnimationDuration;
+  static const Duration longAnimationDuration =
+      UiConstants.longAnimationDuration;
 
   // Component sizing
-  static const double answerButtonHeight = 64.0;
-  static const double feedbackDialogIconSize = 64.0;
+  static const double answerButtonHeight = UiConstants.answerButtonHeight;
+  static const double feedbackDialogIconSize =
+      UiConstants.feedbackDialogIconSize;
 
   // Hive Box Names
-  static const String userProgressBox = 'user_progress';
-  static const String quizHistoryBox = 'quiz_history';
-  static const String settingsBox = 'settings';
+  static const String userProgressBox = StorageConstants.userProgressBox;
+  static const String quizHistoryBox = StorageConstants.quizHistoryBox;
+  static const String settingsBox = StorageConstants.settingsBox;
 
   // Achievement IDs
-  static const String firstQuizAchievement = 'first_quiz';
-  static const String streak7Achievement = 'streak_7';
-  static const String streak30Achievement = 'streak_30';
-  static const String master100Achievement = 'master_100';
-  static const String perfectScoreAchievement = 'perfect_score';
-}
-
-/// Color palette for themes
-class AppColors {
-  AppColors._();
-
-  // Space Theme
-  static const Color spaceBackground = Color(0xFF122B4A);
-  static const Color spacePrimary = Color(0xFFE86F2D);
-  static const Color spaceSecondary = Color(0xFFF7B733);
-  static const Color spaceAccent = Color(0xFF1FAFA0);
-
-  // Jungle Theme
-  static const Color jungleBackground = Color(0xFF1C4A2B);
-  static const Color junglePrimary = Color(0xFF2BAE66);
-  static const Color jungleSecondary = Color(0xFF7BC96F);
-  static const Color jungleAccent = Color(0xFFFFC94A);
-
-  // Common Colors
-  static const Color correctAnswer = Color(0xFF22C55E);
-  static const Color wrongAnswer = Color(0xFFEF4444);
-  static const Color neutralBackground = Color(0xFFFFF6E8);
-  static const Color textPrimary = Color(0xFF111827);
-  static const Color textSecondary = Color(0xFF6B7280);
+  static const String firstQuizAchievement =
+      AchievementIds.firstQuizAchievement;
+  static const String streak7Achievement = AchievementIds.streak7Achievement;
+  static const String streak30Achievement = AchievementIds.streak30Achievement;
+  static const String master100Achievement =
+      AchievementIds.master100Achievement;
+  static const String perfectScoreAchievement =
+      AchievementIds.perfectScoreAchievement;
 }
