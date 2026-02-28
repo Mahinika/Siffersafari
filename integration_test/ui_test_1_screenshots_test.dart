@@ -14,56 +14,73 @@ void main() {
       await tester.pumpAndSettle(duration);
     }
 
-    Finder preferTappable(Finder finder) {
+    Future<bool> tryTap(
+      Finder finder, {
+      Duration after = const Duration(milliseconds: 900),
+      List<String>? errors,
+    }) async {
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
       final candidates = <Finder>[
+        // If the finder targets a leaf (Text/Icon), climb to common tappables.
         find.ancestor(of: finder, matching: find.byType(IconButton)),
         find.ancestor(of: finder, matching: find.byType(ElevatedButton)),
         find.ancestor(of: finder, matching: find.byType(FilledButton)),
         find.ancestor(of: finder, matching: find.byType(OutlinedButton)),
         find.ancestor(of: finder, matching: find.byType(TextButton)),
-        find.ancestor(of: finder, matching: find.byType(InkWell)),
-        find.ancestor(of: finder, matching: find.byType(InkResponse)),
-        find.ancestor(of: finder, matching: find.byType(GestureDetector)),
         find.ancestor(of: finder, matching: find.byType(ListTile)),
+
+        // If the finder targets a composite (e.g. ElevatedButton/DropdownButton),
+        // tap on an internal render box that participates in hit testing.
+        find.descendant(of: finder, matching: find.byType(InkResponse)),
+        find.descendant(of: finder, matching: find.byType(InkWell)),
+        find.descendant(of: finder, matching: find.byType(GestureDetector)),
+
+        // Last resort.
         finder,
       ];
 
       for (final candidate in candidates) {
-        if (candidate.evaluate().isNotEmpty) return candidate;
+        bool hasMatch;
+        try {
+          hasMatch = candidate.evaluate().isNotEmpty;
+        } catch (_) {
+          continue;
+        }
+        if (!hasMatch) continue;
+
+        final target = candidate.first;
+        await tester.ensureVisible(target);
+        await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+        try {
+          await tester.tap(target);
+          await tester.pumpAndSettle(after);
+          return true;
+        } catch (e) {
+          errors?.add('${candidate.description}: $e');
+          // Try next candidate.
+        }
       }
-      return finder;
+
+      return false;
     }
 
     Future<void> tap(
       Finder finder, {
       Duration after = const Duration(milliseconds: 900),
     }) async {
-      await tester.pumpAndSettle(const Duration(milliseconds: 200));
+      final errors = <String>[];
+      final ok = await tryTap(
+        finder,
+        after: after,
+        errors: errors,
+      );
+      if (ok) return;
 
-      final chosen = preferTappable(finder);
-      final elements = chosen.evaluate().toList(growable: false);
-      if (elements.isEmpty) {
-        fail(
-          'Tried to tap a widget, but finder is empty. Visible texts: ${_visibleTexts(tester).take(80).toList()}',
-        );
-      }
-
-      final element = elements.first;
-      final elementFinder =
-          find.byElementPredicate((e) => identical(e, element));
-
-      // Ensure it is on-screen before calculating coordinates.
-      await tester.ensureVisible(elementFinder);
-      await tester.pumpAndSettle(const Duration(milliseconds: 200));
-
-      final box = element.renderObject;
-      if (box is! RenderBox) {
-        fail('Tried to tap a widget but renderObject is not a RenderBox');
-      }
-
-      final center = box.localToGlobal(box.size.center(Offset.zero));
-      await tester.tapAt(center);
-      await tester.pumpAndSettle(after);
+      fail(
+        'Tried to tap a widget, but no tappable RenderBox was found. Finder: ${finder.description}. Errors: $errors. Visible texts: ${_visibleTexts(tester).take(80).toList()}',
+      );
     }
 
     String safeName(String raw) {
@@ -202,26 +219,31 @@ void main() {
       // ---- Onboarding step 1: grade ----
       await shot('onboarding_grade');
 
-      final gradeDropdown = find.byType(DropdownButton<int?>);
-      if (gradeDropdown.evaluate().isNotEmpty) {
-        await tap(
-          gradeDropdown.first,
-          after: const Duration(milliseconds: 600),
-        );
-        await shot('onboarding_grade_dropdown_open');
-        if (find.text('Åk 3').evaluate().isNotEmpty) {
-          await tap(
-            find.text('Åk 3'),
-            after: const Duration(milliseconds: 700),
+      final isGradePage = find.text('1/2').evaluate().isNotEmpty;
+      if (isGradePage) {
+        final gradeDropdown = find.byType(DropdownButton<int?>);
+        if (gradeDropdown.evaluate().isNotEmpty) {
+          final opened = await tryTap(
+            gradeDropdown.first,
+            after: const Duration(milliseconds: 600),
           );
-          await shot('onboarding_grade_selected');
-        } else {
-          // Close dropdown by tapping "Ingen" if present.
-          if (find.text('Ingen').evaluate().isNotEmpty) {
-            await tap(
-              find.text('Ingen'),
-              after: const Duration(milliseconds: 600),
-            );
+          if (opened) {
+            await shot('onboarding_grade_dropdown_open');
+            if (find.text('Åk 3').evaluate().isNotEmpty) {
+              await tryTap(
+                find.text('Åk 3'),
+                after: const Duration(milliseconds: 700),
+              );
+              await shot('onboarding_grade_selected');
+            } else {
+              // Close dropdown by tapping "Ingen" if present.
+              if (find.text('Ingen').evaluate().isNotEmpty) {
+                await tryTap(
+                  find.text('Ingen'),
+                  after: const Duration(milliseconds: 600),
+                );
+              }
+            }
           }
         }
       }

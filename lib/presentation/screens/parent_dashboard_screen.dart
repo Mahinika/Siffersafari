@@ -19,7 +19,6 @@ class ParentDashboardScreen extends ConsumerWidget {
     final user = ref.watch(userProvider).activeUser;
 
     return ThemedBackgroundScaffold(
-      overlayOpacity: 0.76,
       appBar: AppBar(
         title: const Text('Föräldraläge'),
         backgroundColor: Colors.transparent,

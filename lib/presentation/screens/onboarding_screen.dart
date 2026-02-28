@@ -148,7 +148,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return PopScope(
       canPop: false,
       child: ThemedBackgroundScaffold(
-        overlayOpacity: 0.76,
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

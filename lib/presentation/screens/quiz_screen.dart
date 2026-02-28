@@ -110,7 +110,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         );
       });
 
-      return const Scaffold(
+      return const ThemedBackgroundScaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
@@ -139,7 +139,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     });
 
     return ThemedBackgroundScaffold(
-      overlayOpacity: 0.76,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

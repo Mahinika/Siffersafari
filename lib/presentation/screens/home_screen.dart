@@ -198,7 +198,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final recommendedOperation = _recommendedOperation(allowedOps);
 
     return ThemedBackgroundScaffold(
-      overlayOpacity: 0.72,
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
       body: SingleChildScrollView(
         child: Column(

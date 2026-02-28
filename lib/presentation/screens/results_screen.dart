@@ -170,9 +170,15 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final primaryActionColor = themeCfg.primaryActionColor;
 
     if (session == null) {
-      return const Scaffold(
+      return ThemedBackgroundScaffold(
         body: Center(
-          child: Text('Ingen data tillgänglig'),
+          child: Text(
+            'Ingen data tillgänglig',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
         ),
       );
     }
@@ -184,7 +190,6 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final hardest = _getHardestQuestions(session);
 
     return ThemedBackgroundScaffold(
-      overlayOpacity: 0.76,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(

@@ -91,7 +91,6 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
   Widget build(BuildContext context) {
     final primaryActionColor = Theme.of(context).colorScheme.primary;
     return ThemedBackgroundScaffold(
-      overlayOpacity: 0.76,
       appBar: AppBar(
         title: Text(_isSettingNewPin ? 'Skapa PIN' : 'Ange PIN'),
         backgroundColor: Colors.transparent,

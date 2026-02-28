@@ -8,7 +8,7 @@ class ThemedBackgroundScaffold extends ConsumerWidget {
     required this.body,
     this.appBar,
     this.padding,
-    this.overlayOpacity = 0.76,
+    this.overlayOpacity = 0.72,
     this.extendBodyBehindAppBar = false,
     super.key,
   });
@@ -23,10 +23,14 @@ class ThemedBackgroundScaffold extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cfg = ref.watch(appThemeConfigProvider);
 
+    final effectiveExtendBodyBehindAppBar =
+        extendBodyBehindAppBar || appBar != null;
+    final appBarHeight = appBar?.preferredSize.height ?? 0.0;
+
     return Scaffold(
       backgroundColor: cfg.baseBackgroundColor,
       appBar: appBar,
-      extendBodyBehindAppBar: extendBodyBehindAppBar,
+      extendBodyBehindAppBar: effectiveExtendBodyBehindAppBar,
       body: Stack(
         children: [
           Positioned.fill(
@@ -52,7 +56,14 @@ class ThemedBackgroundScaffold extends ConsumerWidget {
           SafeArea(
             child: Padding(
               padding: padding ?? EdgeInsets.zero,
-              child: body,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: effectiveExtendBodyBehindAppBar && appBar != null
+                      ? appBarHeight
+                      : 0,
+                ),
+                child: body,
+              ),
             ),
           ),
         ],

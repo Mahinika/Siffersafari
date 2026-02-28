@@ -21,7 +21,6 @@ class SettingsScreen extends ConsumerWidget {
     final themeCfg = ref.watch(appThemeConfigProvider);
 
     return ThemedBackgroundScaffold(
-      overlayOpacity: 0.76,
       appBar: AppBar(
         title: const Text('Inställningar'),
         backgroundColor: Colors.transparent,
