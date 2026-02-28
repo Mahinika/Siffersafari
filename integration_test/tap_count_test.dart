@@ -13,7 +13,7 @@ void main() {
     final debugLogs = Platform.environment['TAP_COUNT_DEBUG'] == '1';
     var taps = 0;
 
-    Finder _preferTappable(Finder finder) {
+    Finder preferTappable(Finder finder) {
       // When a Finder targets a Text/Icon inside a button, tapping the leaf can
       // miss hit-testing depending on layout/overlays. Prefer tapping the
       // nearest tappable ancestor.
@@ -37,15 +37,18 @@ void main() {
       return finder;
     }
 
-    Future<void> settle(
-        [Duration duration = const Duration(milliseconds: 700)]) async {
+    Future<void> settle([
+      Duration duration = const Duration(milliseconds: 700),
+    ]) async {
       await tester.pumpAndSettle(duration);
     }
 
-    Future<void> tap(Finder finder,
-        {Duration settle = const Duration(milliseconds: 600)}) async {
+    Future<void> tap(
+      Finder finder, {
+      Duration settle = const Duration(milliseconds: 600),
+    }) async {
       expect(finder, findsWidgets);
-      final tappable = _preferTappable(finder);
+      final tappable = preferTappable(finder);
       await tester.ensureVisible(tappable.first);
       await tester.pumpAndSettle(const Duration(milliseconds: 200));
       taps++;
@@ -59,7 +62,8 @@ void main() {
         await settle(const Duration(milliseconds: 600));
       }
       fail(
-          'Onboarding did not appear. Visible texts: ${_visibleTexts(tester).take(80).toList()}');
+        'Onboarding did not appear. Visible texts: ${_visibleTexts(tester).take(80).toList()}',
+      );
     }
 
     Future<void> ensureHomeByVersionText() async {
@@ -69,7 +73,8 @@ void main() {
         await settle(const Duration(milliseconds: 600));
       }
       fail(
-          'Did not return to Home. Visible texts: ${_visibleTexts(tester).take(80).toList()}');
+        'Did not return to Home. Visible texts: ${_visibleTexts(tester).take(80).toList()}',
+      );
     }
 
     Future<void> startFirstAvailableQuiz() async {
@@ -91,7 +96,8 @@ void main() {
 
       if (chosenOperation == null) {
         fail(
-            'No operation cards on Home. Visible texts: ${_visibleTexts(tester).take(80).toList()}');
+          'No operation cards on Home. Visible texts: ${_visibleTexts(tester).take(80).toList()}',
+        );
       }
 
       await tap(chosenOperation, settle: const Duration(seconds: 1));
@@ -105,8 +111,10 @@ void main() {
           // If a feedback dialog is still open, dismiss it first.
           if (find.byType(Dialog).evaluate().isNotEmpty &&
               find.text('Fortsätt').evaluate().isNotEmpty) {
-            await tap(find.text('Fortsätt'),
-                settle: const Duration(milliseconds: 500));
+            await tap(
+              find.text('Fortsätt'),
+              settle: const Duration(milliseconds: 500),
+            );
             if (find.text('Tillbaka till Start').evaluate().isNotEmpty) return;
             continue;
           }
@@ -115,20 +123,27 @@ void main() {
           return;
         }
 
-        await tap(find.byType(AnswerButton),
-            settle: const Duration(milliseconds: 400));
+        await tap(
+          find.byType(AnswerButton),
+          settle: const Duration(milliseconds: 400),
+        );
 
         // Feedback dialog appears.
-        await tap(find.text('Fortsätt'),
-            settle: const Duration(milliseconds: 500));
+        await tap(
+          find.text('Fortsätt'),
+          settle: const Duration(milliseconds: 500),
+        );
 
         if (find.text('Resultat').evaluate().isNotEmpty) return;
         if (find.text('Tillbaka till Start').evaluate().isNotEmpty) return;
       }
 
       // After enough iterations, we should have finished.
-      expect(find.text('Tillbaka till Start').evaluate().isNotEmpty, isTrue,
-          reason: 'Expected to end on Results after answering all questions.');
+      expect(
+        find.text('Tillbaka till Start').evaluate().isNotEmpty,
+        isTrue,
+        reason: 'Expected to end on Results after answering all questions.',
+      );
     }
 
     // --- Scenario: first-time user (fresh app data expected) ---
@@ -209,17 +224,24 @@ void main() {
         final gradeDropdown2 = find.byType(DropdownButton<int?>);
         if (gradeDropdown2.evaluate().isNotEmpty) {
           await tap(gradeDropdown2, settle: const Duration(milliseconds: 400));
-          await tap(find.text('Åk 3'),
-              settle: const Duration(milliseconds: 400));
+          await tap(
+            find.text('Åk 3'),
+            settle: const Duration(milliseconds: 400),
+          );
         }
-        await tap(find.text('Nästa'),
-            settle: const Duration(milliseconds: 700));
+        await tap(
+          find.text('Nästa'),
+          settle: const Duration(milliseconds: 700),
+        );
       }
 
       // Ops page
-      expect(find.text('Välj räknesätt').evaluate().isNotEmpty, isTrue,
-          reason:
-              'Expected ops onboarding step. Visible texts: ${_visibleTexts(tester).take(40).toList()}');
+      expect(
+        find.text('Välj räknesätt').evaluate().isNotEmpty,
+        isTrue,
+        reason:
+            'Expected ops onboarding step. Visible texts: ${_visibleTexts(tester).take(40).toList()}',
+      );
       await tap(find.text('Klar'), settle: const Duration(seconds: 1));
 
       await settle(const Duration(seconds: 1));
@@ -287,10 +309,11 @@ void main() {
       if (practiceButton.evaluate().isNotEmpty ||
           find.text(practiceLabel).evaluate().isNotEmpty) {
         await tap(
-            practiceButton.evaluate().isNotEmpty
-                ? practiceButton
-                : find.text(practiceLabel),
-            settle: const Duration(seconds: 1));
+          practiceButton.evaluate().isNotEmpty
+              ? practiceButton
+              : find.text(practiceLabel),
+          settle: const Duration(seconds: 1),
+        );
         expect(find.textContaining('Fråga '), findsOneWidget);
       }
 
@@ -306,7 +329,8 @@ void main() {
       print('TAP_COUNT_FIRST_TIME_to_first_question=$tapsToFirstQuestion');
       // ignore: avoid_print
       print(
-          'TAP_COUNT_FIRST_TIME_finish_session_and_start_next=$tapsToFinishAndStartNext');
+        'TAP_COUNT_FIRST_TIME_finish_session_and_start_next=$tapsToFinishAndStartNext',
+      );
       // ignore: avoid_print
       print(
         'TAP_COUNT_PARENT_set_and_reopen_existing='
@@ -314,7 +338,8 @@ void main() {
       );
     } else {
       fail(
-          'Expected fresh install ("Skapa användare" visible). Clear app data before running this test.');
+        'Expected fresh install ("Skapa användare" visible). Clear app data before running this test.',
+      );
     }
 
     // Basic per-question verification from the executed session:

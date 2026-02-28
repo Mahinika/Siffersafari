@@ -45,7 +45,7 @@ class AnswerButton extends StatelessWidget {
     } else {
       // Before answer is submitted
       backgroundColor = isSelected
-          ? (selectedBackgroundColor ?? AppColors.spacePrimary)
+          ? (selectedBackgroundColor ?? Theme.of(context).colorScheme.primary)
           : (idleBackgroundColor ?? AppColors.neutralBackground);
       textColor =
           isSelected ? Colors.white : (idleTextColor ?? AppColors.textPrimary);

@@ -110,11 +110,14 @@ img.Image _renderIcon(int size) {
 
   // Small equation (kept subtle so it doesn't get mushy at small sizes)
   if (size >= 96) {
-    img.drawString(canvas, '2x3=6',
-        font: img.arial24,
-        x: (size * 0.28).round(),
-        y: (top + boardH * 0.70).round(),
-        color: img.ColorRgb8(0xF3, 0xF6, 0xFF));
+    img.drawString(
+      canvas,
+      '2x3=6',
+      font: img.arial24,
+      x: (size * 0.28).round(),
+      y: (top + boardH * 0.70).round(),
+      color: img.ColorRgb8(0xF3, 0xF6, 0xFF),
+    );
   }
 
   // Simple pencil accent (bottom-right)

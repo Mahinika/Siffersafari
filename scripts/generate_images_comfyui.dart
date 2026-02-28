@@ -77,7 +77,8 @@ void main(List<String> args) async {
     _applyCommonNumericOverrides(graph, seed: runSeed);
 
     stdout.writeln(
-        '[ComfyUI] Generating image ${i + 1}/$count (seed=$runSeed)...');
+      '[ComfyUI] Generating image ${i + 1}/$count (seed=$runSeed)...',
+    );
 
     final promptId = await _submitPrompt(server, graph, clientId: clientId);
     final outputs = await _waitForOutputs(server, promptId);
@@ -105,7 +106,8 @@ void main(List<String> args) async {
 
   if (imagesSaved.isEmpty) {
     stderr.writeln(
-        'No images saved. Check that ComfyUI is running and your workflow outputs images.');
+      'No images saved. Check that ComfyUI is running and your workflow outputs images.',
+    );
     exit(1);
   }
 
@@ -277,8 +279,11 @@ void _applyCommonNumericOverrides(
   }
 }
 
-Future<String> _submitPrompt(Uri server, Map<String, dynamic> graph,
-    {required String clientId}) async {
+Future<String> _submitPrompt(
+  Uri server,
+  Map<String, dynamic> graph, {
+  required String clientId,
+}) async {
   final uri = server.replace(path: '/prompt');
 
   final body = jsonEncode({
@@ -290,13 +295,16 @@ Future<String> _submitPrompt(Uri server, Map<String, dynamic> graph,
   final promptId = response['prompt_id'];
   if (promptId is! String || promptId.isEmpty) {
     throw StateError(
-        'ComfyUI /prompt did not return prompt_id. Response: $response');
+      'ComfyUI /prompt did not return prompt_id. Response: $response',
+    );
   }
   return promptId;
 }
 
 Future<Map<String, dynamic>> _waitForOutputs(
-    Uri server, String promptId) async {
+  Uri server,
+  String promptId,
+) async {
   final uri = server.replace(path: '/history/$promptId');
   final deadline = DateTime.now().add(const Duration(minutes: 5));
 
@@ -315,7 +323,8 @@ Future<Map<String, dynamic>> _waitForOutputs(
   }
 
   throw TimeoutException(
-      'Timed out waiting for ComfyUI outputs for prompt_id=$promptId');
+    'Timed out waiting for ComfyUI outputs for prompt_id=$promptId',
+  );
 }
 
 class _DownloadedImage {
@@ -325,7 +334,9 @@ class _DownloadedImage {
 }
 
 Future<List<_DownloadedImage>> _downloadAllImages(
-    Uri server, Map<String, dynamic> outputs) async {
+  Uri server,
+  Map<String, dynamic> outputs,
+) async {
   final result = <_DownloadedImage>[];
 
   for (final output in outputs.values) {
@@ -397,8 +408,11 @@ String _buildOutputName({
   return '${prefix.substring(0, min(prefix.length, 48))}_seed${seed}_$index.$extension';
 }
 
-Future<Map<String, dynamic>> _httpJson(String method, Uri uri,
-    {String? body}) async {
+Future<Map<String, dynamic>> _httpJson(
+  String method,
+  Uri uri, {
+  String? body,
+}) async {
   final client = HttpClient();
   try {
     final request = await client.openUrl(method, uri);

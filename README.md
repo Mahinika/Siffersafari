@@ -50,6 +50,10 @@ lib/
 └── core/            # Delad funktionalitet, services
 ```
 
+Dokumentation (med Mermaid-diagram):
+- `docs/ARCHITECTURE.md`
+- `docs/MERMAID_GUIDE.md`
+
 ## Installation (Utveckling)
 
 ```bash

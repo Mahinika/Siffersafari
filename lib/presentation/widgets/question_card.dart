@@ -35,12 +35,12 @@ class QuestionCard extends StatelessWidget {
             color: cardColor ?? AppColors.neutralBackground,
             borderRadius: BorderRadius.circular(AppConstants.borderRadius * 2),
             border: Border.all(
-              color: borderColor ?? Colors.white.withOpacity(0.12),
+              color: borderColor ?? Colors.white.withValues(alpha: 0.12),
             ),
             boxShadow: [
               BoxShadow(
-                color:
-                    (shadowColor ?? AppColors.spacePrimary).withOpacity(0.18),
+                color: (shadowColor ?? Theme.of(context).colorScheme.primary)
+                    .withValues(alpha: 0.18),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),

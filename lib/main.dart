@@ -9,6 +9,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/di/injection.dart';
+import 'core/providers/app_theme_provider.dart';
 import 'presentation/screens/home_screen.dart';
 
 Future<void> main() async {
@@ -54,70 +55,24 @@ Future<T> _measureAsync<T>(String name, Future<T> Function() fn) async {
   }
 }
 
-class MathGameApp extends StatelessWidget {
+class MathGameApp extends ConsumerWidget {
   const MathGameApp({super.key, required this.bootstrapError});
 
   final String? bootstrapError;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        final colorScheme = const ColorScheme.light(
-          primary: AppColors.spacePrimary,
-          onPrimary: Colors.white,
-          secondary: AppColors.spaceAccent,
-          onSecondary: Colors.white,
-          surface: Color(0xFFFFF6E8),
-          onSurface: AppColors.textPrimary,
-          error: AppColors.wrongAnswer,
-          onError: Colors.white,
-        );
+        final theme = ref.watch(appThemeDataProvider);
 
         return MaterialApp(
           title: 'Siffersafari',
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: colorScheme,
-            scaffoldBackgroundColor: AppColors.neutralBackground,
-            elevatedButtonTheme: ElevatedButtonThemeData(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(
-                  double.infinity,
-                  AppConstants.minTouchTargetSize,
-                ),
-                backgroundColor: AppColors.spacePrimary,
-                foregroundColor: Colors.white,
-                textStyle: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.borderRadius),
-                ),
-              ),
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                minimumSize: const Size(44, 44),
-                foregroundColor: AppColors.spaceSecondary,
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            appBarTheme: const AppBarTheme(
-              centerTitle: true,
-              backgroundColor: Colors.transparent,
-              foregroundColor: Colors.white,
-              elevation: 0,
-            ),
-          ),
+          theme: theme,
           home: bootstrapError == null
               ? const HomeScreen()
               : _BootstrapErrorScreen(error: bootstrapError!),

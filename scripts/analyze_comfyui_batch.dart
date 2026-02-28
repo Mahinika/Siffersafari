@@ -5,7 +5,8 @@ import 'package:image/image.dart' as img;
 void main(List<String> args) {
   if (args.isEmpty || args.contains('-h') || args.contains('--help')) {
     stdout.writeln(
-        'Usage: dart run scripts/analyze_comfyui_batch.dart <fileOrDir> [more...]');
+      'Usage: dart run scripts/analyze_comfyui_batch.dart <fileOrDir> [more...]',
+    );
     stdout
         .writeln('Prints one-line diagnostics per image (alpha, bbox, edge).');
     exit(0);

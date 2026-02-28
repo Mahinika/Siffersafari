@@ -25,7 +25,7 @@ void main() {
         sessionId: 's1',
         operationType: OperationType.addition,
         difficulty: DifficultyLevel.easy,
-        questions: const [],
+        questions: [],
         correctAnswers: 0,
         wrongAnswers: 0,
         totalPoints: 0,

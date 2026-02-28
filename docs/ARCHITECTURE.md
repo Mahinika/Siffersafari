@@ -1,5 +1,169 @@
 # Projektdokumentation
 
+## Arkitekturöversikt (hela appen)
+
+Det här är en “helikoptervy” som visar hur appen hänger ihop från bootstrap till UI/state/services och persistens.
+
+```mermaid
+flowchart TB
+  %% End-to-end: bootstrap -> presentation -> state -> services -> data -> storage
+
+  subgraph Bootstrap[Bootstrap / Startup]
+    MAIN[main()] --> HIVEINIT[Hive.initFlutter()]
+    MAIN --> DI[initializeDependencies()]
+    MAIN --> PS[ProviderScope]
+    PS --> APP[MathGameApp (MaterialApp)]
+    DI --> GETIT[GetIt container]
+  end
+
+  subgraph Presentation[Presentation / Screens]
+    HOME[HomeScreen]
+    QUIZ[QuizScreen]
+    RESULTS[ResultsScreen]
+    SETTINGS[SettingsScreen]
+    PARENT[ParentPin/ParentDashboard]
+
+    APP --> HOME
+    HOME --> QUIZ
+    QUIZ --> RESULTS
+    HOME --> SETTINGS
+    HOME --> PARENT
+  end
+
+  subgraph State[State (Riverpod providers)]
+    QP[quizProvider (QuizNotifier)]
+    UP[userProvider (UserNotifier)]
+    PP[parentSettingsProvider]
+    DP[ageGroup/operation/difficulty providers]
+  end
+
+  subgraph Core[Core (Services + DI)]
+    QGS[QuestionGeneratorService]
+    ADS[AdaptiveDifficultyService]
+    SRS[SpacedRepetitionService]
+    FS[FeedbackService]
+    AS[AudioService]
+    ACS[AchievementService]
+    QPS[QuestProgressionService]
+  end
+
+  subgraph Data[Data (Repositories)]
+    LSR[LocalStorageRepository]
+  end
+
+  subgraph Storage[Storage]
+    HIVE[(Hive boxes)]
+  end
+
+  subgraph Domain[Domain (models)]
+    MODELS[Entities + Enums\n(t.ex. Question, QuizSession, UserProgress)]
+  end
+
+  %% UI reads/writes state via providers
+  HOME --> DP
+  QUIZ --> QP
+  RESULTS --> UP
+  SETTINGS --> UP
+  PARENT --> PP
+
+  %% Providers resolve dependencies through GetIt
+  QP --> GETIT
+  UP --> GETIT
+  PP --> GETIT
+
+  %% GetIt provides services and repositories
+  GETIT --> QGS
+  GETIT --> ADS
+  GETIT --> SRS
+  GETIT --> FS
+  GETIT --> AS
+  GETIT --> ACS
+  GETIT --> QPS
+  GETIT --> LSR
+
+  %% Services/repo persist to Hive
+  LSR --> HIVE
+  ACS --> LSR
+  QPS --> LSR
+
+  %% Domain models are used across layers
+  QGS -.-> MODELS
+  ADS -.-> MODELS
+  FS -.-> MODELS
+  LSR -.-> MODELS
+  QP -.-> MODELS
+  UP -.-> MODELS
+```
+
+## Mermaid-diagram (arkitektur + flöden)
+
+Mermaid-diagram i Markdown ger versionshanterad, “levande” dokumentation.
+
+### Lager (Clean-ish Architecture)
+
+```mermaid
+flowchart TB
+  subgraph Presentation[Presentation]
+    Home[Home / Screens]
+    Quiz[Quiz Screen]
+    Parent[Parent Dashboard]
+    Widgets[Widgets]
+  end
+
+  subgraph Domain[Domain]
+    Entities[Entities]
+    Enums[Enums]
+  end
+
+  subgraph Core[Core]
+    Services[Services]
+    DI[DI / GetIt]
+    Config[Config / Constants]
+  end
+
+  subgraph Data[Data]
+    Repos[Repositories]
+    Hive[(Hive Local Storage)]
+  end
+
+  Presentation --> Core
+  Presentation --> Domain
+  Core --> Data
+  Data --> Hive
+
+  Home --> Widgets
+  Quiz --> Widgets
+  Parent --> Widgets
+  Services --> Repos
+  DI --> Services
+  DI --> Repos
+```
+
+### Quiz-flöde (happy path)
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant U as Barn
+  participant H as Home
+  participant Q as Quiz
+  participant S as Services
+  participant D as Local Storage
+  participant R as Results
+
+  U->>H: Väljer räknesätt
+  H->>Q: Startar quiz
+  Q->>S: Be om nästa fråga
+  S-->>Q: Question + svarsalternativ
+  U->>Q: Svarar
+  Q->>S: Validera + feedback
+  S->>D: Spara progression/quizdata
+  Q-->>U: Visar feedback
+  Q->>R: Slut → resultat
+  R->>D: Läser sammanfattning
+  R-->>U: Visar resultat
+```
+
 ## Översikt
 
 Detta är ett pedagogiskt mattespel för barn (6-13+ år) som bygger på vetenskaplig forskning om effektiv inlärning av matematik.

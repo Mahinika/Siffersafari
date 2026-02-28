@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
+import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
@@ -13,9 +14,9 @@ import '../../core/services/achievement_service.dart';
 import '../../core/services/audio_service.dart';
 import '../../domain/entities/question.dart';
 import '../../domain/entities/quiz_session.dart';
-import '../../domain/enums/app_theme.dart';
 import '../../domain/enums/operation_type.dart';
 import '../widgets/star_rating.dart';
+import '../widgets/themed_background_scaffold.dart';
 import 'home_screen.dart';
 import 'quiz_screen.dart';
 
@@ -164,14 +165,9 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final session = quizState.session;
     final reward = userState.lastReward;
 
-    final selectedTheme =
-        userState.activeUser?.selectedTheme ?? AppTheme.space;
-    final backgroundAsset = switch (selectedTheme) {
-      AppTheme.jungle => 'assets/images/themes/jungle/background.png',
-      _ => 'assets/images/themes/space/background.png',
-    };
-    final baseBackgroundColor =
-        selectedTheme == AppTheme.jungle ? AppColors.jungleBackground : AppColors.spaceBackground;
+    final themeCfg = ref.watch(appThemeConfigProvider);
+
+    final primaryActionColor = themeCfg.primaryActionColor;
 
     if (session == null) {
       return const Scaffold(
@@ -187,326 +183,293 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final timeText = _formatDuration(session.sessionDuration);
     final hardest = _getHardestQuestions(session);
 
-    return Scaffold(
-      backgroundColor: baseBackgroundColor,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              backgroundAsset,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.asset(
-                  'assets/images/splash_background.png',
-                  fit: BoxFit.cover,
-                );
-              },
-            ),
-          ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: baseBackgroundColor.withOpacity(0.76),
-              ),
-            ),
-          ),
-          SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  padding: EdgeInsets.all(AppConstants.largePadding.w),
-                  child: ConstrainedBox(
-                    constraints:
-                        BoxConstraints(minHeight: constraints.maxHeight),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                    // Title
-                    Text(
-                      _getTitle(stars),
-                      style:
-                          Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    SizedBox(height: AppConstants.largePadding.h),
-
-                    if (shouldCelebrate) ...[
-                      SizedBox(
-                        height: 140.h,
-                        child: Lottie.asset(
-                          'assets/animations/celebration.json',
-                          fit: BoxFit.contain,
-                          repeat: false,
+    return ThemedBackgroundScaffold(
+      overlayOpacity: 0.76,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(AppConstants.largePadding.w),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Title
+                  Text(
+                    _getTitle(stars),
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  SizedBox(height: AppConstants.largePadding.h),
+
+                  if (shouldCelebrate) ...[
+                    SizedBox(
+                      height: 140.h,
+                      child: Lottie.asset(
+                        'assets/animations/celebration.json',
+                        fit: BoxFit.contain,
+                        repeat: false,
                       ),
-                      SizedBox(height: AppConstants.largePadding.h),
-                    ],
+                    ),
+                    SizedBox(height: AppConstants.largePadding.h),
+                  ],
 
-                    // Star rating
-                    StarRating(stars: stars),
+                  // Star rating
+                  StarRating(stars: stars),
 
-                    SizedBox(height: AppConstants.largePadding.h * 2),
+                  SizedBox(height: AppConstants.largePadding.h * 2),
 
-                    // Stats card
-                    Container(
-                      padding: EdgeInsets.all(AppConstants.largePadding.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius:
-                            BorderRadius.circular(AppConstants.borderRadius),
-                      ),
-                      child: Column(
-                        children: [
-                          _buildStatRow(
-                            context,
-                            'Rätt svar',
-                            '${session.correctAnswers} / ${session.totalQuestions}',
-                          ),
+                  // Stats card
+                  Container(
+                    padding: EdgeInsets.all(AppConstants.largePadding.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.borderRadius),
+                    ),
+                    child: Column(
+                      children: [
+                        _buildStatRow(
+                          context,
+                          'Rätt svar',
+                          '${session.correctAnswers} / ${session.totalQuestions}',
+                        ),
+                        SizedBox(height: AppConstants.defaultPadding.h),
+                        _buildStatRow(
+                          context,
+                          'Tid',
+                          timeText,
+                        ),
+                        SizedBox(height: AppConstants.defaultPadding.h),
+                        _buildStatRow(
+                          context,
+                          'Poäng',
+                          session.totalPoints.toString(),
+                        ),
+                        if (userState.questStatus != null) ...[
                           SizedBox(height: AppConstants.defaultPadding.h),
                           _buildStatRow(
                             context,
-                            'Tid',
-                            timeText,
-                          ),
-                          SizedBox(height: AppConstants.defaultPadding.h),
-                          _buildStatRow(
-                            context,
-                            'Poäng',
-                            session.totalPoints.toString(),
-                          ),
-                          if (userState.questStatus != null) ...[
-                            SizedBox(height: AppConstants.defaultPadding.h),
-                            _buildStatRow(
-                              context,
-                              'Uppdrag',
-                              '${(userState.questStatus!.progress * 100).round()}%',
-                            ),
-                          ],
-                          if (reward != null && reward.bonusPoints > 0) ...[
-                            SizedBox(height: AppConstants.defaultPadding.h),
-                            _buildStatRow(
-                              context,
-                              'Bonuspoäng',
-                              '+${reward.bonusPoints}',
-                            ),
-                          ],
-                          SizedBox(height: AppConstants.defaultPadding.h),
-                          _buildStatRow(
-                            context,
-                            'Framgångsfrekvens',
-                            '${(session.successRate * 100).toStringAsFixed(0)}%',
+                            'Uppdrag',
+                            '${(userState.questStatus!.progress * 100).round()}%',
                           ),
                         ],
-                      ),
+                        if (reward != null && reward.bonusPoints > 0) ...[
+                          SizedBox(height: AppConstants.defaultPadding.h),
+                          _buildStatRow(
+                            context,
+                            'Bonuspoäng',
+                            '+${reward.bonusPoints}',
+                          ),
+                        ],
+                        SizedBox(height: AppConstants.defaultPadding.h),
+                        _buildStatRow(
+                          context,
+                          'Framgångsfrekvens',
+                          '${(session.successRate * 100).toStringAsFixed(0)}%',
+                        ),
+                      ],
                     ),
+                  ),
 
+                  SizedBox(height: AppConstants.largePadding.h),
+
+                  _buildHardestPanel(context, hardest),
+
+                  if (reward != null && reward.unlockedIds.isNotEmpty) ...[
                     SizedBox(height: AppConstants.largePadding.h),
+                    _buildAchievementPanel(context, reward),
+                  ],
 
-                    _buildHardestPanel(context, hardest),
+                  SizedBox(height: AppConstants.largePadding.h * 2),
 
-                    if (reward != null && reward.unlockedIds.isNotEmpty) ...[
-                      SizedBox(height: AppConstants.largePadding.h),
-                      _buildAchievementPanel(context, reward),
-                    ],
-
-                    SizedBox(height: AppConstants.largePadding.h * 2),
-
-                    // Buttons
-                    ElevatedButton(
-                      onPressed: () {
-                        final user = ref.read(userProvider).activeUser;
-                        if (user == null) {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (_) => const HomeScreen()),
-                            (route) => false,
-                          );
-                          return;
-                        }
-
-                        // Respect parent settings (if present). If the operation is
-                        // disabled, return to Home.
-                        final allowedOps =
-                            ref.read(parentSettingsProvider)[user.userId] ??
-                                {
-                                  OperationType.addition,
-                                  OperationType.subtraction,
-                                  OperationType.multiplication,
-                                  OperationType.division,
-                                };
-
-                        if (!allowedOps.contains(session.operationType)) {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (_) => const HomeScreen()),
-                            (route) => false,
-                          );
-                          return;
-                        }
-
-                        final effectiveAgeGroup =
-                            DifficultyConfig.effectiveAgeGroup(
-                          fallback: user.ageGroup,
-                          gradeLevel: user.gradeLevel,
-                        );
-
-                        final effectiveDifficulty =
-                            DifficultyConfig.effectiveDifficulty(
-                          fallback: session.difficulty,
-                          gradeLevel: user.gradeLevel,
-                        );
-
-                        final count = DifficultyConfig.getQuestionsPerSession(
-                          effectiveAgeGroup,
-                        );
-
-                        final miniQuestions = _buildFocusedMiniPassQuestions(
-                          session,
-                          hardest,
-                          count,
-                        );
-
-                        if (miniQuestions.isEmpty) {
-                          ref.read(quizProvider.notifier).startSession(
-                                ageGroup: effectiveAgeGroup,
-                                operationType: session.operationType,
-                                difficulty: effectiveDifficulty,
-                              );
-                        } else {
-                          ref.read(quizProvider.notifier).startCustomSession(
-                                operationType: session.operationType,
-                                difficulty: effectiveDifficulty,
-                                questions: miniQuestions,
-                              );
-                        }
-
+                  // Buttons
+                  ElevatedButton(
+                    onPressed: () {
+                      final user = ref.read(userProvider).activeUser;
+                      if (user == null) {
                         Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => const QuizScreen()),
+                          MaterialPageRoute(builder: (_) => const HomeScreen()),
                           (route) => false,
                         );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.spacePrimary,
-                        minimumSize: Size(double.infinity, 56.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppConstants.borderRadius),
-                        ),
-                      ),
-                      child: Text(
-                        'Öva på det svåraste (2 min)',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                    ),
+                        return;
+                      }
 
-                    SizedBox(height: AppConstants.defaultPadding.h),
+                      // Respect parent settings (if present). If the operation is
+                      // disabled, return to Home.
+                      final allowedOps =
+                          ref.read(parentSettingsProvider)[user.userId] ??
+                              {
+                                OperationType.addition,
+                                OperationType.subtraction,
+                                OperationType.multiplication,
+                                OperationType.division,
+                              };
 
-                    OutlinedButton(
-                      onPressed: () {
-                        final user = ref.read(userProvider).activeUser;
-                        if (user == null) {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (_) => const HomeScreen()),
-                            (route) => false,
-                          );
-                          return;
-                        }
-
-                        // Respect parent settings (if present). If the operation is
-                        // disabled, return to Home.
-                        final allowedOps =
-                            ref.read(parentSettingsProvider)[user.userId] ??
-                                {
-                                  OperationType.addition,
-                                  OperationType.subtraction,
-                                  OperationType.multiplication,
-                                  OperationType.division,
-                                };
-
-                        if (!allowedOps.contains(session.operationType)) {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (_) => const HomeScreen()),
-                            (route) => false,
-                          );
-                          return;
-                        }
-
-                        final effectiveAgeGroup =
-                            DifficultyConfig.effectiveAgeGroup(
-                          fallback: user.ageGroup,
-                          gradeLevel: user.gradeLevel,
+                      if (!allowedOps.contains(session.operationType)) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const HomeScreen()),
+                          (route) => false,
                         );
+                        return;
+                      }
 
-                        final effectiveDifficulty =
-                            DifficultyConfig.effectiveDifficulty(
-                          fallback: session.difficulty,
-                          gradeLevel: user.gradeLevel,
-                        );
+                      final effectiveAgeGroup =
+                          DifficultyConfig.effectiveAgeGroup(
+                        fallback: user.ageGroup,
+                        gradeLevel: user.gradeLevel,
+                      );
 
+                      final effectiveDifficulty =
+                          DifficultyConfig.effectiveDifficulty(
+                        fallback: session.difficulty,
+                        gradeLevel: user.gradeLevel,
+                      );
+
+                      final count = DifficultyConfig.getQuestionsPerSession(
+                        effectiveAgeGroup,
+                      );
+
+                      final miniQuestions = _buildFocusedMiniPassQuestions(
+                        session,
+                        hardest,
+                        count,
+                      );
+
+                      if (miniQuestions.isEmpty) {
                         ref.read(quizProvider.notifier).startSession(
                               ageGroup: effectiveAgeGroup,
                               operationType: session.operationType,
                               difficulty: effectiveDifficulty,
                             );
+                      } else {
+                        ref.read(quizProvider.notifier).startCustomSession(
+                              operationType: session.operationType,
+                              difficulty: effectiveDifficulty,
+                              questions: miniQuestions,
+                            );
+                      }
 
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => const QuizScreen()),
-                          (route) => false,
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.white),
-                        minimumSize: Size(double.infinity, 56.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppConstants.borderRadius),
-                        ),
-                      ),
-                      child: Text(
-                        'Spela igen',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const QuizScreen()),
+                        (route) => false,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryActionColor,
+                      minimumSize: Size(double.infinity, 56.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.borderRadius),
                       ),
                     ),
+                    child: Text(
+                      'Öva på det svåraste (2 min)',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
 
-                    SizedBox(height: AppConstants.smallPadding.h),
+                  SizedBox(height: AppConstants.defaultPadding.h),
 
-                    TextButton(
-                      onPressed: () {
+                  OutlinedButton(
+                    onPressed: () {
+                      final user = ref.read(userProvider).activeUser;
+                      if (user == null) {
                         Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(builder: (_) => const HomeScreen()),
                           (route) => false,
                         );
-                      },
-                      child: Text(
-                        'Tillbaka till Start',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        return;
+                      }
+
+                      // Respect parent settings (if present). If the operation is
+                      // disabled, return to Home.
+                      final allowedOps =
+                          ref.read(parentSettingsProvider)[user.userId] ??
+                              {
+                                OperationType.addition,
+                                OperationType.subtraction,
+                                OperationType.multiplication,
+                                OperationType.division,
+                              };
+
+                      if (!allowedOps.contains(session.operationType)) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const HomeScreen()),
+                          (route) => false,
+                        );
+                        return;
+                      }
+
+                      final effectiveAgeGroup =
+                          DifficultyConfig.effectiveAgeGroup(
+                        fallback: user.ageGroup,
+                        gradeLevel: user.gradeLevel,
+                      );
+
+                      final effectiveDifficulty =
+                          DifficultyConfig.effectiveDifficulty(
+                        fallback: session.difficulty,
+                        gradeLevel: user.gradeLevel,
+                      );
+
+                      ref.read(quizProvider.notifier).startSession(
+                            ageGroup: effectiveAgeGroup,
+                            operationType: session.operationType,
+                            difficulty: effectiveDifficulty,
+                          );
+
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const QuizScreen()),
+                        (route) => false,
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.white),
+                      minimumSize: Size(double.infinity, 56.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppConstants.borderRadius),
                       ),
                     ),
-                      ],
+                    child: Text(
+                      'Spela igen',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
-                );
-              },
+
+                  SizedBox(height: AppConstants.smallPadding.h),
+
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const HomeScreen()),
+                        (route) => false,
+                      );
+                    },
+                    child: Text(
+                      'Tillbaka till Start',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -545,10 +508,10 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
       width: double.infinity,
       padding: EdgeInsets.all(AppConstants.defaultPadding.w),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         border: Border.all(
-          color: Colors.white.withOpacity(0.15),
+          color: Colors.white.withValues(alpha: 0.15),
         ),
       ),
       child: Column(
@@ -583,10 +546,10 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
       width: double.infinity,
       padding: EdgeInsets.all(AppConstants.defaultPadding.w),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         border: Border.all(
-          color: Colors.white.withOpacity(0.15),
+          color: Colors.white.withValues(alpha: 0.15),
         ),
       ),
       child: Column(

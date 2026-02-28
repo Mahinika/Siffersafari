@@ -44,7 +44,7 @@ class SpacedRepetitionService {
       const intervalDays = AppConstants.firstReviewInterval;
       return ReviewSchedule(
         questionId: questionId,
-        nextReviewDate: currentTime.add(Duration(days: intervalDays)),
+        nextReviewDate: currentTime.add(const Duration(days: intervalDays)),
         intervalDays: intervalDays,
         consecutiveCorrect: wasCorrect ? 1 : 0,
       );
@@ -53,7 +53,7 @@ class SpacedRepetitionService {
     if (!wasCorrect) {
       const intervalDays = AppConstants.firstReviewInterval;
       return previous.copyWith(
-        nextReviewDate: currentTime.add(Duration(days: intervalDays)),
+        nextReviewDate: currentTime.add(const Duration(days: intervalDays)),
         intervalDays: intervalDays,
         consecutiveCorrect: 0,
       );

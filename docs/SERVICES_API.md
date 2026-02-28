@@ -2,6 +2,61 @@
 
 Det här dokumentet beskriver appens centrala “services” på en nivå som är praktiskt användbar för utveckling/test.
 
+## Mermaid – service-karta
+
+```mermaid
+flowchart TB
+	UI[Presentation / UI] --> QS[QuestionGeneratorService]
+	UI --> ADS[AdaptiveDifficultyService]
+	UI --> SRS[SpacedRepetitionService]
+	UI --> FS[FeedbackService]
+	UI --> AS[AchievementService]
+	UI --> AU[AudioService]
+
+	QS --> LSR[LocalStorageRepository]
+	ADS --> LSR
+	SRS --> LSR
+	AS --> LSR
+	AU --> LSR
+
+	LSR --> H[(Hive)]
+```
+
+## Mermaid – typiskt quiz-flöde (översikt)
+
+```mermaid
+sequenceDiagram
+	autonumber
+	participant UI as Quiz UI
+	participant QS as QuestionGeneratorService
+	participant ADS as AdaptiveDifficultyService
+	participant SRS as SpacedRepetitionService
+	participant FS as FeedbackService
+	participant AS as AchievementService
+	participant LSR as LocalStorageRepository
+	participant H as Hive
+
+	UI->>ADS: Hämta rekommenderad svårighet
+	ADS-->>UI: DifficultyLevel
+
+	UI->>SRS: Hämta repetitionsprioritet
+	SRS-->>UI: Prioriteringsdata
+
+	UI->>QS: Generera nästa fråga
+	QS-->>UI: Question (+ svarsalternativ)
+
+	UI->>FS: Skapa feedback för svar
+	FS-->>UI: Feedback-model
+
+	UI->>LSR: Spara quizresultat/progression
+	LSR->>H: Persist
+	H-->>LSR: OK
+
+	UI->>AS: Utvärdera achievements
+	AS->>LSR: Läs/spara milestones
+	LSR->>H: Persist
+```
+
 > Not: Namn och exakta signaturer kan ändras; se källkod för detaljer.
 
 ## QuestionGeneratorService

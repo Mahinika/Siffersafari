@@ -7,6 +7,7 @@ import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../data/repositories/local_storage_repository.dart';
 import '../../domain/enums/operation_type.dart';
+import '../widgets/themed_background_scaffold.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({
@@ -141,106 +142,99 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final progress = (_pageIndex + 1) / 2;
+    final accentColor = Theme.of(context).colorScheme.secondary;
+    final primaryActionColor = Theme.of(context).colorScheme.primary;
 
     return PopScope(
       canPop: false,
-      child: Scaffold(
-        backgroundColor: AppColors.spaceBackground,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(AppConstants.defaultPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: ThemedBackgroundScaffold(
+        overlayOpacity: 0.76,
+        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Kom igång',
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                    ),
-                    Text(
-                      '${_pageIndex + 1}/2',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white70,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppConstants.smallPadding),
-                ClipRRect(
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.borderRadius),
-                  child: LinearProgressIndicator(
-                    value: progress.clamp(0.0, 1.0),
-                    minHeight: 10,
-                    backgroundColor: Colors.white.withValues(alpha: 0.15),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppColors.spaceAccent,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppConstants.largePadding),
                 Expanded(
-                  child: PageView(
-                    controller: _controller,
-                    onPageChanged: (index) =>
-                        setState(() => _pageIndex = index),
-                    children: [
-                      _OnboardingGradePage(
-                        gradeLevel: _gradeLevel,
-                        onChanged: (value) => setState(() {
-                          _gradeLevel = value;
-                        }),
-                      ),
-                      _OnboardingOpsPage(
-                        allowedOps: _allowedOps,
-                        onChanged: (updated) => setState(() {
-                          _allowedOps = updated;
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppConstants.defaultPadding),
-                ElevatedButton(
-                  onPressed: _next,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.spacePrimary,
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppConstants.borderRadius),
-                    ),
-                  ),
                   child: Text(
-                    _pageIndex >= 1 ? 'Klar' : 'Nästa',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    'Kom igång',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                 ),
-                const SizedBox(height: AppConstants.smallPadding),
-                TextButton(
-                  onPressed: _finish,
-                  child: Text(
-                    'Hoppa över',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
+                Text(
+                  '${_pageIndex + 1}/2',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: AppConstants.smallPadding),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+              child: LinearProgressIndicator(
+                value: progress.clamp(0.0, 1.0),
+                minHeight: 10,
+                backgroundColor: Colors.white.withValues(alpha: 0.15),
+                valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+              ),
+            ),
+            const SizedBox(height: AppConstants.largePadding),
+            Expanded(
+              child: PageView(
+                controller: _controller,
+                onPageChanged: (index) => setState(() => _pageIndex = index),
+                children: [
+                  _OnboardingGradePage(
+                    gradeLevel: _gradeLevel,
+                    onChanged: (value) => setState(() {
+                      _gradeLevel = value;
+                    }),
+                  ),
+                  _OnboardingOpsPage(
+                    allowedOps: _allowedOps,
+                    onChanged: (updated) => setState(() {
+                      _allowedOps = updated;
+                    }),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppConstants.defaultPadding),
+            ElevatedButton(
+              onPressed: _next,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryActionColor,
+                minimumSize: const Size(double.infinity, 56),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.borderRadius),
+                ),
+              ),
+              child: Text(
+                _pageIndex >= 1 ? 'Klar' : 'Nästa',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
+            const SizedBox(height: AppConstants.smallPadding),
+            TextButton(
+              onPressed: _finish,
+              child: Text(
+                'Hoppa över',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -260,6 +254,7 @@ class _OnboardingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accentColor = Theme.of(context).colorScheme.secondary;
     return Center(
       child: Container(
         padding: const EdgeInsets.all(AppConstants.largePadding),
@@ -277,7 +272,7 @@ class _OnboardingCard extends StatelessWidget {
             Icon(
               icon,
               size: 56,
-              color: AppColors.spaceAccent,
+              color: accentColor,
             ),
             const SizedBox(height: AppConstants.defaultPadding),
             Text(
@@ -310,6 +305,7 @@ class _OnboardingGradePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dropdownBg = Theme.of(context).scaffoldBackgroundColor;
     return _OnboardingCard(
       icon: Icons.school,
       title: 'Välj årskurs',
@@ -338,7 +334,7 @@ class _OnboardingGradePage extends StatelessWidget {
               ),
               DropdownButton<int?>(
                 value: gradeLevel,
-                dropdownColor: AppColors.spaceBackground,
+                dropdownColor: dropdownBg,
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
@@ -377,7 +373,8 @@ class _OnboardingOpsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = const <OperationType>[
+    final accentColor = Theme.of(context).colorScheme.secondary;
+    const items = <OperationType>[
       OperationType.addition,
       OperationType.subtraction,
       OperationType.multiplication,
@@ -421,7 +418,7 @@ class _OnboardingOpsPage extends StatelessWidget {
                   }
                   onChanged(updated);
                 },
-                activeColor: AppColors.spaceAccent,
+                activeColor: accentColor,
                 title: Text(
                   op.displayName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(

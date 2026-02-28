@@ -92,15 +92,19 @@ class QuestProgressionService {
       }
       if (grade <= 4) {
         return defaultQuests
-            .where((q) =>
-                q.difficulty == DifficultyLevel.easy ||
-                q.difficulty == DifficultyLevel.medium)
+            .where(
+              (q) =>
+                  q.difficulty == DifficultyLevel.easy ||
+                  q.difficulty == DifficultyLevel.medium,
+            )
             .toList(growable: false);
       }
       return defaultQuests
-          .where((q) =>
-              q.difficulty == DifficultyLevel.easy ||
-              q.difficulty == DifficultyLevel.medium)
+          .where(
+            (q) =>
+                q.difficulty == DifficultyLevel.easy ||
+                q.difficulty == DifficultyLevel.medium,
+          )
           .toList(growable: false);
     }
 
@@ -112,15 +116,19 @@ class QuestProgressionService {
             .toList(growable: false);
       case AgeGroup.middle:
         return defaultQuests
-            .where((q) =>
-                q.difficulty == DifficultyLevel.easy ||
-                q.difficulty == DifficultyLevel.medium)
+            .where(
+              (q) =>
+                  q.difficulty == DifficultyLevel.easy ||
+                  q.difficulty == DifficultyLevel.medium,
+            )
             .toList(growable: false);
       case AgeGroup.older:
         return defaultQuests
-            .where((q) =>
-                q.difficulty == DifficultyLevel.easy ||
-                q.difficulty == DifficultyLevel.medium)
+            .where(
+              (q) =>
+                  q.difficulty == DifficultyLevel.easy ||
+                  q.difficulty == DifficultyLevel.medium,
+            )
             .toList(growable: false);
     }
   }
@@ -173,8 +181,10 @@ class QuestProgressionService {
     );
   }
 
-  String? nextQuestId(
-      {required UserProgress user, required String currentQuestId}) {
+  String? nextQuestId({
+    required UserProgress user,
+    required String currentQuestId,
+  }) {
     final path = questsForUser(user);
     final effectivePath = path.isNotEmpty ? path : defaultQuests;
 

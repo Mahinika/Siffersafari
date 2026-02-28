@@ -7,6 +7,7 @@ import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../data/repositories/local_storage_repository.dart';
 import '../../domain/enums/operation_type.dart';
+import '../widgets/themed_background_scaffold.dart';
 import 'parent_pin_screen.dart';
 import 'settings_screen.dart';
 
@@ -17,8 +18,8 @@ class ParentDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider).activeUser;
 
-    return Scaffold(
-      backgroundColor: AppColors.spaceBackground,
+    return ThemedBackgroundScaffold(
+      overlayOpacity: 0.76,
       appBar: AppBar(
         title: const Text('Föräldraläge'),
         backgroundColor: Colors.transparent,
@@ -49,20 +50,18 @@ class ParentDashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: user == null
-            ? Center(
-                child: Text(
-                  'Ingen aktiv användare',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              )
-            : _DashboardBody(userId: user.userId),
-      ),
+      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      body: user == null
+          ? Center(
+              child: Text(
+                'Ingen aktiv användare',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            )
+          : _DashboardBody(userId: user.userId),
     );
   }
 }
@@ -76,6 +75,7 @@ class _DashboardBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final accentColor = Theme.of(context).colorScheme.secondary;
     final user = ref.watch(userProvider).activeUser!;
     final repo = getIt<LocalStorageRepository>();
     final history = repo.getQuizHistory(userId, limit: 5);
@@ -153,7 +153,7 @@ class _DashboardBody extends ConsumerWidget {
                 ),
                 trailing: DropdownButton<int?>(
                   value: user.gradeLevel,
-                  dropdownColor: AppColors.spaceBackground,
+                  dropdownColor: Theme.of(context).scaffoldBackgroundColor,
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium
@@ -191,9 +191,8 @@ class _DashboardBody extends ConsumerWidget {
                         ),
                   ),
                   value: isOn,
-                  activeThumbColor: AppColors.spaceAccent,
-                  activeTrackColor:
-                      AppColors.spaceAccent.withValues(alpha: 0.35),
+                  activeThumbColor: accentColor,
+                  activeTrackColor: accentColor.withValues(alpha: 0.35),
                   onChanged: (!isOn || canTurnOff)
                       ? (value) {
                           settingsNotifier.setOperationAllowed(
@@ -245,7 +244,7 @@ class _DashboardBody extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            '${a.label}',
+                            a.label,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -306,11 +305,13 @@ class _DashboardBody extends ConsumerWidget {
 
     final entries = masteryLevels.entries
         .where((e) => e.value.isFinite)
-        .map((e) => _WeakArea(
-              key: e.key,
-              rate: e.value.clamp(0.0, 1.0),
-              label: _prettyMasteryKey(e.key),
-            ))
+        .map(
+          (e) => _WeakArea(
+            key: e.key,
+            rate: e.value.clamp(0.0, 1.0),
+            label: _prettyMasteryKey(e.key),
+          ),
+        )
         .toList();
 
     entries.sort((a, b) => a.rate.compareTo(b.rate));

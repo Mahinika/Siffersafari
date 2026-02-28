@@ -130,7 +130,8 @@ Future<void> initializeDependencies({
   if (total != null) {
     total.stop();
     debugPrint(
-        '[PERF] initializeDependencies total: ${total.elapsedMilliseconds}ms');
+      '[PERF] initializeDependencies total: ${total.elapsedMilliseconds}ms',
+    );
   }
 }
 

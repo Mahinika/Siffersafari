@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
 
-import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/user_provider.dart';
-import '../../domain/enums/age_group.dart';
+import '../dialogs/create_user_dialog.dart';
+import '../widgets/themed_background_scaffold.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -18,123 +18,10 @@ class SettingsScreen extends ConsumerWidget {
     final user = userState.activeUser;
     final allUsers = userState.allUsers;
 
-    Future<void> showCreateUserDialog() async {
-      final nameController = TextEditingController();
-      int? selectedGrade;
+    final themeCfg = ref.watch(appThemeConfigProvider);
 
-      await showDialog<void>(
-        context: context,
-        builder: (dialogContext) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                backgroundColor: AppColors.spaceBackground,
-                title: const Text(
-                  'Skapa användare',
-                  style: TextStyle(color: Colors.white),
-                ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      autofocus: true,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: 'Namn',
-                        labelStyle: const TextStyle(color: Colors.white70),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.white.withOpacity(0.2)),
-                        ),
-                        focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.spaceAccent),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppConstants.defaultPadding),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Årskurs',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
-                                ?.copyWith(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ),
-                        DropdownButton<int?>(
-                          value: selectedGrade,
-                          dropdownColor: AppColors.spaceBackground,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(color: Colors.white),
-                          underline: const SizedBox.shrink(),
-                          items: [
-                            const DropdownMenuItem<int?>(
-                              value: null,
-                              child: Text('Ingen'),
-                            ),
-                            ..._gradeItems.map(
-                              (g) => DropdownMenuItem<int?>(
-                                value: g,
-                                child: Text('Åk $g'),
-                              ),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              selectedGrade = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(dialogContext).pop(),
-                    child: const Text('Avbryt'),
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      final name = nameController.text.trim();
-                      if (name.isEmpty) return;
-
-                      final ageGroup = DifficultyConfig.effectiveAgeGroup(
-                        fallback: AgeGroup.young,
-                        gradeLevel: selectedGrade,
-                      );
-
-                      await ref.read(userProvider.notifier).createUser(
-                            userId: const Uuid().v4(),
-                            name: name,
-                            ageGroup: ageGroup,
-                            gradeLevel: selectedGrade,
-                          );
-
-                      if (dialogContext.mounted) {
-                        Navigator.of(dialogContext).pop();
-                      }
-                    },
-                    child: const Text('Skapa'),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: AppColors.spaceBackground,
+    return ThemedBackgroundScaffold(
+      overlayOpacity: 0.76,
       appBar: AppBar(
         title: const Text('Inställningar'),
         backgroundColor: Colors.transparent,
@@ -172,7 +59,7 @@ class SettingsScreen extends ConsumerWidget {
                         ? null
                         : DropdownButton<String>(
                             value: user?.userId,
-                            dropdownColor: AppColors.spaceBackground,
+                            dropdownColor: themeCfg.baseBackgroundColor,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -205,7 +92,10 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     leading:
                         const Icon(Icons.person_add, color: Colors.white70),
-                    onTap: showCreateUserDialog,
+                    onTap: () => showCreateUserDialog(
+                      context: context,
+                      ref: ref,
+                    ),
                   ),
                 ],
               ),
@@ -249,7 +139,7 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       trailing: DropdownButton<int?>(
                         value: user.gradeLevel,
-                        dropdownColor: AppColors.spaceBackground,
+                        dropdownColor: themeCfg.baseBackgroundColor,
                         style: Theme.of(context)
                             .textTheme
                             .bodyMedium
@@ -290,9 +180,9 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                       ),
                       value: user.soundEnabled,
-                      activeThumbColor: AppColors.spaceAccent,
+                      activeThumbColor: themeCfg.accentColor,
                       activeTrackColor:
-                          AppColors.spaceAccent.withValues(alpha: 0.35),
+                          themeCfg.accentColor.withValues(alpha: 0.35),
                       onChanged: (value) async {
                         await ref
                             .read(userProvider.notifier)
@@ -315,9 +205,9 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                       ),
                       value: user.musicEnabled,
-                      activeThumbColor: AppColors.spaceAccent,
+                      activeThumbColor: themeCfg.accentColor,
                       activeTrackColor:
-                          AppColors.spaceAccent.withValues(alpha: 0.35),
+                          themeCfg.accentColor.withValues(alpha: 0.35),
                       onChanged: (value) async {
                         await ref
                             .read(userProvider.notifier)

@@ -123,7 +123,8 @@ List<({int r, int g, int b})> _estimateCornerBackgrounds(img.Image image) {
       }
     }
     out.add(
-        (r: (rSum / n).round(), g: (gSum / n).round(), b: (bSum / n).round()));
+      (r: (rSum / n).round(), g: (gSum / n).round(), b: (bSum / n).round()),
+    );
   }
 
   return out;

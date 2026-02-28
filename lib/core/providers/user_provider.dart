@@ -124,7 +124,9 @@ class UserNotifier extends StateNotifier<UserState> {
 
     if (current != status.quest.id) {
       await _repository.saveSetting(
-          _questCurrentKey(user.userId), status.quest.id);
+        _questCurrentKey(user.userId),
+        status.quest.id,
+      );
       final label = user.gradeLevel != null
           ? 'Årskurs ${user.gradeLevel}'
           : user.ageGroup.displayName;
@@ -333,7 +335,7 @@ class UserNotifier extends StateNotifier<UserState> {
         !completedQuestIds.contains(beforeQuestStatus.quest.id)) {
       final updatedCompleted = {
         ...completedQuestIds,
-        beforeQuestStatus.quest.id
+        beforeQuestStatus.quest.id,
       };
       final nextId = _questProgressionService.nextQuestId(
         user: updatedUser,

@@ -37,7 +37,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final direction = Directionality.of(context);
       final feedback = widget.feedback;
-      SemanticsService.announce(
+      SemanticsService.sendAnnouncement(
+        View.of(context),
         '${feedback.title}. ${feedback.message}',
         direction,
       );
@@ -116,7 +117,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: widget.feedback.isCorrect
                     ? AppColors.correctAnswer
-                    : (widget.continueButtonColor ?? AppColors.spacePrimary),
+                    : (widget.continueButtonColor ??
+                        Theme.of(context).colorScheme.primary),
                 minimumSize: Size(double.infinity, 56.h),
                 shape: RoundedRectangleBorder(
                   borderRadius:

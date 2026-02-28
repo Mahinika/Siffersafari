@@ -163,11 +163,11 @@ void main() {
   });
 
   testWidgets('App shows title on home', (WidgetTester tester) async {
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    tester.binding.window.physicalSizeTestValue = const Size(375, 812);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(375, 812);
     addTearDown(() {
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
 
     await tester.pumpWidget(
@@ -184,11 +184,11 @@ void main() {
 
   testWidgets('Can complete a short quiz and practice again',
       (WidgetTester tester) async {
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    tester.binding.window.physicalSizeTestValue = const Size(375, 812);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(375, 812);
     addTearDown(() {
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
 
     await repository.clearAllData();
@@ -252,11 +252,11 @@ void main() {
 
   testWidgets('Can start focused mini-pass from results',
       (WidgetTester tester) async {
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    tester.binding.window.physicalSizeTestValue = const Size(375, 812);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(375, 812);
     addTearDown(() {
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
 
     await repository.clearAllData();
@@ -308,11 +308,11 @@ void main() {
 
   testWidgets('Shows empty hardest-state when no weaknesses',
       (WidgetTester tester) async {
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    tester.binding.window.physicalSizeTestValue = const Size(375, 812);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(375, 812);
     addTearDown(() {
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
 
     await repository.clearAllData();
@@ -366,11 +366,11 @@ void main() {
 
   testWidgets('Can create a new parent PIN and open parent dashboard',
       (WidgetTester tester) async {
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    tester.binding.window.physicalSizeTestValue = const Size(375, 812);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(375, 812);
     addTearDown(() {
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
 
     await repository.clearAllData();
@@ -411,11 +411,11 @@ void main() {
 
   testWidgets('Can enter existing parent PIN and open parent dashboard',
       (WidgetTester tester) async {
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    tester.binding.window.physicalSizeTestValue = const Size(375, 812);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(375, 812);
     addTearDown(() {
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
 
     await repository.clearAllData();
@@ -456,11 +456,11 @@ void main() {
 
   testWidgets('Onboarding is shown once and then not repeated',
       (WidgetTester tester) async {
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    tester.binding.window.physicalSizeTestValue = const Size(375, 812);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(375, 812);
     addTearDown(() {
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
 
     await repository.clearAllData();

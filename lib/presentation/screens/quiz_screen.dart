@@ -4,14 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../domain/entities/question.dart';
-import '../../domain/enums/app_theme.dart';
 import '../widgets/answer_button.dart';
 import '../widgets/feedback_dialog.dart';
 import '../widgets/progress_indicator_bar.dart';
 import '../widgets/question_card.dart';
+import '../widgets/themed_background_scaffold.dart';
 import 'home_screen.dart';
 import 'results_screen.dart';
 
@@ -91,30 +92,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final session = quizState.session;
     final feedback = quizState.feedback;
 
-    final user = ref.watch(userProvider).activeUser;
-    final selectedTheme = user?.selectedTheme ?? AppTheme.space;
-    final backgroundAsset = switch (selectedTheme) {
-      AppTheme.jungle => 'assets/images/themes/jungle/background.png',
-      _ => 'assets/images/themes/space/background.png',
-    };
-    final baseBackgroundColor = selectedTheme == AppTheme.jungle
-        ? AppColors.jungleBackground
-        : AppColors.spaceBackground;
-    final primaryActionColor = selectedTheme == AppTheme.jungle
-        ? AppColors.junglePrimary
-        : AppColors.spacePrimary;
-    final accentColor = selectedTheme == AppTheme.jungle
-        ? AppColors.jungleAccent
-        : AppColors.spaceAccent;
-    final cardColor = selectedTheme == AppTheme.jungle
-        ? const Color(0xCC2A4F36)
-        : const Color(0xCC485466);
-    final cardBorderColor = Colors.white.withOpacity(0.14);
-    final lightTextColor = Colors.white;
-    final mutedTextColor = Colors.white70;
-    final buttonDisabledColor = selectedTheme == AppTheme.jungle
-        ? const Color(0xCC3D6C50)
-        : const Color(0xCC5B6575);
+    final themeCfg = ref.watch(appThemeConfigProvider);
+
+    final primaryActionColor = themeCfg.primaryActionColor;
+    final accentColor = themeCfg.accentColor;
+    final cardColor = themeCfg.cardColor;
+    final cardBorderColor = Colors.white.withValues(alpha: 0.14);
+    const lightTextColor = Colors.white;
+    const mutedTextColor = Colors.white70;
 
     if (session == null || session.currentQuestion == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -153,8 +138,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       }
     });
 
-    return Scaffold(
-      backgroundColor: baseBackgroundColor,
+    return ThemedBackgroundScaffold(
+      overlayOpacity: 0.76,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -167,81 +152,49 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          Positioned.fill(
-            child: Image.asset(
-              backgroundAsset,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.asset(
-                  'assets/images/splash_background.png',
-                  fit: BoxFit.cover,
-                );
-              },
+          // Progress bar
+          Padding(
+            padding: EdgeInsets.all(AppConstants.defaultPadding.w),
+            child: ProgressIndicatorBar(
+              progress: progress,
+              valueColor: accentColor,
+              backgroundColor: Colors.white.withValues(alpha: 0.22),
             ),
           ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: baseBackgroundColor.withOpacity(0.76),
-              ),
+
+          SizedBox(height: AppConstants.largePadding.h),
+
+          // Question card
+          Expanded(
+            child: QuestionCard(
+              question: question,
+              cardColor: cardColor,
+              shadowColor: primaryActionColor,
+              questionTextColor: lightTextColor,
+              subtitleTextColor: mutedTextColor,
+              borderColor: cardBorderColor,
             ),
           ),
-          SafeArea(
-            child: Column(
-              children: [
-                // Progress bar
-                Padding(
-                  padding: EdgeInsets.all(AppConstants.defaultPadding.w),
-                  child: ProgressIndicatorBar(
-                    progress: progress,
-                    valueColor: accentColor,
-                    backgroundColor: Colors.white.withOpacity(0.22),
-                  ),
-                ),
 
-                SizedBox(height: AppConstants.largePadding.h),
-
-                // Question card
-                Expanded(
-                  child: QuestionCard(
-                    question: question,
-                    cardColor: cardColor,
-                    shadowColor: primaryActionColor,
-                    questionTextColor: lightTextColor,
-                    subtitleTextColor: mutedTextColor,
-                    borderColor: cardBorderColor,
-                  ),
-                ),
-
-                // Answer buttons
-                Padding(
-                  padding: EdgeInsets.all(AppConstants.defaultPadding.w),
-                  child: _buildAnswerButtons(question),
-                ),
-
-                SizedBox(height: AppConstants.defaultPadding.h),
-              ],
-            ),
+          // Answer buttons
+          Padding(
+            padding: EdgeInsets.all(AppConstants.defaultPadding.w),
+            child: _buildAnswerButtons(question),
           ),
+
+          SizedBox(height: AppConstants.defaultPadding.h),
         ],
       ),
     );
   }
 
   Widget _buildAnswerButtons(Question question) {
-    final selectedTheme =
-        ref.read(userProvider).activeUser?.selectedTheme ?? AppTheme.space;
-    final primaryActionColor = selectedTheme == AppTheme.jungle
-        ? AppColors.junglePrimary
-        : AppColors.spacePrimary;
-    final cardColor = selectedTheme == AppTheme.jungle
-        ? const Color(0xCC2A4F36)
-        : const Color(0xCC485466);
-    final buttonDisabledColor = selectedTheme == AppTheme.jungle
-        ? const Color(0xCC3D6C50)
-        : const Color(0xCC5B6575);
+    final themeCfg = ref.read(appThemeConfigProvider);
+    final primaryActionColor = themeCfg.primaryActionColor;
+    final cardColor = themeCfg.cardColor;
+    final buttonDisabledColor = themeCfg.disabledBackgroundColor;
 
     final options = question.allAnswerOptions;
 

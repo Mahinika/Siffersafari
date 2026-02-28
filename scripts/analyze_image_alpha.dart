@@ -97,16 +97,19 @@ void main(List<String> args) {
   }
 
   stdout.writeln(
-      'Non-transparent bbox: x=$minX..$maxX y=$minY..$maxY  (w=$bboxW h=$bboxH)');
+    'Non-transparent bbox: x=$minX..$maxX y=$minY..$maxY  (w=$bboxW h=$bboxH)',
+  );
 
   // Heuristics
   final transparentPct = transparent / total;
   if (transparentPct < 0.2) {
     stdout.writeln(
-        'NOTE: Low transparency ratio; background might not be fully removed.');
+      'NOTE: Low transparency ratio; background might not be fully removed.',
+    );
   }
   if (transparentPct > 0.95) {
     stdout.writeln(
-        'NOTE: Very high transparency ratio; check that the character is not too thin/eroded.');
+      'NOTE: Very high transparency ratio; check that the character is not too thin/eroded.',
+    );
   }
 }
