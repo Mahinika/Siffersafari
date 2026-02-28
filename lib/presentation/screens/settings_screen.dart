@@ -19,13 +19,13 @@ class SettingsScreen extends ConsumerWidget {
     final allUsers = userState.allUsers;
 
     final themeCfg = ref.watch(appThemeConfigProvider);
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final subtleOnPrimary = onPrimary.withValues(alpha: 0.54);
 
     return ThemedBackgroundScaffold(
       appBar: AppBar(
         title: const Text('Inställningar'),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -34,7 +34,7 @@ class SettingsScreen extends ConsumerWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: onPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppConstants.borderRadius),
               ),
               child: Column(
@@ -44,14 +44,14 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(
                       'Användare',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: Colors.white70,
+                            color: mutedOnPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                     ),
                     subtitle: Text(
                       'Välj eller skapa en profil',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white54,
+                            color: subtleOnPrimary,
                           ),
                     ),
                     trailing: allUsers.isEmpty
@@ -62,7 +62,7 @@ class SettingsScreen extends ConsumerWidget {
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
-                                ?.copyWith(color: Colors.white),
+                                ?.copyWith(color: onPrimary),
                             underline: const SizedBox.shrink(),
                             items: [
                               ...allUsers.map(
@@ -80,17 +80,16 @@ class SettingsScreen extends ConsumerWidget {
                             },
                           ),
                   ),
-                  const Divider(height: 1, color: Colors.white24),
+                  const Divider(height: 1),
                   ListTile(
                     title: Text(
                       'Skapa användare',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: Colors.white70,
+                            color: mutedOnPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                     ),
-                    leading:
-                        const Icon(Icons.person_add, color: Colors.white70),
+                    leading: Icon(Icons.person_add, color: mutedOnPrimary),
                     onTap: () => showCreateUserDialog(
                       context: context,
                       ref: ref,
@@ -106,7 +105,7 @@ class SettingsScreen extends ConsumerWidget {
                   child: Text(
                     'Ingen aktiv användare',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.white70,
+                          color: mutedOnPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                   ),
@@ -115,7 +114,7 @@ class SettingsScreen extends ConsumerWidget {
             else
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: onPrimary.withValues(alpha: 0.1),
                   borderRadius:
                       BorderRadius.circular(AppConstants.borderRadius),
                 ),
@@ -126,14 +125,14 @@ class SettingsScreen extends ConsumerWidget {
                       title: Text(
                         'Årskurs',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Colors.white70,
+                              color: mutedOnPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
                       subtitle: Text(
                         'Styr svårighetsnivå (Åk 1–9).',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white54,
+                              color: subtleOnPrimary,
                             ),
                       ),
                       trailing: DropdownButton<int?>(
@@ -142,7 +141,7 @@ class SettingsScreen extends ConsumerWidget {
                         style: Theme.of(context)
                             .textTheme
                             .bodyMedium
-                            ?.copyWith(color: Colors.white),
+                            ?.copyWith(color: onPrimary),
                         underline: const SizedBox.shrink(),
                         items: [
                           const DropdownMenuItem<int?>(
@@ -163,19 +162,19 @@ class SettingsScreen extends ConsumerWidget {
                         },
                       ),
                     ),
-                    const Divider(height: 1, color: Colors.white24),
+                    const Divider(height: 1),
                     SwitchListTile(
                       title: Text(
                         'Ljudeffekter',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Colors.white70,
+                              color: mutedOnPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
                       subtitle: Text(
                         'Rätt/fel, klick, belöningar',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white54,
+                              color: subtleOnPrimary,
                             ),
                       ),
                       value: user.soundEnabled,
@@ -188,19 +187,19 @@ class SettingsScreen extends ConsumerWidget {
                             .saveUser(user.copyWith(soundEnabled: value));
                       },
                     ),
-                    const Divider(height: 1, color: Colors.white24),
+                    const Divider(height: 1),
                     SwitchListTile(
                       title: Text(
                         'Musik',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Colors.white70,
+                              color: mutedOnPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
                       subtitle: Text(
                         'Bakgrundsmusik',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white54,
+                              color: subtleOnPrimary,
                             ),
                       ),
                       value: user.musicEnabled,

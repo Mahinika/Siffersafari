@@ -12,6 +12,7 @@ class StarRating extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clamped = stars.clamp(0, 3);
+    final starColor = Theme.of(context).colorScheme.secondary;
     return Semantics(
       label: 'Betyg: $clamped av 3 stjärnor',
       child: ExcludeSemantics(
@@ -23,7 +24,7 @@ class StarRating extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 8.w),
               child: Icon(
                 isFilled ? Icons.star : Icons.star_border,
-                color: Colors.amber,
+                color: starColor,
                 size: 64.sp,
               ),
             );

@@ -90,7 +90,7 @@ class AppThemeConfig {
             AppConstants.minTouchTargetSize,
           ),
           backgroundColor: primaryActionColor,
-          foregroundColor: Colors.white,
+          foregroundColor: scheme.onPrimary,
           textStyle: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -100,19 +100,36 @@ class AppThemeConfig {
           ),
         ),
       ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(
+            double.infinity,
+            AppConstants.minTouchTargetSize,
+          ),
+          foregroundColor: scheme.onPrimary,
+          side: BorderSide(color: scheme.secondary),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           minimumSize: const Size(44, 44),
-          foregroundColor: accentColor,
+          foregroundColor: scheme.secondary,
           textStyle: const TextStyle(
             fontWeight: FontWeight.w700,
           ),
         ),
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         centerTitle: true,
         backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
+        foregroundColor: scheme.onPrimary,
         elevation: 0,
       ),
       dialogTheme: DialogThemeData(
@@ -123,31 +140,35 @@ class AppThemeConfig {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.08),
-        labelStyle: const TextStyle(color: Colors.white70),
-        hintStyle: const TextStyle(color: Colors.white54),
+        fillColor: scheme.onPrimary.withValues(alpha: 0.08),
+        labelStyle: TextStyle(color: scheme.onPrimary.withValues(alpha: 0.70)),
+        hintStyle: TextStyle(color: scheme.onPrimary.withValues(alpha: 0.54)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+          borderSide:
+              BorderSide(color: scheme.onPrimary.withValues(alpha: 0.2)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-          borderSide: BorderSide(color: accentColor),
+          borderSide: BorderSide(color: scheme.secondary),
         ),
       ),
       dropdownMenuTheme: DropdownMenuThemeData(
-        textStyle: const TextStyle(color: Colors.white),
+        textStyle: TextStyle(color: scheme.onPrimary),
         menuStyle: MenuStyle(
           backgroundColor: WidgetStatePropertyAll(
             baseBackgroundColor.withValues(alpha: 0.98),
           ),
         ),
       ),
-      dividerTheme: const DividerThemeData(color: Colors.white24, thickness: 1),
+      dividerTheme: DividerThemeData(
+        color: scheme.onPrimary.withValues(alpha: 0.24),
+        thickness: 1,
+      ),
     );
   }
 }

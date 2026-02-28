@@ -1,5 +1,5 @@
 param(
-  [ValidateSet('run', 'install')]
+  [ValidateSet('run', 'install', 'sync')]
   [string]$Action = 'run',
   [string[]]$FlutterArgs = @(),
   [switch]$ClearLogcatBeforeRun,
@@ -166,6 +166,65 @@ function Get-PackageInfo([string]$deviceId, [string]$appId) {
   }
 }
 
+function Install-DebugApkAndVerify([string]$deviceId, [string]$appId, [string[]]$flutterArgs) {
+  $beforeInstall = Get-PackageInfo -deviceId $deviceId -appId $appId
+  if ($beforeInstall) {
+    Write-Host "Före install: version=$($beforeInstall.versionName) code=$($beforeInstall.versionCode) lastUpdateTime=$($beforeInstall.lastUpdateTime)"
+  } else {
+    Write-Host "Före install: paketet är inte installerat eller kunde inte läsas."
+  }
+
+  Write-Host "Bygger debug APK (deterministisk install)..."
+  & flutter build apk --debug @flutterArgs
+  if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+  }
+
+  $apkPath = Get-DebugApkPath
+  if (-not (Test-Path -LiteralPath $apkPath)) {
+    throw "Hittade inte APK efter build: $apkPath"
+  }
+
+  $apk = Get-Item -LiteralPath $apkPath
+  $apkHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $apkPath).Hash
+
+  Write-Host "Installerar exakt APK: $apkPath"
+  Write-Host "APK info: size=$($apk.Length) bytes, modified=$($apk.LastWriteTime.ToString('s'))"
+  Write-Host "APK sha256: $apkHash"
+
+  # Ignore uninstall failure if app is not already installed.
+  & adb -s $deviceId uninstall $appId | Out-Null
+
+  & adb -s $deviceId install -r -t "$apkPath"
+  if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+  }
+
+  Write-Host "Verifierar installerat paket på enheten..."
+  $afterInstall = Get-PackageInfo -deviceId $deviceId -appId $appId
+  if (-not $afterInstall) {
+    throw "Install verification failed: kunde inte läsa package info efter install."
+  }
+
+  if (-not $afterInstall.lastUpdateTime -or -not $afterInstall.versionName -or -not $afterInstall.versionCode) {
+    throw "Install verification failed: saknar versionName/versionCode/lastUpdateTime efter install."
+  }
+
+  if ($beforeInstall -and $beforeInstall.lastUpdateTime -and ($beforeInstall.lastUpdateTime -eq $afterInstall.lastUpdateTime)) {
+    throw "Install verification failed: lastUpdateTime ändrades inte. Risk för stale APK/install."
+  }
+
+  Write-Host "Efter install: version=$($afterInstall.versionName) code=$($afterInstall.versionCode) lastUpdateTime=$($afterInstall.lastUpdateTime)"
+  Write-Host "firstInstallTime=$($afterInstall.firstInstallTime)"
+
+  return [PSCustomObject]@{
+    beforeInstall = $beforeInstall
+    afterInstall = $afterInstall
+    apkPath = $apkPath
+    apkSha256 = $apkHash
+  }
+}
+
 $pixelDeviceId = Ensure-Pixel6Device
 Wait-ForAndroidReady -deviceId $pixelDeviceId
 Write-Host "Använder enhet: $pixelDeviceId (AVD: $PixelAvdName)"
@@ -224,57 +283,34 @@ if ($Action -eq 'run') {
 
 Push-Location $RepoRoot
 try {
-  Write-Host "Läge: INSTALL (build apk + adb install exact file)"
-  $beforeInstall = Get-PackageInfo -deviceId $pixelDeviceId -appId $AppId
-  if ($beforeInstall) {
-    Write-Host "Före install: version=$($beforeInstall.versionName) code=$($beforeInstall.versionCode) lastUpdateTime=$($beforeInstall.lastUpdateTime)"
-  } else {
-    Write-Host "Före install: paketet är inte installerat eller kunde inte läsas."
+  if ($Action -eq 'install') {
+    Write-Host "Läge: INSTALL (build apk + adb install exact file)"
+    Install-DebugApkAndVerify -deviceId $pixelDeviceId -appId $AppId -flutterArgs $effectiveFlutterArgs | Out-Null
+    exit 0
   }
 
-  Write-Host "Bygger debug APK (deterministisk install)..."
-  & flutter build apk --debug @effectiveFlutterArgs
-  if ($LASTEXITCODE -ne 0) {
-    exit $LASTEXITCODE
+  if ($Action -eq 'sync') {
+    Write-Host "Läge: SYNC (build+install+restart+launch)"
+    Install-DebugApkAndVerify -deviceId $pixelDeviceId -appId $AppId -flutterArgs $effectiveFlutterArgs | Out-Null
+
+    Write-Host "Startar om appen för att säkert köra senaste versionen..."
+    try {
+      & adb -s $pixelDeviceId shell am force-stop $AppId 2>$null | Out-Null
+    } catch {
+      # Ignore force-stop issues.
+    }
+
+    # Launch app without needing to know the exact activity.
+    & adb -s $pixelDeviceId shell monkey -p $AppId -c android.intent.category.LAUNCHER 1 | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      throw "Kunde inte starta appen efter sync (monkey exit code=$LASTEXITCODE)."
+    }
+
+    Write-Host "SYNC klar: Appen är installerad, omstartad och startad på Pixel_6."
+    exit 0
   }
 
-  $apkPath = Get-DebugApkPath
-  if (-not (Test-Path -LiteralPath $apkPath)) {
-    throw "Hittade inte APK efter build: $apkPath"
-  }
-
-  $apk = Get-Item -LiteralPath $apkPath
-  $apkHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $apkPath).Hash
-
-  Write-Host "Installerar exakt APK: $apkPath"
-  Write-Host "APK info: size=$($apk.Length) bytes, modified=$($apk.LastWriteTime.ToString('s'))"
-  Write-Host "APK sha256: $apkHash"
-
-  # Ignore uninstall failure if app is not already installed.
-  & adb -s $pixelDeviceId uninstall $AppId | Out-Null
-
-  & adb -s $pixelDeviceId install -r -t "$apkPath"
-  if ($LASTEXITCODE -ne 0) {
-    exit $LASTEXITCODE
-  }
-
-  Write-Host "Verifierar installerat paket på enheten..."
-  $afterInstall = Get-PackageInfo -deviceId $pixelDeviceId -appId $AppId
-  if (-not $afterInstall) {
-    throw "Install verification failed: kunde inte läsa package info efter install."
-  }
-
-  if (-not $afterInstall.lastUpdateTime -or -not $afterInstall.versionName -or -not $afterInstall.versionCode) {
-    throw "Install verification failed: saknar versionName/versionCode/lastUpdateTime efter install."
-  }
-
-  if ($beforeInstall -and $beforeInstall.lastUpdateTime -and ($beforeInstall.lastUpdateTime -eq $afterInstall.lastUpdateTime)) {
-    throw "Install verification failed: lastUpdateTime ändrades inte. Risk för stale APK/install."
-  }
-
-  Write-Host "Efter install: version=$($afterInstall.versionName) code=$($afterInstall.versionCode) lastUpdateTime=$($afterInstall.lastUpdateTime)"
-  Write-Host "firstInstallTime=$($afterInstall.firstInstallTime)"
-  exit 0
+  throw "Okänt Action-läge: $Action"
 } finally {
   Pop-Location
 }

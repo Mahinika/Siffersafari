@@ -17,13 +17,12 @@ class ParentDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider).activeUser;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
 
     return ThemedBackgroundScaffold(
       appBar: AppBar(
         title: const Text('Föräldraläge'),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        elevation: 0,
         actions: [
           IconButton(
             tooltip: 'Inställningar',
@@ -55,7 +54,7 @@ class ParentDashboardScreen extends ConsumerWidget {
               child: Text(
                 'Ingen aktiv användare',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white70,
+                      color: mutedOnPrimary,
                       fontWeight: FontWeight.w600,
                     ),
               ),
@@ -75,6 +74,9 @@ class _DashboardBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accentColor = Theme.of(context).colorScheme.secondary;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final subtleOnPrimary = onPrimary.withValues(alpha: 0.54);
     final user = ref.watch(userProvider).activeUser!;
     final repo = getIt<LocalStorageRepository>();
     final history = repo.getQuizHistory(userId, limit: 5);
@@ -94,7 +96,7 @@ class _DashboardBody extends ConsumerWidget {
               Text(
                 'Översikt',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
+                      color: onPrimary,
                       fontWeight: FontWeight.bold,
                     ),
               ),
@@ -130,7 +132,7 @@ class _DashboardBody extends ConsumerWidget {
               Text(
                 'Anpassningar',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
+                      color: onPrimary,
                       fontWeight: FontWeight.bold,
                     ),
               ),
@@ -140,14 +142,14 @@ class _DashboardBody extends ConsumerWidget {
                 title: Text(
                   'Årskurs',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Colors.white70,
+                        color: mutedOnPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
                 subtitle: Text(
                   'Styr svårighetsnivå (Åk 1–9).',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white54,
+                        color: subtleOnPrimary,
                       ),
                 ),
                 trailing: DropdownButton<int?>(
@@ -156,7 +158,7 @@ class _DashboardBody extends ConsumerWidget {
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium
-                      ?.copyWith(color: Colors.white),
+                      ?.copyWith(color: onPrimary),
                   underline: const SizedBox.shrink(),
                   items: [
                     const DropdownMenuItem<int?>(
@@ -177,7 +179,7 @@ class _DashboardBody extends ConsumerWidget {
                   },
                 ),
               ),
-              const Divider(height: 1, color: Colors.white24),
+              const Divider(height: 1),
               ..._baseOps().map((op) {
                 final isOn = allowedOps.contains(op);
                 final canTurnOff = allowedOps.length > 1;
@@ -185,7 +187,7 @@ class _DashboardBody extends ConsumerWidget {
                   title: Text(
                     op.displayName,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: Colors.white70,
+                          color: mutedOnPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                   ),
@@ -214,7 +216,7 @@ class _DashboardBody extends ConsumerWidget {
               Text(
                 'Analys',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
+                      color: onPrimary,
                       fontWeight: FontWeight.bold,
                     ),
               ),
@@ -223,7 +225,7 @@ class _DashboardBody extends ConsumerWidget {
                 Text(
                   'Spela några quiz till för att få rekommendationer.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
+                        color: mutedOnPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                 )
@@ -231,7 +233,7 @@ class _DashboardBody extends ConsumerWidget {
                 Text(
                   'Rekommenderad övning:',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
+                        color: mutedOnPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
@@ -248,7 +250,7 @@ class _DashboardBody extends ConsumerWidget {
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                  color: Colors.white70,
+                                  color: mutedOnPrimary,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
@@ -257,7 +259,7 @@ class _DashboardBody extends ConsumerWidget {
                           '${(a.rate * 100).toStringAsFixed(0)}%',
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white,
+                                    color: onPrimary,
                                     fontWeight: FontWeight.bold,
                                   ),
                         ),
@@ -277,7 +279,7 @@ class _DashboardBody extends ConsumerWidget {
               Text(
                 'Senaste quiz',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
+                      color: onPrimary,
                       fontWeight: FontWeight.bold,
                     ),
               ),
@@ -286,7 +288,7 @@ class _DashboardBody extends ConsumerWidget {
                 Text(
                   'Ingen historik än',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
+                        color: mutedOnPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                 )
@@ -381,10 +383,11 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
     return Container(
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: onPrimary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
       ),
       child: child,
@@ -400,6 +403,8 @@ class _StatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -409,7 +414,7 @@ class _StatRow extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white70,
+                    color: mutedOnPrimary,
                   ),
             ),
           ),
@@ -417,7 +422,7 @@ class _StatRow extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
+                  color: onPrimary,
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -434,6 +439,8 @@ class _HistoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
     final operation = (history['operationType'] as String?) ?? '-';
     final difficulty = (history['difficulty'] as String?) ?? '-';
     final correct = (history['correctAnswers'] as int?) ?? 0;
@@ -449,7 +456,7 @@ class _HistoryRow extends StatelessWidget {
             child: Text(
               '${_pretty(operation)} • ${_pretty(difficulty)}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white70,
+                    color: mutedOnPrimary,
                     fontWeight: FontWeight.w600,
                   ),
             ),
@@ -457,7 +464,7 @@ class _HistoryRow extends StatelessWidget {
           Text(
             '$correct/$total',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
+                  color: onPrimary,
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -465,7 +472,7 @@ class _HistoryRow extends StatelessWidget {
           Text(
             '$pointsWithBonus p',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
+                  color: mutedOnPrimary,
                   fontWeight: FontWeight.w600,
                 ),
           ),

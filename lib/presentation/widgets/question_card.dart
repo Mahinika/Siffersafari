@@ -32,10 +32,14 @@ class QuestionCard extends StatelessWidget {
               EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding.w),
           padding: EdgeInsets.all(AppConstants.largePadding.w),
           decoration: BoxDecoration(
-            color: cardColor ?? AppColors.neutralBackground,
+            color: cardColor ?? Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(AppConstants.borderRadius * 2),
             border: Border.all(
-              color: borderColor ?? Colors.white.withValues(alpha: 0.12),
+              color: borderColor ??
+                  Theme.of(context)
+                      .colorScheme
+                      .onPrimary
+                      .withValues(alpha: 0.12),
             ),
             boxShadow: [
               BoxShadow(
@@ -52,14 +56,15 @@ class QuestionCard extends StatelessWidget {
               children: [
                 Text(
                   question.operationType.emoji,
-                  style: TextStyle(fontSize: 48.sp),
+                  style: Theme.of(context).textTheme.displayLarge,
                 ),
                 SizedBox(height: AppConstants.defaultPadding.h),
                 Text(
                   question.questionText,
                   style: Theme.of(context).textTheme.displayLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: questionTextColor ?? AppColors.textPrimary,
+                        color: questionTextColor ??
+                            Theme.of(context).colorScheme.onSurface,
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -67,7 +72,11 @@ class QuestionCard extends StatelessWidget {
                 Text(
                   'Vad blir resultatet?',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: subtitleTextColor ?? AppColors.textSecondary,
+                        color: subtitleTextColor ??
+                            Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.70),
                       ),
                 ),
               ],

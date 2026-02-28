@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
-import '../../data/repositories/local_storage_repository.dart';
+import '../../domain/services/parent_pin_service.dart';
 import '../widgets/themed_background_scaffold.dart';
 import 'parent_dashboard_screen.dart';
 
@@ -22,22 +22,20 @@ class ParentPinScreen extends ConsumerStatefulWidget {
 }
 
 class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
-  static const _pinKey = 'parent_pin';
-
   final _pinController = TextEditingController();
   final _confirmController = TextEditingController();
 
   String? _error;
   bool _isSettingNewPin = false;
+  int? _lockoutMinutes;
 
   @override
   void initState() {
     super.initState();
 
-    final repo = getIt<LocalStorageRepository>();
-    final existingPin = repo.getSetting(_pinKey) as String?;
-    _isSettingNewPin =
-        widget.forceSetNewPin || existingPin == null || existingPin.isEmpty;
+    final pinService = getIt<ParentPinService>();
+    _isSettingNewPin = widget.forceSetNewPin || !pinService.hasPinSet();
+    _lockoutMinutes = pinService.getLockoutRemainingMinutes();
   }
 
   @override
@@ -48,11 +46,12 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
   }
 
   Future<void> _submit() async {
-    setState(() => _error = null);
+    setState(() {
+      _error = null;
+      _lockoutMinutes = null;
+    });
 
-    final repo = getIt<LocalStorageRepository>();
-    final existingPin = repo.getSetting(_pinKey) as String?;
-
+    final pinService = getIt<ParentPinService>();
     final pin = _pinController.text.trim();
 
     if (pin.length < 4) {
@@ -67,7 +66,12 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
         return;
       }
 
-      await repo.saveSetting(_pinKey, pin);
+      try {
+        await pinService.setPin(pin);
+      } catch (e) {
+        setState(() => _error = 'Kunde inte spara PIN: $e');
+        return;
+      }
 
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
@@ -76,26 +80,44 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
       return;
     }
 
-    if (existingPin != pin) {
-      setState(() => _error = 'Fel PIN');
-      return;
-    }
+    // Verify existing PIN
+    try {
+      final isCorrect = await pinService.verifyPin(pin);
 
-    if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const ParentDashboardScreen()),
-    );
+      if (!isCorrect) {
+        final remaining = pinService.getRemainingAttempts();
+        setState(
+          () => _error =
+              remaining > 0 ? 'Fel PIN. $remaining försök kvar.' : 'Fel PIN.',
+        );
+        return;
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const ParentDashboardScreen()),
+      );
+    } on PinLockoutException catch (e) {
+      setState(() {
+        _error = e.toString();
+        _lockoutMinutes = e.remainingMinutes;
+      });
+    } catch (e) {
+      setState(() => _error = 'Ett fel uppstod: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final primaryActionColor = Theme.of(context).colorScheme.primary;
+    final isLockedOut = _lockoutMinutes != null && _lockoutMinutes! > 0;
+    final scheme = Theme.of(context).colorScheme;
+    final onPrimary = scheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final errorColor = scheme.error;
+
     return ThemedBackgroundScaffold(
       appBar: AppBar(
         title: Text(_isSettingNewPin ? 'Skapa PIN' : 'Ange PIN'),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        elevation: 0,
       ),
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
       body: Column(
@@ -104,7 +126,7 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
           Container(
             padding: const EdgeInsets.all(AppConstants.defaultPadding),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: onPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppConstants.borderRadius),
             ),
             child: Column(
@@ -113,9 +135,11 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
                 Text(
                   _isSettingNewPin
                       ? 'Välj en PIN-kod för föräldraläge'
-                      : 'Skriv PIN-koden för att öppna föräldraläge',
+                      : isLockedOut
+                          ? 'För många felaktiga försök. Vänta $_lockoutMinutes minut${_lockoutMinutes! != 1 ? 'er' : ''}.'
+                          : 'Skriv PIN-koden för att öppna föräldraläge',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
+                        color: isLockedOut ? errorColor : mutedOnPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
@@ -124,12 +148,13 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
                   controller: _pinController,
                   keyboardType: TextInputType.number,
                   obscureText: true,
-                  style: const TextStyle(color: Colors.white),
+                  enabled: !isLockedOut,
+                  style: TextStyle(color: onPrimary),
                   decoration: InputDecoration(
                     labelText: 'PIN',
-                    labelStyle: const TextStyle(color: Colors.white70),
+                    labelStyle: TextStyle(color: mutedOnPrimary),
                     filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.08),
+                    fillColor: onPrimary.withValues(alpha: 0.08),
                     border: OutlineInputBorder(
                       borderRadius:
                           BorderRadius.circular(AppConstants.borderRadius),
@@ -143,12 +168,12 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
                     controller: _confirmController,
                     keyboardType: TextInputType.number,
                     obscureText: true,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: onPrimary),
                     decoration: InputDecoration(
                       labelText: 'Bekräfta PIN',
-                      labelStyle: const TextStyle(color: Colors.white70),
+                      labelStyle: TextStyle(color: mutedOnPrimary),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.08),
+                      fillColor: onPrimary.withValues(alpha: 0.08),
                       border: OutlineInputBorder(
                         borderRadius:
                             BorderRadius.circular(AppConstants.borderRadius),
@@ -162,26 +187,18 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
                   Text(
                     _error!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.redAccent,
+                          color: errorColor,
                           fontWeight: FontWeight.w600,
                         ),
                   ),
                 ],
                 const SizedBox(height: AppConstants.defaultPadding),
                 ElevatedButton(
-                  onPressed: _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryActionColor,
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppConstants.borderRadius),
-                    ),
-                  ),
+                  onPressed: isLockedOut ? null : _submit,
                   child: Text(
                     _isSettingNewPin ? 'Spara PIN' : 'Öppna',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
+                          color: onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                   ),

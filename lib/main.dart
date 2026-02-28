@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,10 +11,32 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'core/constants/app_constants.dart';
 import 'core/di/injection.dart';
 import 'core/providers/app_theme_provider.dart';
-import 'presentation/screens/home_screen.dart';
+import 'presentation/screens/app_entry_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Global error handling for Flutter framework errors
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('Flutter error: ${details.exception}');
+    debugPrintStack(stackTrace: details.stack);
+  };
+
+  // Global error handling for async errors outside Flutter framework
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    debugPrint('Platform error: $error');
+    debugPrintStack(stackTrace: stack);
+    return true; // Prevent crash
+  };
+
+  // Global error handling for isolate errors
+  Isolate.current.addErrorListener(
+    RawReceivePort((dynamic pair) {
+      final List<dynamic> errorAndStacktrace = pair as List<dynamic>;
+      debugPrint('Isolate error: ${errorAndStacktrace.first}');
+    }).sendPort,
+  );
 
   String? bootstrapError;
   try {
@@ -28,7 +51,13 @@ Future<void> main() async {
     debugPrintStack(stackTrace: st);
   }
 
-  runApp(ProviderScope(child: MathGameApp(bootstrapError: bootstrapError)));
+  runApp(
+    ProviderScope(
+      child: MathGameApp(
+        bootstrapError: bootstrapError,
+      ),
+    ),
+  );
 
   if (bootstrapError == null) {
     // Open the potentially large history box in the background.
@@ -74,7 +103,7 @@ class MathGameApp extends ConsumerWidget {
           debugShowCheckedModeBanner: false,
           theme: theme,
           home: bootstrapError == null
-              ? const HomeScreen()
+              ? const AppEntryScreen()
               : _BootstrapErrorScreen(error: bootstrapError!),
         );
       },

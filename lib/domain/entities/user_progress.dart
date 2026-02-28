@@ -15,6 +15,7 @@ class UserProgress extends Equatable {
     required this.userId,
     required this.name,
     required this.ageGroup,
+    this.avatarEmoji = '🧒',
     this.gradeLevel,
     this.totalQuizzesTaken = 0,
     this.totalQuestionsAnswered = 0,
@@ -40,6 +41,10 @@ class UserProgress extends Equatable {
 
   @HiveField(2)
   final AgeGroup ageGroup;
+
+  /// Simple avatar icon for the child profile (emoji).
+  @HiveField(18)
+  final String avatarEmoji;
 
   /// Selected Swedish grade/year (Åk), 1-9. When set, the app derives
   /// difficulty progression from this value.
@@ -148,6 +153,7 @@ class UserProgress extends Equatable {
     String? userId,
     String? name,
     AgeGroup? ageGroup,
+    String? avatarEmoji,
     int? gradeLevel,
     int? totalQuizzesTaken,
     int? totalQuestionsAnswered,
@@ -168,6 +174,7 @@ class UserProgress extends Equatable {
       userId: userId ?? this.userId,
       name: name ?? this.name,
       ageGroup: ageGroup ?? this.ageGroup,
+      avatarEmoji: avatarEmoji ?? this.avatarEmoji,
       gradeLevel: gradeLevel ?? this.gradeLevel,
       totalQuizzesTaken: totalQuizzesTaken ?? this.totalQuizzesTaken,
       totalQuestionsAnswered:
@@ -192,6 +199,7 @@ class UserProgress extends Equatable {
         userId,
         name,
         ageGroup,
+      avatarEmoji,
         gradeLevel,
         totalQuizzesTaken,
         totalQuestionsAnswered,

@@ -193,10 +193,7 @@ class UserNotifier extends StateNotifier<UserState> {
         : null;
 
     final activeUser = storedActiveUser ??
-        (state.activeUser != null && !_isLegacyDemoUser(state.activeUser!)
-            ? state.activeUser
-            : null) ??
-        (users.isNotEmpty ? users.first : null);
+      (users.length == 1 ? users.first : null);
 
     if (activeUser != null) {
       _syncAudioSettings(activeUser);
@@ -246,12 +243,14 @@ class UserNotifier extends StateNotifier<UserState> {
     required String userId,
     required String name,
     required AgeGroup ageGroup,
+    String avatarEmoji = '🧒',
     int? gradeLevel,
   }) async {
     final newUser = UserProgress(
       userId: userId,
       name: name,
       ageGroup: ageGroup,
+      avatarEmoji: avatarEmoji,
       gradeLevel: gradeLevel,
     );
 

@@ -38,9 +38,14 @@ class AppConstants {
   static const double minTouchTargetSize = 56.0;
 
   // Animation Durations
+  static const Duration microAnimationDuration = Duration(milliseconds: 100);
   static const Duration shortAnimationDuration = Duration(milliseconds: 200);
   static const Duration mediumAnimationDuration = Duration(milliseconds: 400);
   static const Duration longAnimationDuration = Duration(milliseconds: 600);
+
+  // Component sizing
+  static const double answerButtonHeight = 64.0;
+  static const double feedbackDialogIconSize = 64.0;
 
   // Hive Box Names
   static const String userProgressBox = 'user_progress';

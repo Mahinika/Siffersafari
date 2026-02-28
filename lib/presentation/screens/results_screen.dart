@@ -6,7 +6,6 @@ import 'package:lottie/lottie.dart';
 import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
-import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
@@ -165,9 +164,9 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final session = quizState.session;
     final reward = userState.lastReward;
 
-    final themeCfg = ref.watch(appThemeConfigProvider);
-
-    final primaryActionColor = themeCfg.primaryActionColor;
+    final scheme = Theme.of(context).colorScheme;
+    final onPrimary = scheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
 
     if (session == null) {
       return ThemedBackgroundScaffold(
@@ -175,7 +174,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
           child: Text(
             'Ingen data tillgänglig',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white70,
+                  color: mutedOnPrimary,
                   fontWeight: FontWeight.w600,
                 ),
           ),
@@ -203,7 +202,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                   Text(
                     _getTitle(stars),
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          color: Colors.white,
+                          color: onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                     textAlign: TextAlign.center,
@@ -232,7 +231,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                   Container(
                     padding: EdgeInsets.all(AppConstants.largePadding.w),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
+                      color: onPrimary.withValues(alpha: 0.1),
                       borderRadius:
                           BorderRadius.circular(AppConstants.borderRadius),
                     ),
@@ -364,18 +363,10 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                         (route) => false,
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryActionColor,
-                      minimumSize: Size(double.infinity, 56.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppConstants.borderRadius),
-                      ),
-                    ),
                     child: Text(
                       'Öva på det svåraste (2 min)',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
+                            color: onPrimary,
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -436,18 +427,10 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                         (route) => false,
                       );
                     },
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.white),
-                      minimumSize: Size(double.infinity, 56.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppConstants.borderRadius),
-                      ),
-                    ),
                     child: Text(
                       'Spela igen',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
+                            color: onPrimary,
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -465,7 +448,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                     child: Text(
                       'Tillbaka till Start',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: Colors.white70,
+                            color: mutedOnPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                     ),
@@ -480,6 +463,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
   }
 
   Widget _buildStatRow(BuildContext context, String label, String value) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -489,7 +474,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white70,
+                  color: mutedOnPrimary,
                 ),
           ),
         ),
@@ -497,7 +482,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         Text(
           value,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.white,
+                color: onPrimary,
                 fontWeight: FontWeight.bold,
               ),
         ),
@@ -509,14 +494,16 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     BuildContext context,
     AchievementReward reward,
   ) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(AppConstants.defaultPadding.w),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: onPrimary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.15),
+          color: onPrimary.withValues(alpha: 0.15),
         ),
       ),
       child: Column(
@@ -525,7 +512,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
           Text(
             'Upplåsta prestationer',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
+                  color: onPrimary,
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -534,7 +521,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
             (id) => Text(
               '• ${AchievementService().getDisplayName(id)}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white70,
+                    color: mutedOnPrimary,
                   ),
             ),
           ),
@@ -547,14 +534,16 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     BuildContext context,
     List<_HardestQuestion> hardest,
   ) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(AppConstants.defaultPadding.w),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: onPrimary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.15),
+          color: onPrimary.withValues(alpha: 0.15),
         ),
       ),
       child: Column(
@@ -563,7 +552,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
           Text(
             'Svårast idag',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
+                  color: onPrimary,
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -572,7 +561,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
             Text(
               'Inget särskilt – riktigt bra jobbat!',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white70,
+                    color: mutedOnPrimary,
                     fontWeight: FontWeight.w600,
                   ),
             )
@@ -601,7 +590,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                     Text(
                       '• ${q.questionText}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
+                            color: onPrimary,
                             fontWeight: FontWeight.w700,
                           ),
                     ),
@@ -609,7 +598,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                       Text(
                         details,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white70,
+                              color: mutedOnPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                       ),

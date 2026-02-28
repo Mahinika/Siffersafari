@@ -47,12 +47,25 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isCorrect = widget.feedback.isCorrect;
+    const correctColor = AppColors.correctAnswer;
+    const incorrectColor = AppColors.wrongAnswer;
+    final scheme = Theme.of(context).colorScheme;
+    final buttonBackgroundColor = isCorrect
+        ? correctColor
+        : (widget.continueButtonColor ?? Theme.of(context).colorScheme.primary);
+
+    final dialogBackgroundColor = widget.dialogBackgroundColor ??
+        Theme.of(context).dialogTheme.backgroundColor ??
+        Theme.of(context).colorScheme.surface;
+    final dialogShape = Theme.of(context).dialogTheme.shape ??
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadius * 2),
+        );
+
     return Dialog(
-      backgroundColor:
-          widget.dialogBackgroundColor ?? Theme.of(context).colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius * 2),
-      ),
+      backgroundColor: dialogBackgroundColor,
+      shape: dialogShape,
       child: Padding(
         padding: EdgeInsets.all(AppConstants.largePadding.w),
         child: Column(
@@ -61,11 +74,9 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
             // Icon
             ExcludeSemantics(
               child: Icon(
-                widget.feedback.isCorrect ? Icons.check_circle : Icons.cancel,
-                color: widget.feedback.isCorrect
-                    ? AppColors.correctAnswer
-                    : AppColors.wrongAnswer,
-                size: 64.sp,
+                isCorrect ? Icons.check_circle : Icons.cancel,
+                color: isCorrect ? correctColor : incorrectColor,
+                size: AppConstants.feedbackDialogIconSize.sp,
               ),
             ),
 
@@ -80,9 +91,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                   widget.feedback.title,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: widget.feedback.isCorrect
-                            ? AppColors.correctAnswer
-                            : AppColors.wrongAnswer,
+                        color: isCorrect ? correctColor : incorrectColor,
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -98,8 +107,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 child: Text(
                   widget.feedback.message,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color:
-                            widget.messageTextColor ?? AppColors.textSecondary,
+                        color: widget.messageTextColor ??
+                            scheme.onSurface.withValues(alpha: 0.70),
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -114,21 +123,16 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 Navigator.of(context).pop();
                 widget.onContinue();
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: widget.feedback.isCorrect
-                    ? AppColors.correctAnswer
-                    : (widget.continueButtonColor ??
-                        Theme.of(context).colorScheme.primary),
-                minimumSize: Size(double.infinity, 56.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.borderRadius),
-                ),
+              style: (Theme.of(context).elevatedButtonTheme.style ??
+                      const ButtonStyle())
+                  .copyWith(
+                backgroundColor: WidgetStatePropertyAll(buttonBackgroundColor),
+                foregroundColor: WidgetStatePropertyAll(scheme.onPrimary),
               ),
               child: Text(
                 'Fortsätt',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
+                      color: scheme.onPrimary,
                       fontWeight: FontWeight.bold,
                     ),
               ),

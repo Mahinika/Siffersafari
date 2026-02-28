@@ -30,6 +30,18 @@ class _CreateUserDialog extends ConsumerStatefulWidget {
 class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
   final _nameController = TextEditingController();
   int? _selectedGrade;
+  String _selectedAvatar = _avatars.first;
+
+  static const List<String> _avatars = [
+    '🦊',
+    '🐯',
+    '🐼',
+    '🐵',
+    '🐸',
+    '🦁',
+    '🐨',
+    '🐰',
+  ];
 
   @override
   void dispose() {
@@ -40,25 +52,59 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
   @override
   Widget build(BuildContext context) {
     final cfg = ref.watch(appThemeConfigProvider);
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
 
     return AlertDialog(
       scrollable: true,
       backgroundColor: cfg.cardColor,
-      title: const Text(
-        'Skapa användare',
-        style: TextStyle(color: Colors.white),
-      ),
+      title: Text('Skapa användare', style: TextStyle(color: onPrimary)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _nameController,
             autofocus: true,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
+            style: TextStyle(color: onPrimary),
+            decoration: InputDecoration(
               labelText: 'Namn',
-              labelStyle: TextStyle(color: Colors.white70),
+              labelStyle: TextStyle(color: mutedOnPrimary),
             ),
+          ),
+          const SizedBox(height: AppConstants.defaultPadding),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Figur',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: mutedOnPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              DropdownButton<String>(
+                value: _selectedAvatar,
+                dropdownColor: cfg.baseBackgroundColor,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: onPrimary),
+                underline: const SizedBox.shrink(),
+                items: [
+                  ..._avatars.map(
+                    (a) => DropdownMenuItem<String>(
+                      value: a,
+                      child: Text(a),
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value == null) return;
+                  setState(() => _selectedAvatar = value);
+                },
+              ),
+            ],
           ),
           const SizedBox(height: AppConstants.defaultPadding),
           Row(
@@ -67,7 +113,7 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
                 child: Text(
                   'Årskurs',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Colors.white70,
+                        color: mutedOnPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
@@ -78,7 +124,7 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
-                    ?.copyWith(color: Colors.white),
+                    ?.copyWith(color: onPrimary),
                 underline: const SizedBox.shrink(),
                 items: const [
                   DropdownMenuItem<int?>(
@@ -149,6 +195,7 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
                   userId: const Uuid().v4(),
                   name: name,
                   ageGroup: ageGroup,
+              avatarEmoji: _selectedAvatar,
                   gradeLevel: _selectedGrade,
                 );
 

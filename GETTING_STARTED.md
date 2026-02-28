@@ -21,7 +21,9 @@ För att kunna köra och utveckla detta projekt behöver du:
 
 4. **Git** (för versionskontroll)
 
-5. **Android Studio** eller **Xcode** (för att köra på emulator/simulator)
+5. **Android Studio** (för Android SDK + emulator)
+
+> Not: Detta projekt är **Android-only**. iOS/web/desktop ingår inte i mål-scope.
 
 ## Installation & Setup
 
@@ -72,6 +74,21 @@ flutter run
 
 Detta startar appen i debug-läge med hot reload.
 
+### Rekommenderat på Android: Pixel_6-script (för att undvika "fel APK")
+
+Det finns ett deterministiskt PowerShell-script som alltid riktar in sig på emulatorn **Pixel_6**, väntar tills Android är redo, och kan bygga/installerar på ett sätt som minskar risken att en gammal APK råkar ligga kvar.
+
+```bash
+# SYNC: bygg + installera + starta om + starta appen (säkrast när du vill att emulatorn matchar koden)
+powershell -ExecutionPolicy Bypass -File scripts/flutter_pixel6.ps1 -Action sync
+
+# RUN: utvecklingsläge med hot reload
+powershell -ExecutionPolicy Bypass -File scripts/flutter_pixel6.ps1 -Action run
+
+# INSTALL: bara bygg + installera (startar inte appen)
+powershell -ExecutionPolicy Bypass -File scripts/flutter_pixel6.ps1 -Action install
+```
+
 ## Utvecklingskommandon
 
 ### Kör appen
@@ -82,10 +99,6 @@ flutter run
 
 # Release mode (optimerad)
 flutter run --release
-
-# På specifik plattform
-flutter run -d chrome     # Webb
-flutter run -d windows    # Windows
 ```
 
 ### Testning
@@ -125,12 +138,6 @@ flutter build apk --release
 
 # Android App Bundle (för Play Store)
 flutter build appbundle --release
-
-# iOS (kräver Xcode och Mac)
-flutter build ios --release
-
-# Webb
-flutter build web --release
 ```
 
 ## Projektstruktur - Snabböversikt
@@ -142,14 +149,18 @@ lib/
 │   ├── config/               # Konfiguration
 │   ├── constants/            # Konstanter
 │   ├── di/                   # Dependency Injection
+│   ├── utils/                # Små utilities (t.ex. navigation/transitions)
 │   └── services/             # Business logic services
 ├── data/                      # Data layer
 │   └── repositories/         # Data repositories
 ├── domain/                    # Domain layer
 │   ├── entities/             # Business entities
 │   └── enums/                # Enumerations
+│   └── services/              # Domain services (t.ex. ParentPinService)
 └── presentation/              # UI layer
     ├── screens/              # Full screens
+   │   ├── app_entry_screen.dart
+   │   ├── profile_picker_screen.dart
     └── widgets/              # Reusable widgets
 ```
 

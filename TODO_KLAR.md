@@ -80,6 +80,8 @@ Denna fil samlar alla **klara** checkboxar från TODO.md och FÖRBÄTTRINGAR.md.
 - [x] Lägg till riktiga ljudfiler i `assets/sounds/`
 - [x] Lägg till Lottie-animationer i `assets/animations/`
 - [x] Konfigurera CI/CD (GitHub Actions)
+- [x] Lägg till global felhantering i `main.dart` (`FlutterError.onError` + `PlatformDispatcher.instance.onError` + `Isolate.current.addErrorListener`)
+- [x] Härda föräldra-PIN: hashad lagring (SHA-256) + enkel rate-limit efter flera felaktiga försök (5 försök → 5 min lockout)
 
 ### Dokumentation TODO
 - [x] API-dokumentation för services
@@ -136,4 +138,4 @@ Denna fil samlar alla **klara** checkboxar från TODO.md och FÖRBÄTTRINGAR.md.
 
 ---
 
-**Senast uppdaterad:** 2026-02-27
+**Senast uppdaterad:** 2026-02-28 (efter implementering av global felhantering + säker PIN)

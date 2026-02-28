@@ -12,17 +12,14 @@ Denna fil samlar alla **oklara** checkboxar från TODO.md.
 
 ## Fas 8: Produktionsdeploy
 - [ ] Android signing för Google Play (keystore, upload key) och release build
-- [ ] iOS provisioning och build
 - [ ] App store metadata
-- [ ] Beta-testning (TestFlight, Google Play Internal)
+- [ ] Beta-testning (Google Play Internal)
 - [ ] Lansering
 
 ## Tekniska TODO
 - [ ] Skapa tema-bilder för rymd och djungel
 - [ ] Sätt upp custom font (om önskat)
 - [ ] Lägg till crashlytics/analytics (Firebase, optional)
-- [ ] Lägg till global felhantering i `main.dart` (`FlutterError.onError` + `PlatformDispatcher.instance.onError`)
-- [ ] Härda föräldra-PIN: hashad lagring + enkel rate-limit efter flera felaktiga försök
 
 ## Framtida Förbättringar (Post-MVP)
 - [ ] Fler teman (underwater, fantasy, etc.)
@@ -31,4 +28,4 @@ Denna fil samlar alla **oklara** checkboxar från TODO.md.
 
 ---
 
-**Senast uppdaterad:** 2026-02-28
+**Senast uppdaterad:** 2026-02-28 (efter implementering av global felhantering + säker PIN)

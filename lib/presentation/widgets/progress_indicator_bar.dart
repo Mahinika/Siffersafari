@@ -18,6 +18,8 @@ class ProgressIndicatorBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final percent = (progress.clamp(0.0, 1.0) * 100).round();
+    final scheme = Theme.of(context).colorScheme;
+    final fallbackValueColor = Theme.of(context).colorScheme.secondary;
     return Semantics(
       label: 'Framsteg',
       value: '$percent procent',
@@ -28,9 +30,9 @@ class ProgressIndicatorBar extends StatelessWidget {
             value: progress,
             minHeight: 12.h,
             backgroundColor:
-                backgroundColor ?? Colors.white.withValues(alpha: 0.2),
+                backgroundColor ?? scheme.onPrimary.withValues(alpha: 0.2),
             valueColor: AlwaysStoppedAnimation<Color>(
-              valueColor ?? AppColors.spaceAccent,
+              valueColor ?? fallbackValueColor,
             ),
           ),
         ),

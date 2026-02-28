@@ -52,11 +52,17 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 - Årskurs (Åk 1–9) per användare styr effektiv svårighet
 
 ### Fas 5: Föräldra-/lärardashboard
-- PIN-kod för föräldraläge
+- PIN-kod för föräldraläge med SHA-256 hashning
+- Rate-limiting: 5 felaktiga försök → 5 min lockout
 - Byt PIN inne i föräldraläge
 - Dashboard med översikt + senaste quiz
 - MVP-analys (svagaste områden + rekommenderad övning)
 - Anpassning av aktiva räknesätt per användare
+
+### Säkerhet & stabilitet
+- Global felhantering (`FlutterError.onError`, `PlatformDispatcher.instance.onError`, `Isolate.current.addErrorListener`)
+- Säker PIN-lagring med SHA-256 hash (aldrig klartext)
+- `ParentPinService` med rate-limiting och lockout-mekanismer
 
 ### Fas 6/7 (delar)
 - Onboarding/tutorial implementerad
@@ -67,12 +73,15 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 
 ---
 
-## ✅ Nyligen färdigställt och stabiliserat
+## ✅ Nyligen färdigställt och stabiliserat (2026-02-28)
+- **Global felhantering** i main.dart för proaktiv diagnostik och crashprevention
+- **Säker PIN-lagring** med SHA-256 hash + rate-limiting (5 försök → 5 min lockout)
+- `ParentPinService` skapad i domain/services med full testning
 - Demo-seed borttaget (ingen automatisk demo-användare skapas)
 - Multi-user stöd (skapa/välj aktiv användare)
 - Aktiv användare persisteras (`active_user_id`)
 - Legacy-städning vid uppstart:
-  - Rensar tidigare “Demo Användare” profiler
+  - Rensar tidigare "Demo Användare" profiler
   - Rensar relaterad quizhistorik
   - Rensar relaterade per-user settings
 - Pixel_6-flöde/scripthantering finns i `scripts/`
@@ -80,20 +89,22 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 ---
 
 ## 📊 Teststatus
-- Senaste verifiering: **22 tester passerar, 0 fail**
-- Tester inkluderar enhetstester för kärnlogik samt widget-test
+- Senaste verifiering: **52 tester passerar, 0 fail**
+- Tester inkluderar:
+  - Enhetstester för kärnlogik (services, difficulty, repetition, progression)
+  - Widget-tester för centrala appflöden
+  - Integration smoke-test
 
 ---
 
-## 🟡 Återstår (enligt TODO)
-- Offline-funktionalitet validering
-- Tillgänglighet (TTS/färgblind/hög kontrast)
-- Lottie-animationer och fler visuella assets
-- Utökade enhets-/integrations-/prestandatester
-- Produktionsdeploy (signing, store metadata, beta, release)
+## 🟡 Återstår (nästa fokus)
+- Prestanda-optimering
+- User testing med målgrupp
+- Tema-bilder/visuella assets (rymd/djungel)
+- Produktionsdeploy: Android signing + Play Store metadata + intern/beta
 - Dokumentation: API-guide, parent/teacher usage guide, store screenshot guide, policy/terms
 
 ---
 
 ## Kommentar
-Detta dokument är nu uppdaterat för att spegla nuvarande kodbas och TODO-status per 2026-02-28.
+Detta dokument är uppdaterat per 2026-02-28 efter implementering av global felhantering och säker PIN-lagring, samt efter stabilisering av multi-user/profilval och Pixel_6-flödet.

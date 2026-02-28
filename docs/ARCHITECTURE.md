@@ -17,17 +17,25 @@ flowchart TB
   end
 
   subgraph Presentation[Presentation / Screens]
+    ENTRY[AppEntryScreen]
+    PICKER[ProfilePickerScreen]
     HOME[HomeScreen]
     QUIZ[QuizScreen]
     RESULTS[ResultsScreen]
     SETTINGS[SettingsScreen]
-    PARENT[ParentPin/ParentDashboard]
+    PIN[ParentPinScreen]
+    PARENT[ParentDashboardScreen]
 
-    APP --> HOME
+    APP --> ENTRY
+    ENTRY --> HOME
+    ENTRY --> PICKER
+    PICKER --> HOME
     HOME --> QUIZ
     QUIZ --> RESULTS
     HOME --> SETTINGS
-    HOME --> PARENT
+    HOME --> PIN
+    PIN --> PARENT
+    PARENT --> SETTINGS
   end
 
   subgraph State[State (Riverpod providers)]
@@ -55,8 +63,9 @@ flowchart TB
     HIVE[(Hive boxes)]
   end
 
-  subgraph Domain[Domain (models)]
+  subgraph Domain[Domain]
     MODELS[Entities + Enums\n(t.ex. Question, QuizSession, UserProgress)]
+    PPS[ParentPinService]
   end
 
   %% UI reads/writes state via providers
@@ -64,12 +73,16 @@ flowchart TB
   QUIZ --> QP
   RESULTS --> UP
   SETTINGS --> UP
+  PIN --> PPS
   PARENT --> PP
 
   %% Providers resolve dependencies through GetIt
   QP --> GETIT
   UP --> GETIT
   PP --> GETIT
+
+  %% Domain services are also resolved through GetIt
+  PPS --> GETIT
 
   %% GetIt provides services and repositories
   GETIT --> QGS
@@ -93,6 +106,10 @@ flowchart TB
   LSR -.-> MODELS
   QP -.-> MODELS
   UP -.-> MODELS
+  PPS -.-> MODELS
+
+  %% PIN service persists via LocalStorageRepository
+  PPS --> LSR
 ```
 
 ## Mermaid-diagram (arkitektur + flöden)
@@ -106,13 +123,17 @@ flowchart TB
   subgraph Presentation[Presentation]
     Home[Home / Screens]
     Quiz[Quiz Screen]
+    Entry[AppEntry Screen]
+    ProfilePicker[Profile Picker]
     Parent[Parent Dashboard]
+    ParentPin[Parent PIN]
     Widgets[Widgets]
   end
 
   subgraph Domain[Domain]
     Entities[Entities]
     Enums[Enums]
+    DomainServices[Services\n(t.ex. ParentPinService)]
   end
 
   subgraph Core[Core]
@@ -131,9 +152,12 @@ flowchart TB
   Core --> Data
   Data --> Hive
 
+  Entry --> Widgets
+  ProfilePicker --> Widgets
   Home --> Widgets
   Quiz --> Widgets
   Parent --> Widgets
+  ParentPin --> Widgets
   Services --> Repos
   DI --> Services
   DI --> Repos
@@ -179,6 +203,8 @@ lib/
 │   │   └── app_constants.dart
 │   ├── di/                    # Dependency Injection
 │   │   └── injection.dart
+│   ├── utils/                 # Små utilities
+│   │   └── page_transitions.dart
 │   └── services/              # Services
 │       ├── question_generator_service.dart
 │       ├── adaptive_difficulty_service.dart
@@ -203,10 +229,14 @@ lib/
 │       ├── difficulty_level.dart
 │       ├── app_theme.dart
 │       └── mastery_level.dart
+│   └── services/              # Domain services
+│       └── parent_pin_service.dart
 │
 └── presentation/              # Presentation/UI
   ├── screens/              # Skärmar
+  │   ├── app_entry_screen.dart
   │   ├── home_screen.dart
+  │   ├── profile_picker_screen.dart
   │   ├── quiz_screen.dart
   │   ├── results_screen.dart
   │   ├── settings_screen.dart

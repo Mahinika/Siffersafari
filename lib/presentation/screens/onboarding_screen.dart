@@ -143,7 +143,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     final progress = (_pageIndex + 1) / 2;
     final accentColor = Theme.of(context).colorScheme.secondary;
-    final primaryActionColor = Theme.of(context).colorScheme.primary;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
 
     return PopScope(
       canPop: false,
@@ -158,7 +159,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   child: Text(
                     'Kom igång',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
+                          color: onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                   ),
@@ -166,7 +167,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 Text(
                   '${_pageIndex + 1}/2',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
+                        color: mutedOnPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
@@ -178,7 +179,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: LinearProgressIndicator(
                 value: progress.clamp(0.0, 1.0),
                 minHeight: 10,
-                backgroundColor: Colors.white.withValues(alpha: 0.15),
+                backgroundColor: onPrimary.withValues(alpha: 0.15),
                 valueColor: AlwaysStoppedAnimation<Color>(accentColor),
               ),
             ),
@@ -206,18 +207,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             const SizedBox(height: AppConstants.defaultPadding),
             ElevatedButton(
               onPressed: _next,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryActionColor,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.borderRadius),
-                ),
-              ),
               child: Text(
                 _pageIndex >= 1 ? 'Klar' : 'Nästa',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
+                      color: onPrimary,
                       fontWeight: FontWeight.bold,
                     ),
               ),
@@ -228,7 +221,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: Text(
                 'Hoppa över',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.white70,
+                      color: mutedOnPrimary,
                       fontWeight: FontWeight.w600,
                     ),
               ),
@@ -254,14 +247,15 @@ class _OnboardingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accentColor = Theme.of(context).colorScheme.secondary;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
     return Center(
       child: Container(
         padding: const EdgeInsets.all(AppConstants.largePadding),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.08),
+          color: onPrimary.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.12),
+            color: onPrimary.withValues(alpha: 0.12),
           ),
         ),
         child: Column(
@@ -270,14 +264,14 @@ class _OnboardingCard extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 56,
+              size: AppConstants.minTouchTargetSize,
               color: accentColor,
             ),
             const SizedBox(height: AppConstants.defaultPadding),
             Text(
               title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
+                    color: onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
               textAlign: TextAlign.center,
@@ -305,6 +299,8 @@ class _OnboardingGradePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dropdownBg = Theme.of(context).scaffoldBackgroundColor;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
     return _OnboardingCard(
       icon: Icons.school,
       title: 'Välj årskurs',
@@ -314,7 +310,7 @@ class _OnboardingGradePage extends StatelessWidget {
           Text(
             'Det hjälper oss att anpassa svårighetsnivån.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
+                  color: mutedOnPrimary,
                   fontWeight: FontWeight.w600,
                 ),
             textAlign: TextAlign.center,
@@ -326,7 +322,7 @@ class _OnboardingGradePage extends StatelessWidget {
                 child: Text(
                   'Årskurs',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Colors.white70,
+                        color: mutedOnPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
@@ -337,7 +333,7 @@ class _OnboardingGradePage extends StatelessWidget {
                 style: Theme.of(context)
                     .textTheme
                     .bodyMedium
-                    ?.copyWith(color: Colors.white),
+                    ?.copyWith(color: onPrimary),
                 underline: const SizedBox.shrink(),
                 items: [
                   const DropdownMenuItem<int?>(
@@ -373,6 +369,8 @@ class _OnboardingOpsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accentColor = Theme.of(context).colorScheme.secondary;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
     const items = <OperationType>[
       OperationType.addition,
       OperationType.subtraction,
@@ -389,7 +387,7 @@ class _OnboardingOpsPage extends StatelessWidget {
           Text(
             'Du kan ändra detta senare i Föräldraläge.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
+                  color: mutedOnPrimary,
                   fontWeight: FontWeight.w600,
                 ),
             textAlign: TextAlign.center,
@@ -399,7 +397,7 @@ class _OnboardingOpsPage extends StatelessWidget {
             final isChecked = allowedOps.contains(op);
             return Theme(
               data: Theme.of(context).copyWith(
-                unselectedWidgetColor: Colors.white70,
+                unselectedWidgetColor: mutedOnPrimary,
               ),
               child: CheckboxListTile(
                 value: isChecked,
@@ -421,7 +419,7 @@ class _OnboardingOpsPage extends StatelessWidget {
                 title: Text(
                   op.displayName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
+                        color: onPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                 ),

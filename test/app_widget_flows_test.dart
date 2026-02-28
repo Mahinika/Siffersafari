@@ -11,6 +11,7 @@ import 'package:math_game_app/domain/entities/user_progress.dart';
 import 'package:math_game_app/domain/enums/age_group.dart';
 import 'package:math_game_app/domain/enums/difficulty_level.dart';
 import 'package:math_game_app/domain/enums/operation_type.dart';
+import 'package:math_game_app/domain/services/parent_pin_service.dart';
 import 'package:math_game_app/main.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -70,6 +71,11 @@ class _InMemoryLocalStorageRepository extends LocalStorageRepository {
   @override
   dynamic getSetting(String key, {dynamic defaultValue}) {
     return _settings.containsKey(key) ? _settings[key] : defaultValue;
+  }
+
+  @override
+  Future<void> deleteSetting(String key) async {
+    _settings.remove(key);
   }
 
   @override
@@ -186,6 +192,47 @@ void main() {
   );
 
   testWidgets(
+    'Widget (App): visar profilväljare när flera profiler finns',
+    (WidgetTester tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(375, 812);
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await repository.clearAllData();
+
+      const user1 = UserProgress(
+        userId: 'u1',
+        name: 'Alex',
+        ageGroup: AgeGroup.middle,
+        avatarEmoji: '🐯',
+      );
+      const user2 = UserProgress(
+        userId: 'u2',
+        name: 'Sam',
+        ageGroup: AgeGroup.middle,
+        avatarEmoji: '🦊',
+      );
+      await repository.saveUserProgress(user1);
+      await repository.saveUserProgress(user2);
+
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MathGameApp(bootstrapError: null),
+        ),
+      );
+
+      await pumpUntilFound(tester, find.text('Välj profil'));
+
+      expect(find.text('Välj profil'), findsOneWidget);
+      expect(find.text('Alex'), findsOneWidget);
+      expect(find.text('Sam'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'Widget (Quiz): kan slutföra kort quiz och spela igen',
     (WidgetTester tester) async {
       tester.view.devicePixelRatio = 1.0;
@@ -212,29 +259,26 @@ void main() {
         ),
       );
 
-      final multiplication =
-          find.text(OperationType.multiplication.displayName);
+      final multiplication = find.byKey(const Key('operation_card_multiplication'));
       await pumpUntilFound(tester, multiplication);
-      if (multiplication.evaluate().isEmpty) {
-        // In smaller test viewports the second row of operation cards may be
-        // off-screen; scroll the grid until the card is visible.
-        await tester.scrollUntilVisible(
-          multiplication,
-          300,
-          scrollable: find.byType(Scrollable).first,
-        );
-        await tester.pump();
-      }
-
       expect(multiplication, findsOneWidget);
 
       // Start a quiz from Home.
+      await tester.ensureVisible(multiplication);
+      await tester.pump();
+      await pumpFor(
+        tester,
+        AppConstants.mediumAnimationDuration +
+        const Duration(milliseconds: 150),
+      );
       await tester.tap(multiplication);
       await pumpUntilFound(tester, find.textContaining('Fråga'));
 
       expect(find.textContaining('Fråga'), findsOneWidget);
 
       // Answer correctly (deterministic fake question: correctAnswer = 42).
+      await tester.ensureVisible(find.text('42'));
+      await tester.pump();
       await tester.tap(find.text('42'));
       await pumpUntilFound(tester, find.text('Fortsätt'));
 
@@ -283,23 +327,25 @@ void main() {
         ),
       );
 
-      final multiplication =
-          find.text(OperationType.multiplication.displayName);
+      final multiplication = find.byKey(const Key('operation_card_multiplication'));
       await pumpUntilFound(tester, multiplication);
-      if (multiplication.evaluate().isEmpty) {
-        await tester.scrollUntilVisible(
-          multiplication,
-          300,
-          scrollable: find.byType(Scrollable).first,
-        );
-        await tester.pump();
-      }
+      expect(multiplication, findsOneWidget);
 
       // Start a quiz from Home.
+      await tester.ensureVisible(multiplication);
+      await tester.pump();
+      await pumpFor(
+        tester,
+        AppConstants.mediumAnimationDuration +
+        const Duration(milliseconds: 150),
+      );
       await tester.tap(multiplication);
       await pumpUntilFound(tester, find.textContaining('Fråga'));
+      expect(find.textContaining('Fråga'), findsOneWidget);
 
       // Answer correctly (deterministic fake question: correctAnswer = 42).
+      await tester.ensureVisible(find.text('42'));
+      await tester.pump();
       await tester.tap(find.text('42'));
       await pumpUntilFound(tester, find.text('Fortsätt'));
       await tester.ensureVisible(find.text('Fortsätt'));
@@ -342,22 +388,24 @@ void main() {
         ),
       );
 
-      final multiplication =
-          find.text(OperationType.multiplication.displayName);
+      final multiplication = find.byKey(const Key('operation_card_multiplication'));
       await pumpUntilFound(tester, multiplication);
-      if (multiplication.evaluate().isEmpty) {
-        await tester.scrollUntilVisible(
-          multiplication,
-          300,
-          scrollable: find.byType(Scrollable).first,
-        );
-        await tester.pump();
-      }
+      expect(multiplication, findsOneWidget);
 
+      await tester.ensureVisible(multiplication);
+      await tester.pump();
+      await pumpFor(
+        tester,
+        AppConstants.mediumAnimationDuration +
+        const Duration(milliseconds: 150),
+      );
       await tester.tap(multiplication);
       await pumpUntilFound(tester, find.textContaining('Fråga'));
+      expect(find.textContaining('Fråga'), findsOneWidget);
 
       // Answer correctly quickly.
+      await tester.ensureVisible(find.text('42'));
+      await tester.pump();
       await tester.tap(find.text('42'));
       await pumpUntilFound(tester, find.text('Fortsätt'));
       await tester.ensureVisible(find.text('Fortsätt'));
@@ -443,7 +491,9 @@ void main() {
       );
       await repository.saveUserProgress(user);
       await repository.saveSetting('onboarding_done_$userId', true);
-      await repository.saveSetting('parent_pin', '1234');
+      // Use ParentPinService to set PIN correctly (hashed)
+      final pinService = getIt<ParentPinService>();
+      await pinService.setPin('1234');
 
       await tester.pumpWidget(
         const ProviderScope(

@@ -9,6 +9,7 @@ import '../../domain/enums/app_theme.dart';
 import '../../domain/enums/difficulty_level.dart';
 import '../../domain/enums/mastery_level.dart';
 import '../../domain/enums/operation_type.dart';
+import '../../domain/services/parent_pin_service.dart';
 import '../services/achievement_service.dart';
 import '../services/adaptive_difficulty_service.dart';
 import '../services/audio_service.dart';
@@ -123,6 +124,14 @@ Future<void> initializeDependencies({
     _perf('getIt.register(AchievementService)', () {
       getIt.registerLazySingleton<AchievementService>(
         () => AchievementService(),
+      );
+    });
+  }
+
+  if (!getIt.isRegistered<ParentPinService>()) {
+    _perf('getIt.register(ParentPinService)', () {
+      getIt.registerLazySingleton<ParentPinService>(
+        () => ParentPinService(getIt<LocalStorageRepository>()),
       );
     });
   }

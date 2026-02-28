@@ -7,6 +7,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
+import '../../core/utils/page_transitions.dart';
 import '../../domain/entities/question.dart';
 import '../widgets/answer_button.dart';
 import '../widgets/feedback_dialog.dart';
@@ -71,11 +72,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       setState(() {
         _selectedAnswer = null;
       });
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const ResultsScreen(),
-        ),
-      );
+      context.pushReplacementSmooth(const ResultsScreen());
       return;
     }
 
@@ -93,19 +90,21 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final feedback = quizState.feedback;
 
     final themeCfg = ref.watch(appThemeConfigProvider);
+    final scheme = Theme.of(context).colorScheme;
+    final onPrimary = scheme.onPrimary;
 
     final primaryActionColor = themeCfg.primaryActionColor;
     final accentColor = themeCfg.accentColor;
     final cardColor = themeCfg.cardColor;
-    final cardBorderColor = Colors.white.withValues(alpha: 0.14);
-    const lightTextColor = Colors.white;
-    const mutedTextColor = Colors.white70;
+    final cardBorderColor = onPrimary.withValues(alpha: 0.14);
+    final lightTextColor = onPrimary;
+    final mutedTextColor = onPrimary.withValues(alpha: 0.70);
 
     if (session == null || session.currentQuestion == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        context.pushAndRemoveUntilSmooth(
+          const HomeScreen(),
           (route) => false,
         );
       });
@@ -140,14 +139,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
     return ThemedBackgroundScaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         title: Text(
           'Fråga ${session.currentQuestionIndex + 1} av ${session.totalQuestions}',
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: onPrimary),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: Icon(Icons.close, color: onPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -159,7 +156,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             child: ProgressIndicatorBar(
               progress: progress,
               valueColor: accentColor,
-              backgroundColor: Colors.white.withValues(alpha: 0.22),
+              backgroundColor: onPrimary.withValues(alpha: 0.22),
             ),
           ),
 
@@ -180,7 +177,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           // Answer buttons
           Padding(
             padding: EdgeInsets.all(AppConstants.defaultPadding.w),
-            child: _buildAnswerButtons(question),
+            child: _buildAnswerButtons(context, question),
           ),
 
           SizedBox(height: AppConstants.defaultPadding.h),
@@ -189,11 +186,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     );
   }
 
-  Widget _buildAnswerButtons(Question question) {
+  Widget _buildAnswerButtons(BuildContext context, Question question) {
     final themeCfg = ref.read(appThemeConfigProvider);
-    final primaryActionColor = themeCfg.primaryActionColor;
-    final cardColor = themeCfg.cardColor;
+    final idleButtonColor = themeCfg.primaryActionColor;
+    final selectedButtonColor = themeCfg.secondaryActionColor;
     final buttonDisabledColor = themeCfg.disabledBackgroundColor;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
 
     final options = question.allAnswerOptions;
 
@@ -209,9 +207,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             answer: answer,
             isSelected: isSelected,
             isCorrect: showResult ? isCorrect : null,
-            selectedBackgroundColor: primaryActionColor,
-            idleBackgroundColor: cardColor,
-            idleTextColor: Colors.white,
+            selectedBackgroundColor: selectedButtonColor,
+            idleBackgroundColor: idleButtonColor,
+            idleTextColor: onPrimary,
             disabledBackgroundColor: buttonDisabledColor,
             onPressed: () => _handleAnswerSelected(answer),
           ),

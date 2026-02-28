@@ -8,6 +8,7 @@ import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
+import '../../core/utils/page_transitions.dart';
 import '../../data/repositories/local_storage_repository.dart';
 import '../../domain/entities/user_progress.dart';
 import '../../domain/enums/difficulty_level.dart';
@@ -67,9 +68,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Skapa en användare först.')),
       );
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const SettingsScreen()),
-      );
+      context.pushSmooth(const SettingsScreen());
       return;
     }
 
@@ -91,9 +90,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           difficulty: effectiveDifficulty,
         );
 
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const QuizScreen()),
-    );
+    context.pushSmooth(const QuizScreen());
   }
 
   @override
@@ -105,7 +102,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final backgroundAsset = themeCfg.backgroundAsset;
     final questHeroAsset = themeCfg.questHeroAsset;
     final accentColor = themeCfg.accentColor;
-    final primaryActionColor = themeCfg.primaryActionColor;
+
+    final scheme = Theme.of(context).colorScheme;
+    final onPrimary = scheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final subtleOnPrimary = onPrimary.withValues(alpha: 0.54);
+    final faintOnPrimary = onPrimary.withValues(alpha: 0.38);
 
     if (user != null && _loadedAllowedOpsForUserId != user.userId) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -209,7 +211,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Text(
                     AppConstants.appName,
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          color: Colors.white,
+                          color: onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                   ),
@@ -218,16 +220,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   IconButton(
                     tooltip: 'Föräldraläge',
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const ParentPinScreen(),
-                        ),
-                      );
+                      context.pushSmooth(const ParentPinScreen());
                     },
-                    icon: const Icon(
-                      Icons.lock,
-                      color: Colors.white70,
-                    ),
+                    icon: Icon(Icons.lock, color: mutedOnPrimary),
                   ),
               ],
             ),
@@ -239,7 +234,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ? '👋 Hej ${user.name}!'
                   : '🚀 Välkommen till mattespelet! 🚀',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white70,
+                    color: mutedOnPrimary,
                   ),
               textAlign: TextAlign.center,
             ),
@@ -251,7 +246,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ? 'Årskurs ${user.gradeLevel}'
                     : user.ageGroup.displayName,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white54,
+                      color: subtleOnPrimary,
                     ),
               ),
             ],
@@ -263,15 +258,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onPressed: () {
                   showCreateUserDialog(context: context, ref: ref);
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryActionColor,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 56),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppConstants.borderRadius),
-                  ),
-                ),
                 child: const Text('Skapa användare'),
               ),
               const SizedBox(height: AppConstants.largePadding),
@@ -282,7 +268,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(AppConstants.defaultPadding),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: onPrimary.withValues(alpha: 0.1),
                   borderRadius:
                       BorderRadius.circular(AppConstants.borderRadius),
                 ),
@@ -317,7 +303,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           'Nivå ${user.level}',
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: Colors.white70,
+                                    color: mutedOnPrimary,
                                     fontWeight: FontWeight.w600,
                                   ),
                         ),
@@ -325,7 +311,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           '${user.pointsIntoLevel}/${UserProgress.pointsPerLevel}',
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: Colors.white54,
+                                    color: subtleOnPrimary,
                                   ),
                         ),
                       ],
@@ -336,7 +322,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: Text(
                         'Titel: ${user.levelTitle}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white54,
+                              color: subtleOnPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
@@ -348,7 +334,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: LinearProgressIndicator(
                         value: user.levelProgress.clamp(0.0, 1.0),
                         minHeight: 10,
-                        backgroundColor: Colors.white.withValues(alpha: 0.15),
+                        backgroundColor: onPrimary.withValues(alpha: 0.15),
                         valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                       ),
                     ),
@@ -360,7 +346,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           'Aktivt uppdrag',
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: Colors.white70,
+                                    color: mutedOnPrimary,
                                     fontWeight: FontWeight.w600,
                                   ),
                         ),
@@ -370,7 +356,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               : '${(userState.questStatus!.progress * 100).round()}%',
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: Colors.white,
+                                    color: onPrimary,
                                     fontWeight: FontWeight.bold,
                                   ),
                         ),
@@ -381,7 +367,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       userState.questStatus?.quest.title ??
                           'Inget uppdrag valt ännu',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white70,
+                            color: mutedOnPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                     ),
@@ -393,7 +379,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         value: (userState.questStatus?.progress ?? 0.0)
                             .clamp(0.0, 1.0),
                         minHeight: 10,
-                        backgroundColor: Colors.white.withValues(alpha: 0.15),
+                        backgroundColor: onPrimary.withValues(alpha: 0.15),
                         valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                       ),
                     ),
@@ -412,7 +398,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 .textTheme
                                 .titleSmall
                                 ?.copyWith(
-                                  color: Colors.white70,
+                                  color: mutedOnPrimary,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
@@ -424,7 +410,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             return Icon(
                               filled ? Icons.star : Icons.star_border,
                               size: 18,
-                              color: filled ? accentColor : Colors.white38,
+                              color: filled ? accentColor : faintOnPrimary,
                             );
                           }),
                         ),
@@ -436,7 +422,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: Text(
                         _nextGoalMessage(user),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white54,
+                              color: subtleOnPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
@@ -452,7 +438,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 margin: const EdgeInsets.only(top: AppConstants.defaultPadding),
                 padding: const EdgeInsets.all(AppConstants.defaultPadding),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: onPrimary.withValues(alpha: 0.1),
                   borderRadius:
                       BorderRadius.circular(AppConstants.borderRadius),
                 ),
@@ -489,7 +475,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           'Nästa uppdrag',
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: Colors.white70,
+                                    color: mutedOnPrimary,
                                     fontWeight: FontWeight.w600,
                                   ),
                         ),
@@ -499,7 +485,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Text(
                       userState.questStatus!.quest.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
+                            color: onPrimary,
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -508,7 +494,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Text(
                         userState.questNotice!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white70,
+                              color: mutedOnPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
@@ -517,7 +503,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Text(
                       userState.questStatus!.quest.description,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white54,
+                            color: subtleOnPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                     ),
@@ -529,7 +515,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           'Framsteg',
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.white54,
+                                    color: subtleOnPrimary,
                                     fontWeight: FontWeight.w600,
                                   ),
                         ),
@@ -537,7 +523,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           '${(userState.questStatus!.progress * 100).round()}%',
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.white70,
+                                    color: mutedOnPrimary,
                                     fontWeight: FontWeight.bold,
                                   ),
                         ),
@@ -550,7 +536,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: LinearProgressIndicator(
                         value: userState.questStatus!.progress,
                         minHeight: 10,
-                        backgroundColor: Colors.white.withValues(alpha: 0.15),
+                        backgroundColor: onPrimary.withValues(alpha: 0.15),
                         valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                       ),
                     ),
@@ -559,16 +545,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       onPressed: () => _startQuiz(
                         operationType: userState.questStatus!.quest.operation,
                         difficulty: userState.questStatus!.quest.difficulty,
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryActionColor,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppConstants.borderRadius,
-                          ),
-                        ),
                       ),
                       child: const Text('Starta uppdrag'),
                     ),
@@ -584,19 +560,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   operationType: recommendedOperation,
                   difficulty: DifficultyLevel.easy,
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryActionColor,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 56),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppConstants.borderRadius),
-                  ),
-                ),
                 child: Text(
                   'Starta ${recommendedOperation.displayName}',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
+                        color: onPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
@@ -620,7 +587,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Text(
               'Version ${AppConstants.appVersion}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white38,
+                    color: faintOnPrimary,
                   ),
             ),
           ],
@@ -630,20 +597,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildStatItem(BuildContext context, String label, String value) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           value,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.white,
+                color: onPrimary,
                 fontWeight: FontWeight.bold,
               ),
         ),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white70,
+                color: mutedOnPrimary,
               ),
         ),
       ],
@@ -656,56 +625,88 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     IconData icon,
   ) {
     final themeCfg = ref.read(appThemeConfigProvider);
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+
+    final cardContent = GestureDetector(
+      key: Key('operation_card_${operation.name}'),
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _startQuiz(
+        operationType: operation,
+        difficulty: DifficultyLevel.easy,
+      ),
+      child: AnimatedContainer(
+        duration: AppConstants.shortAnimationDuration,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              themeCfg.primaryActionColor,
+              themeCfg.secondaryActionColor,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(AppConstants.borderRadius * 2),
+          boxShadow: [
+            BoxShadow(
+              color: themeCfg.primaryActionColor.withValues(alpha: 0.4),
+              blurRadius: 12,
+              spreadRadius: 1,
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Hero(
+              tag: 'operation_${operation.name}',
+              child: Icon(
+                icon,
+                size: AppConstants.largeIconSize,
+                color: onPrimary,
+              ),
+            ),
+            const SizedBox(height: AppConstants.smallPadding),
+            Text(
+              operation.displayName,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+
     return Semantics(
       button: true,
       label: 'Starta ${operation.displayName}',
       child: ExcludeSemantics(
-        child: GestureDetector(
-          onTap: () => _startQuiz(
-            operationType: operation,
-            difficulty: DifficultyLevel.easy,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  themeCfg.primaryActionColor,
-                  themeCfg.secondaryActionColor,
-                ],
+        // Only animate when not in widget test mode
+        child: const bool.fromEnvironment('FLUTTER_TEST')
+            ? cardContent
+            : TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: AppConstants.mediumAnimationDuration,
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Opacity(
+                      opacity: value,
+                      child: child,
+                    ),
+                  );
+                },
+                child: cardContent,
               ),
-              borderRadius:
-                  BorderRadius.circular(AppConstants.borderRadius * 2),
-              boxShadow: [
-                BoxShadow(
-                  color: themeCfg.primaryActionColor.withValues(alpha: 0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: 48,
-                  color: Colors.white,
-                ),
-                const SizedBox(height: AppConstants.smallPadding),
-                Text(
-                  operation.displayName,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
