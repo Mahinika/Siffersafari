@@ -6,10 +6,14 @@ import '../../core/constants/app_constants.dart';
 class ProgressIndicatorBar extends StatelessWidget {
   const ProgressIndicatorBar({
     required this.progress,
+    this.backgroundColor,
+    this.valueColor,
     super.key,
   });
 
   final double progress;
+  final Color? backgroundColor;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +27,9 @@ class ProgressIndicatorBar extends StatelessWidget {
           child: LinearProgressIndicator(
             value: progress,
             minHeight: 12.h,
-            backgroundColor: Colors.white.withOpacity(0.2),
-            valueColor: const AlwaysStoppedAnimation<Color>(
-              AppColors.spaceAccent,
+            backgroundColor: backgroundColor ?? Colors.white.withOpacity(0.2),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              valueColor ?? AppColors.spaceAccent,
             ),
           ),
         ),

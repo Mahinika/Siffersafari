@@ -66,14 +66,56 @@ class MathGameApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
+        final colorScheme = const ColorScheme.light(
+          primary: AppColors.spacePrimary,
+          onPrimary: Colors.white,
+          secondary: AppColors.spaceAccent,
+          onSecondary: Colors.white,
+          surface: Color(0xFFFFF6E8),
+          onSurface: AppColors.textPrimary,
+          error: AppColors.wrongAnswer,
+          onError: Colors.white,
+        );
+
         return MaterialApp(
           title: 'Siffersafari',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.deepPurple,
-              brightness: Brightness.light,
+            colorScheme: colorScheme,
+            scaffoldBackgroundColor: AppColors.neutralBackground,
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(
+                  double.infinity,
+                  AppConstants.minTouchTargetSize,
+                ),
+                backgroundColor: AppColors.spacePrimary,
+                foregroundColor: Colors.white,
+                textStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.borderRadius),
+                ),
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                minimumSize: const Size(44, 44),
+                foregroundColor: AppColors.spaceSecondary,
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            appBarTheme: const AppBarTheme(
+              centerTitle: true,
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.white,
+              elevation: 0,
             ),
           ),
           home: bootstrapError == null

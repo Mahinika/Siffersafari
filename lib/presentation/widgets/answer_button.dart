@@ -9,6 +9,10 @@ class AnswerButton extends StatelessWidget {
     required this.onPressed,
     this.isSelected = false,
     this.isCorrect,
+    this.selectedBackgroundColor,
+    this.idleBackgroundColor,
+    this.idleTextColor,
+    this.disabledBackgroundColor,
     super.key,
   });
 
@@ -16,6 +20,10 @@ class AnswerButton extends StatelessWidget {
   final VoidCallback onPressed;
   final bool isSelected;
   final bool? isCorrect;
+  final Color? selectedBackgroundColor;
+  final Color? idleBackgroundColor;
+  final Color? idleTextColor;
+  final Color? disabledBackgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +39,16 @@ class AnswerButton extends StatelessWidget {
         backgroundColor = AppColors.wrongAnswer;
         textColor = Colors.white;
       } else {
-        backgroundColor = Colors.grey.shade300;
-        textColor = AppColors.textPrimary;
+        backgroundColor = disabledBackgroundColor ?? Colors.grey.shade300;
+        textColor = idleTextColor ?? AppColors.textPrimary;
       }
     } else {
       // Before answer is submitted
-      backgroundColor = isSelected ? AppColors.spacePrimary : Colors.white;
-      textColor = isSelected ? Colors.white : AppColors.textPrimary;
+      backgroundColor = isSelected
+          ? (selectedBackgroundColor ?? AppColors.spacePrimary)
+          : (idleBackgroundColor ?? AppColors.neutralBackground);
+      textColor =
+          isSelected ? Colors.white : (idleTextColor ?? AppColors.textPrimary);
     }
 
     final isEnabled = isCorrect == null;

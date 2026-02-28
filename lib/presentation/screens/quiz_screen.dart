@@ -97,8 +97,24 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       AppTheme.jungle => 'assets/images/themes/jungle/background.png',
       _ => 'assets/images/themes/space/background.png',
     };
-    final baseBackgroundColor =
-        selectedTheme == AppTheme.jungle ? AppColors.jungleBackground : AppColors.spaceBackground;
+    final baseBackgroundColor = selectedTheme == AppTheme.jungle
+        ? AppColors.jungleBackground
+        : AppColors.spaceBackground;
+    final primaryActionColor = selectedTheme == AppTheme.jungle
+        ? AppColors.junglePrimary
+        : AppColors.spacePrimary;
+    final accentColor = selectedTheme == AppTheme.jungle
+        ? AppColors.jungleAccent
+        : AppColors.spaceAccent;
+    final cardColor = selectedTheme == AppTheme.jungle
+        ? const Color(0xCC2A4F36)
+        : const Color(0xCC485466);
+    final cardBorderColor = Colors.white.withOpacity(0.14);
+    final lightTextColor = Colors.white;
+    final mutedTextColor = Colors.white70;
+    final buttonDisabledColor = selectedTheme == AppTheme.jungle
+        ? const Color(0xCC3D6C50)
+        : const Color(0xCC5B6575);
 
     if (session == null || session.currentQuestion == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -129,6 +145,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           builder: (_) => FeedbackDialog(
             feedback: feedback,
             onContinue: _handleNextQuestion,
+            continueButtonColor: primaryActionColor,
+            dialogBackgroundColor: cardColor,
+            messageTextColor: mutedTextColor,
           ),
         );
       }
@@ -175,14 +194,25 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 // Progress bar
                 Padding(
                   padding: EdgeInsets.all(AppConstants.defaultPadding.w),
-                  child: ProgressIndicatorBar(progress: progress),
+                  child: ProgressIndicatorBar(
+                    progress: progress,
+                    valueColor: accentColor,
+                    backgroundColor: Colors.white.withOpacity(0.22),
+                  ),
                 ),
 
                 SizedBox(height: AppConstants.largePadding.h),
 
                 // Question card
                 Expanded(
-                  child: QuestionCard(question: question),
+                  child: QuestionCard(
+                    question: question,
+                    cardColor: cardColor,
+                    shadowColor: primaryActionColor,
+                    questionTextColor: lightTextColor,
+                    subtitleTextColor: mutedTextColor,
+                    borderColor: cardBorderColor,
+                  ),
                 ),
 
                 // Answer buttons
@@ -201,6 +231,18 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Widget _buildAnswerButtons(Question question) {
+    final selectedTheme =
+        ref.read(userProvider).activeUser?.selectedTheme ?? AppTheme.space;
+    final primaryActionColor = selectedTheme == AppTheme.jungle
+        ? AppColors.junglePrimary
+        : AppColors.spacePrimary;
+    final cardColor = selectedTheme == AppTheme.jungle
+        ? const Color(0xCC2A4F36)
+        : const Color(0xCC485466);
+    final buttonDisabledColor = selectedTheme == AppTheme.jungle
+        ? const Color(0xCC3D6C50)
+        : const Color(0xCC5B6575);
+
     final options = question.allAnswerOptions;
 
     return Column(
@@ -215,6 +257,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             answer: answer,
             isSelected: isSelected,
             isCorrect: showResult ? isCorrect : null,
+            selectedBackgroundColor: primaryActionColor,
+            idleBackgroundColor: cardColor,
+            idleTextColor: Colors.white,
+            disabledBackgroundColor: buttonDisabledColor,
             onPressed: () => _handleAnswerSelected(answer),
           ),
         );

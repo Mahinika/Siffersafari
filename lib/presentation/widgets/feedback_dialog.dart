@@ -9,11 +9,17 @@ class FeedbackDialog extends StatefulWidget {
   const FeedbackDialog({
     required this.feedback,
     required this.onContinue,
+    this.continueButtonColor,
+    this.dialogBackgroundColor,
+    this.messageTextColor,
     super.key,
   });
 
   final FeedbackResult feedback;
   final VoidCallback onContinue;
+  final Color? continueButtonColor;
+  final Color? dialogBackgroundColor;
+  final Color? messageTextColor;
 
   @override
   State<FeedbackDialog> createState() => _FeedbackDialogState();
@@ -41,6 +47,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor:
+          widget.dialogBackgroundColor ?? Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.borderRadius * 2),
       ),
@@ -89,7 +97,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 child: Text(
                   widget.feedback.message,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textSecondary,
+                        color:
+                            widget.messageTextColor ?? AppColors.textSecondary,
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -107,7 +116,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: widget.feedback.isCorrect
                     ? AppColors.correctAnswer
-                    : AppColors.spacePrimary,
+                    : (widget.continueButtonColor ?? AppColors.spacePrimary),
                 minimumSize: Size(double.infinity, 56.h),
                 shape: RoundedRectangleBorder(
                   borderRadius:

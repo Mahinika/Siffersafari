@@ -7,10 +7,20 @@ import '../../domain/entities/question.dart';
 class QuestionCard extends StatelessWidget {
   const QuestionCard({
     required this.question,
+    this.cardColor,
+    this.shadowColor,
+    this.questionTextColor,
+    this.subtitleTextColor,
+    this.borderColor,
     super.key,
   });
 
   final Question question;
+  final Color? cardColor;
+  final Color? shadowColor;
+  final Color? questionTextColor;
+  final Color? subtitleTextColor;
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +32,15 @@ class QuestionCard extends StatelessWidget {
               EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding.w),
           padding: EdgeInsets.all(AppConstants.largePadding.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cardColor ?? AppColors.neutralBackground,
             borderRadius: BorderRadius.circular(AppConstants.borderRadius * 2),
+            border: Border.all(
+              color: borderColor ?? Colors.white.withOpacity(0.12),
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color:
+                    (shadowColor ?? AppColors.spacePrimary).withOpacity(0.18),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -45,7 +59,7 @@ class QuestionCard extends StatelessWidget {
                   question.questionText,
                   style: Theme.of(context).textTheme.displayLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: questionTextColor ?? AppColors.textPrimary,
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -53,7 +67,7 @@ class QuestionCard extends StatelessWidget {
                 Text(
                   'Vad blir resultatet?',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: subtitleTextColor ?? AppColors.textSecondary,
                       ),
                 ),
               ],
