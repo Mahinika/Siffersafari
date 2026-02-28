@@ -10,7 +10,9 @@ void main() {
       service = SpacedRepetitionService();
     });
 
-    test('schedules first review with correct interval', () {
+    test(
+        'Unit (SpacedRepetitionService): schemalägger första repetition med rätt intervall',
+        () {
       final now = DateTime(2026, 1, 1);
       final schedule = service.scheduleNextReview(
         questionId: 'q1',
@@ -26,7 +28,8 @@ void main() {
       );
     });
 
-    test('resets interval on incorrect answer', () {
+    test('Unit (SpacedRepetitionService): nollställer intervall vid fel svar',
+        () {
       final now = DateTime(2026, 1, 1);
       final previous = ReviewSchedule(
         questionId: 'q1',
@@ -46,7 +49,8 @@ void main() {
       expect(schedule.intervalDays, AppConstants.firstReviewInterval);
     });
 
-    test('increases interval after consecutive correct answers', () {
+    test('Unit (SpacedRepetitionService): ökar intervall vid flera rätt i rad',
+        () {
       final now = DateTime(2026, 1, 1);
       var schedule = service.scheduleNextReview(
         questionId: 'q1',
@@ -75,7 +79,7 @@ void main() {
       expect(schedule.intervalDays, AppConstants.thirdReviewInterval);
     });
 
-    test('identifies due questions correctly', () {
+    test('Unit (SpacedRepetitionService): hittar frågor som är due', () {
       final now = DateTime(2026, 1, 10);
 
       final schedules = [

@@ -6,7 +6,7 @@ import 'package:math_game_app/domain/enums/operation_type.dart';
 
 void main() {
   group('DifficultyConfig.effectiveAgeGroup', () {
-    test('returns fallback when gradeLevel is null', () {
+    test('använder fallback när gradeLevel saknas', () {
       expect(
         DifficultyConfig.effectiveAgeGroup(
           fallback: AgeGroup.middle,
@@ -16,7 +16,7 @@ void main() {
       );
     });
 
-    test('maps Åk 1-3 to young', () {
+    test('mappar Åk 1–3 till young', () {
       for (final grade in [1, 2, 3]) {
         expect(
           DifficultyConfig.effectiveAgeGroup(
@@ -28,7 +28,7 @@ void main() {
       }
     });
 
-    test('maps Åk 4-6 to middle', () {
+    test('mappar Åk 4–6 till middle', () {
       for (final grade in [4, 5, 6]) {
         expect(
           DifficultyConfig.effectiveAgeGroup(
@@ -40,7 +40,7 @@ void main() {
       }
     });
 
-    test('maps Åk 7-9 to older', () {
+    test('mappar Åk 7–9 till older', () {
       for (final grade in [7, 8, 9]) {
         expect(
           DifficultyConfig.effectiveAgeGroup(
@@ -54,7 +54,7 @@ void main() {
   });
 
   group('DifficultyConfig.effectiveDifficulty', () {
-    test('returns fallback when gradeLevel is null', () {
+    test('använder fallback när gradeLevel saknas', () {
       expect(
         DifficultyConfig.effectiveDifficulty(
           fallback: DifficultyLevel.medium,
@@ -64,7 +64,7 @@ void main() {
       );
     });
 
-    test('maps grades into repeating easy/medium/hard buckets', () {
+    test('mappar årskurser till repeterande easy/medium/hard-buckets', () {
       final expectations = <int, DifficultyLevel>{
         1: DifficultyLevel.easy,
         2: DifficultyLevel.medium,
@@ -91,7 +91,7 @@ void main() {
   });
 
   group('DifficultyConfig.getTimeLimit', () {
-    test('young has the longest base time', () {
+    test('young har längst grundtid', () {
       expect(
         DifficultyConfig.getTimeLimit(AgeGroup.young, DifficultyLevel.easy),
         greaterThan(
@@ -106,7 +106,7 @@ void main() {
       );
     });
 
-    test('hard difficulty gives more time than easy', () {
+    test('hard ger mer tid än easy', () {
       final easy =
           DifficultyConfig.getTimeLimit(AgeGroup.middle, DifficultyLevel.easy);
       final hard =
@@ -116,7 +116,7 @@ void main() {
   });
 
   group('DifficultyConfig.getQuestionsPerSession', () {
-    test('returns expected question counts', () {
+    test('returnerar förväntat antal frågor', () {
       expect(DifficultyConfig.getQuestionsPerSession(AgeGroup.young), 8);
       expect(DifficultyConfig.getQuestionsPerSession(AgeGroup.middle), 10);
       expect(DifficultyConfig.getQuestionsPerSession(AgeGroup.older), 12);
@@ -124,7 +124,7 @@ void main() {
   });
 
   group('DifficultyConfig.getNumberRange', () {
-    test('range contains its endpoints', () {
+    test('intervallet innehåller sina ändpunkter', () {
       final range = DifficultyConfig.getNumberRange(
         AgeGroup.young,
         OperationType.addition,
@@ -135,7 +135,7 @@ void main() {
       expect(range.contains(range.max), isTrue);
     });
 
-    test('different age groups produce different addition-easy max', () {
+    test('olika åldersgrupper ger olika max för addition/easy', () {
       final young = DifficultyConfig.getNumberRange(
         AgeGroup.young,
         OperationType.addition,

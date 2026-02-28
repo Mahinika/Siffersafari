@@ -13,7 +13,7 @@ void main() {
       service = QuestionGeneratorService();
     });
 
-    test('generates correct number of questions', () {
+    test('Unit (QuestionGeneratorService): genererar rätt antal frågor', () {
       final questions = service.generateQuestions(
         ageGroup: AgeGroup.middle,
         operationType: OperationType.addition,
@@ -24,7 +24,7 @@ void main() {
       expect(questions.length, 10);
     });
 
-    test('generates addition question with correct result', () {
+    test('Unit (QuestionGeneratorService): addition ger korrekt svar', () {
       final question = service.generateQuestion(
         ageGroup: AgeGroup.middle,
         operationType: OperationType.addition,
@@ -38,7 +38,9 @@ void main() {
       );
     });
 
-    test('generates subtraction question with non-negative result', () {
+    test(
+        'Unit (QuestionGeneratorService): subtraktion ger inte negativt resultat',
+        () {
       final question = service.generateQuestion(
         ageGroup: AgeGroup.young,
         operationType: OperationType.subtraction,
@@ -53,7 +55,8 @@ void main() {
       );
     });
 
-    test('generates multiplication question with correct result', () {
+    test('Unit (QuestionGeneratorService): multiplikation ger korrekt svar',
+        () {
       final question = service.generateQuestion(
         ageGroup: AgeGroup.middle,
         operationType: OperationType.multiplication,
@@ -67,7 +70,7 @@ void main() {
       );
     });
 
-    test('generates division question with whole number result', () {
+    test('Unit (QuestionGeneratorService): division ger heltalsresultat', () {
       final question = service.generateQuestion(
         ageGroup: AgeGroup.middle,
         operationType: OperationType.division,
@@ -86,7 +89,8 @@ void main() {
       );
     });
 
-    test('respects number range for young age group', () {
+    test('Unit (QuestionGeneratorService): respekterar talintervall för young',
+        () {
       final questions = service.generateQuestions(
         ageGroup: AgeGroup.young,
         operationType: OperationType.addition,
@@ -108,7 +112,9 @@ void main() {
       }
     });
 
-    test('generates wrong answers that are different from correct answer', () {
+    test(
+        'Unit (QuestionGeneratorService): felalternativ skiljer sig från rätt svar',
+        () {
       final question = service.generateQuestion(
         ageGroup: AgeGroup.middle,
         operationType: OperationType.addition,
@@ -121,7 +127,9 @@ void main() {
       }
     });
 
-    test('all answer options include correct answer', () {
+    test(
+        'Unit (QuestionGeneratorService): svarsalternativ innehåller rätt svar',
+        () {
       final question = service.generateQuestion(
         ageGroup: AgeGroup.middle,
         operationType: OperationType.addition,
@@ -134,7 +142,7 @@ void main() {
   });
 
   group('DifficultyConfig', () {
-    test('returns appropriate time limit for age group', () {
+    test('Unit (DifficultyConfig): ger längre tidsgräns för yngre', () {
       final youngTime = DifficultyConfig.getTimeLimit(
         AgeGroup.young,
         DifficultyLevel.easy,
@@ -148,7 +156,7 @@ void main() {
       expect(youngTime, greaterThan(olderTime));
     });
 
-    test('returns more questions for older age groups', () {
+    test('Unit (DifficultyConfig): ger fler frågor för äldre', () {
       final youngQuestions = DifficultyConfig.getQuestionsPerSession(
         AgeGroup.young,
       );
@@ -159,7 +167,7 @@ void main() {
       expect(olderQuestions, greaterThanOrEqualTo(youngQuestions));
     });
 
-    test('number range max is greater than min', () {
+    test('Unit (DifficultyConfig): talintervall har max > min', () {
       final range = DifficultyConfig.getNumberRange(
         AgeGroup.middle,
         OperationType.addition,

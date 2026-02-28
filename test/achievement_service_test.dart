@@ -14,7 +14,7 @@ void main() {
       service = AchievementService();
     });
 
-    test('awards first quiz achievement', () {
+    test('Unit (AchievementService): låser upp första quiz-utmärkelsen', () {
       const user = UserProgress(
         userId: 'u1',
         name: 'Test',

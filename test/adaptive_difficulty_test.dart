@@ -10,14 +10,17 @@ void main() {
       service = AdaptiveDifficultyService();
     });
 
-    test('calculates success rate correctly', () {
+    test('Unit (AdaptiveDifficultyService): beräknar träffsäkerhet korrekt',
+        () {
       final results = [true, true, false, true, false];
       final successRate = service.calculateSuccessRate(results);
 
       expect(successRate, 0.6); // 3/5
     });
 
-    test('suggests same difficulty with insufficient data', () {
+    test(
+        'Unit (AdaptiveDifficultyService): behåller svårighetsgrad vid för lite data',
+        () {
       final results = [true, false];
       final suggestion = service.suggestDifficulty(
         currentDifficulty: DifficultyLevel.easy,
@@ -27,7 +30,9 @@ void main() {
       expect(suggestion, DifficultyLevel.easy);
     });
 
-    test('suggests increased difficulty with high success rate', () {
+    test(
+        'Unit (AdaptiveDifficultyService): höjer svårighetsgrad vid hög träffsäkerhet',
+        () {
       final results = [true, true, true, true, true];
       final suggestion = service.suggestDifficulty(
         currentDifficulty: DifficultyLevel.easy,
@@ -37,7 +42,9 @@ void main() {
       expect(suggestion, DifficultyLevel.medium);
     });
 
-    test('suggests decreased difficulty with low success rate', () {
+    test(
+        'Unit (AdaptiveDifficultyService): sänker svårighetsgrad vid låg träffsäkerhet',
+        () {
       final results = [false, false, true, false, false];
       final suggestion = service.suggestDifficulty(
         currentDifficulty: DifficultyLevel.medium,
@@ -47,7 +54,7 @@ void main() {
       expect(suggestion, DifficultyLevel.easy);
     });
 
-    test('does not increase beyond hard difficulty', () {
+    test('Unit (AdaptiveDifficultyService): höjer inte över hard', () {
       final results = [true, true, true, true, true];
       final suggestion = service.suggestDifficulty(
         currentDifficulty: DifficultyLevel.hard,
@@ -57,7 +64,7 @@ void main() {
       expect(suggestion, DifficultyLevel.hard);
     });
 
-    test('does not decrease below easy difficulty', () {
+    test('Unit (AdaptiveDifficultyService): sänker inte under easy', () {
       final results = [false, false, false, false, false];
       final suggestion = service.suggestDifficulty(
         currentDifficulty: DifficultyLevel.easy,

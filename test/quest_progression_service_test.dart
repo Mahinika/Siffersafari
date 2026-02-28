@@ -7,7 +7,8 @@ void main() {
   group('QuestProgressionService', () {
     const service = QuestProgressionService();
 
-    test('defaults to first quest when no quest state', () {
+    test('Unit (QuestProgressionService): startar på första quest utan state',
+        () {
       const user = UserProgress(
         userId: 'u1',
         name: 'Test',
@@ -25,7 +26,8 @@ void main() {
       expect(status.isCompleted, isFalse);
     });
 
-    test('for Åk 1-2 path includes only easy quests', () {
+    test('Unit (QuestProgressionService): Åk 1–2 innehåller bara easy-quests',
+        () {
       const user = UserProgress(
         userId: 'u1',
         name: 'Test',
@@ -44,25 +46,29 @@ void main() {
       expect(nextAfterDivEasy, isNull);
     });
 
-    test('when currentQuestId is outside path, selects first available in path',
+    test(
+      'Unit (QuestProgressionService): väljer första quest om currentQuestId ligger utanför path',
+      () {
+        const user = UserProgress(
+          userId: 'u1',
+          name: 'Test',
+          ageGroup: AgeGroup.middle,
+          gradeLevel: 1,
+        );
+
+        final status = service.getCurrentStatus(
+          user: user,
+          currentQuestId: 'q_plus_medium',
+          completedQuestIds: <String>{},
+        );
+
+        expect(status.quest.id, 'q_plus_easy');
+      },
+    );
+
+    test(
+        'Unit (QuestProgressionService): markerar quest klar när mastery passerar tröskel',
         () {
-      const user = UserProgress(
-        userId: 'u1',
-        name: 'Test',
-        ageGroup: AgeGroup.middle,
-        gradeLevel: 1,
-      );
-
-      final status = service.getCurrentStatus(
-        user: user,
-        currentQuestId: 'q_plus_medium',
-        completedQuestIds: <String>{},
-      );
-
-      expect(status.quest.id, 'q_plus_easy');
-    });
-
-    test('marks quest completed when mastery reaches threshold', () {
       const user = UserProgress(
         userId: 'u1',
         name: 'Test',
@@ -83,7 +89,9 @@ void main() {
       expect(status.progress, 1.0);
     });
 
-    test('skips completed quests and selects next one', () {
+    test(
+        'Unit (QuestProgressionService): hoppar över avklarade quests och väljer nästa',
+        () {
       const user = UserProgress(
         userId: 'u1',
         name: 'Test',
