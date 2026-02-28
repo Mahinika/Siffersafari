@@ -1,4 +1,4 @@
-# Implementeringsstatus - 2026-02-26
+# Implementeringsstatus - 2026-02-28
 
 ## Översikt
 Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräldraläge, onboarding, widget-test och stabil lokal persistens.
@@ -96,4 +96,4 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 ---
 
 ## Kommentar
-Detta dokument är nu uppdaterat för att spegla nuvarande kodbas och TODO-status per 2026-02-26.
+Detta dokument är nu uppdaterat för att spegla nuvarande kodbas och TODO-status per 2026-02-28.

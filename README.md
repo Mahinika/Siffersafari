@@ -2,7 +2,7 @@
 
 Ett pedagogiskt mattespel för barn (6-13+ år) som lär grundläggande matematik genom interaktiva övningar, quiz och progressionssystem.
 
-## Status (2026-02-26)
+## Status (2026-02-28)
 
 Projektet är i ett fungerande MVP+-läge med:
 - Quizflöde (hem → quiz → resultat)

@@ -2,7 +2,7 @@
 
 ## Uppdatering
 
-- 2026-02-26: Aktuell implementationsstatus finns i `README.md` under sektionen **Status (2026-02-26)** och i `IMPLEMENTATION_STATUS.md`.
+- 2026-02-28: Aktuell implementationsstatus finns i `README.md` under sektionen **Status (2026-02-28)** och i `IMPLEMENTATION_STATUS.md`.
 
 ## Förutsättningar
 

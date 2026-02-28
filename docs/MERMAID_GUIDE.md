@@ -23,7 +23,7 @@ flowchart TD
 
 - Lägg arkitekturdiagram i [docs/ARCHITECTURE.md](ARCHITECTURE.md).
 - Lägg flödesdiagram nära respektive funktionsdokument (t.ex. `docs/SERVICES_API.md`).
-- Namnge diagram på ett sätt som matchar screenshots/test-namn (t.ex. `UI_TEST_1_quiz_flow`).
+- Namnge diagram på ett sätt som matchar screenshots/test-namn (t.ex. `quiz_flow`, `user_profile_setup`).
 
 ## Snabbmallar
 
