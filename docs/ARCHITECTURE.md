@@ -181,9 +181,12 @@ lib/
 │   │   └── injection.dart
 │   └── services/              # Services
 │       ├── question_generator_service.dart
-│       ├── audio_service.dart
-│       ├── adaptive_difficulty_service.dart (TODO)
-│       └── spaced_repetition_service.dart (TODO)
+│       ├── adaptive_difficulty_service.dart
+│       ├── spaced_repetition_service.dart
+│       ├── feedback_service.dart
+│       ├── achievement_service.dart
+│       ├── quest_progression_service.dart
+│       └── audio_service.dart
 │
 ├── data/                      # Dataskikt
 │   └── repositories/          # Repositories
@@ -202,13 +205,18 @@ lib/
 │       └── mastery_level.dart
 │
 └── presentation/              # Presentation/UI
-    ├── screens/              # Skärmar
-    │   ├── home_screen.dart
-    │   ├── quiz_screen.dart (TODO)
-    │   ├── results_screen.dart (TODO)
-    │   └── parent_dashboard_screen.dart (TODO)
-    └── widgets/              # Återanvändbara widgets
-        └── (TODO)
+  ├── screens/              # Skärmar
+  │   ├── home_screen.dart
+  │   ├── quiz_screen.dart
+  │   ├── results_screen.dart
+  │   ├── settings_screen.dart
+  │   ├── onboarding_screen.dart
+  │   ├── parent_pin_screen.dart
+  │   └── parent_dashboard_screen.dart
+  ├── dialogs/
+  │   └── create_user_dialog.dart
+  └── widgets/              # Återanvändbara widgets
+    └── (flera, se lib/presentation/widgets/)
 ```
 
 ## Nästa Steg
@@ -281,6 +289,23 @@ flutter test --coverage
 flutter test test/question_generator_test.dart
 ```
 
+### Test-typer i projektet
+
+- `test/` innehåller unit- och widget-tester (körs med `flutter test`).
+- `integration_test/` innehåller integrationstester (körs också med `flutter test`, men driver hela appflöden).
+
+Exempel:
+
+```bash
+# Integration smoke
+flutter test integration_test/app_smoke_test.dart
+
+# Integration screenshots
+flutter test integration_test/screenshots_test.dart
+```
+
+Not: `integration_test/tap_count_test.dart` är opt-in och körs bara om `RUN_TAP_COUNT=1` är satt i environment.
+
 ## Dependencies
 
 Viktiga dependencies och deras syfte:
@@ -328,4 +353,4 @@ Detta projekt baseras på vetenskaplig forskning:
 5. **Growth Mindset** - Betona ansträngning över resultat
 6. **Adaptive Learning** - Anpassa svårighetsgrad till individen
 
-Se `/memories/session/plan.md` för fullständig forskningssammanfattning.
+Se även README för en kort översikt av mål och scope.
