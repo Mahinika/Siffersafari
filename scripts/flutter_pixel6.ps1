@@ -75,13 +75,61 @@ function Ensure-Pixel6Device {
   return $deviceId
 }
 
+function Wait-ForAndroidReady([string]$deviceId) {
+  Write-Host "Väntar på att enheten ska bli redo (boot + PackageManager)..."
+
+  try {
+    & adb -s $deviceId wait-for-device | Out-Null
+  } catch {
+    throw "Kunde inte ansluta till enheten via adb: $($_.Exception.Message)"
+  }
+
+  $bootCompleted = $null
+  $timeoutAt = (Get-Date).AddMinutes(4)
+  do {
+    Start-Sleep -Seconds 2
+    try {
+      $bootCompleted = (& adb -s $deviceId shell getprop sys.boot_completed 2>$null | Select-Object -First 1)
+      $bootCompleted = "$bootCompleted".Trim()
+    } catch {
+      $bootCompleted = $null
+    }
+  } while (($bootCompleted -ne '1') -and ((Get-Date) -lt $timeoutAt))
+
+  if ($bootCompleted -ne '1') {
+    throw "Enheten rapporterade inte sys.boot_completed=1 inom timeout. (deviceId=$deviceId)"
+  }
+
+  $pmReady = $false
+  $timeoutAt = (Get-Date).AddMinutes(2)
+  do {
+    Start-Sleep -Seconds 2
+    try {
+      $pmOut = & adb -s $deviceId shell pm path android 2>$null
+      if ($LASTEXITCODE -eq 0 -and $pmOut) {
+        $pmReady = $true
+      }
+    } catch {
+      $pmReady = $false
+    }
+  } while ((-not $pmReady) -and ((Get-Date) -lt $timeoutAt))
+
+  if (-not $pmReady) {
+    throw "PackageManager blev inte redo inom timeout. (deviceId=$deviceId)"
+  }
+}
+
 function Get-DebugApkPath {
   return Join-Path $RepoRoot 'build/app/outputs/flutter-apk/app-debug.apk'
 }
 
 function Get-PackageInfo([string]$deviceId, [string]$appId) {
-  $raw = & adb -s $deviceId shell dumpsys package $appId 2>$null
-  if ($LASTEXITCODE -ne 0 -or -not $raw) {
+  try {
+    $raw = & adb -s $deviceId shell dumpsys package $appId 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $raw) {
+      return $null
+    }
+  } catch {
     return $null
   }
 
@@ -119,6 +167,7 @@ function Get-PackageInfo([string]$deviceId, [string]$appId) {
 }
 
 $pixelDeviceId = Ensure-Pixel6Device
+Wait-ForAndroidReady -deviceId $pixelDeviceId
 Write-Host "Använder enhet: $pixelDeviceId (AVD: $PixelAvdName)"
 Write-Host "Script: $ScriptVersion"
 Write-Host "Repo: $RepoRoot"
