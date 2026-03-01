@@ -630,4 +630,81 @@ void main() {
       expect(find.text('Nu kör vi!'), findsNothing);
     },
   );
+
+  testWidgets(
+    'Widget (Onboarding): Klar tar dig inte tillbaka till steg 1',
+    (WidgetTester tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(375, 812);
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await repository.clearAllData();
+
+      const userId = 'test-user';
+      const user = UserProgress(
+        userId: userId,
+        name: 'Test',
+        ageGroup: AgeGroup.middle,
+      );
+      await repository.saveUserProgress(user);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
+        ),
+      );
+
+      // Wait for onboarding without auto-skip.
+      final onboardingTitle = find.text('Nu kör vi!');
+      final steps = (const Duration(seconds: 4).inMilliseconds / 50).ceil();
+      for (var i = 0; i < steps; i++) {
+        if (onboardingTitle.evaluate().isNotEmpty) break;
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      expect(onboardingTitle, findsOneWidget);
+      expect(find.text('1/2'), findsOneWidget);
+      expect(find.text('Vilken årskurs kör du?'), findsOneWidget);
+
+      // Step 1 -> Step 2.
+      await tester.tap(find.text('Nästa'));
+      await pumpFor(
+        tester,
+        AppConstants.mediumAnimationDuration +
+            const Duration(milliseconds: 200),
+      );
+
+      expect(find.text('2/2'), findsOneWidget);
+      expect(find.text('Vad vill du räkna?'), findsOneWidget);
+
+      // Finish onboarding.
+      await tester.tap(find.text('Klar'));
+
+      // Wait for pop back to Home without using pumpUntilFound (no auto-skip).
+      final homeTitle = find.text(AppConstants.appName);
+      final finishSteps = (const Duration(seconds: 4).inMilliseconds / 50).ceil();
+      for (var i = 0; i < finishSteps; i++) {
+        if (homeTitle.evaluate().isNotEmpty) break;
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      // Allow route pop animation to fully complete.
+      await pumpFor(tester, const Duration(milliseconds: 600));
+
+      expect(homeTitle, findsOneWidget);
+      expect(onboardingTitle, findsNothing);
+
+      // Rebuild the app (same in-memory repository) - onboarding should not
+      // appear again.
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
+        ),
+      );
+      await pumpFor(tester, const Duration(milliseconds: 800));
+      expect(find.text('Nu kör vi!'), findsNothing);
+    },
+  );
 }
