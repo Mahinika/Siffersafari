@@ -7,8 +7,8 @@ class AppFeatures {
 
   /// Enables word problems (textuppgifter) in the quiz question generator.
   ///
-  /// Default OFF until the content + UX is tuned.
-  static const bool wordProblemsEnabled = false;
+  /// Note: Only applies when `gradeLevel` is set (Åk 1–3) and operation is +/−.
+  static const bool wordProblemsEnabled = true;
 
   /// Chance (0.0–1.0) that a generated question becomes a word problem when
   /// supported for the current grade/operation.
