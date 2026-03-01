@@ -1,0 +1,126 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "testPath",
+      "type": "promptString",
+      "description": "Testfil eller mapp att köra (t.ex. test/question_generator_test.dart eller test/)",
+      "default": "test/"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "Flutter: Run (Pixel_6 only)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/flutter_pixel6.ps1",
+        "-Action",
+        "run",
+        "-ClearLogcatBeforeRun",
+        "-DumpLogcatOnLostConnection",
+        "-DumpLogcatAfterRun"
+      ],
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "Flutter: Install (Pixel_6 only)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/flutter_pixel6.ps1",
+        "-Action",
+        "install"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "Flutter: Sync (Pixel_6 only)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/flutter_pixel6.ps1",
+        "-Action",
+        "sync"
+      ],
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "QA: Analyze",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["analyze"],
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "QA: Test (valfri path)",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["test", "${input:testPath}"],
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "QA: Test (alla)",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["test"],
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "QA: Analyze + Test (valfri path)",
+      "dependsOrder": "sequence",
+      "dependsOn": ["QA: Analyze", "QA: Test (valfri path)"],
+      "problemMatcher": []
+    },
+    {
+      "label": "QA: Analyze + Full Test (stora ändringar)",
+      "dependsOrder": "sequence",
+      "dependsOn": ["QA: Analyze", "QA: Test (alla)"],
+      "problemMatcher": []
+    }
+  ]
+}
