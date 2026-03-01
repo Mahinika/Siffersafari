@@ -33,6 +33,11 @@ migrate_working_dir/
 # Local design exports / experiments
 assets/images/app_logo_ideas/
 
+# Local generated backups / image seeds (keep out of git)
+assets/sounds/*.wav.backup_*
+assets/images/themes/**/**/*_prev_*.png
+assets/images/themes/**/*seed*.png
+
 # Symbolication related
 app.*.symbols
 
