@@ -94,6 +94,8 @@ Det finns även VS Code tasks som använder samma flöde.
 
 ### Rekommenderad QA-rutin (före commit/push)
 
+Tips: samma QA-flöde finns som VS Code-tasks i `.vscode/tasks.json` (se även `CONTRIBUTING.md`).
+
 ```bash
 # 1) Statisk analys
 flutter analyze
