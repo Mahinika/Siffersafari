@@ -84,6 +84,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
     required OperationType operationType,
     required DifficultyLevel difficulty,
     Map<OperationType, int>? initialDifficultyStepsByOperation,
+    bool? wordProblemsEnabled,
   }) {
     final count = DifficultyConfig.getQuestionsPerSession(ageGroup);
 
@@ -95,12 +96,15 @@ class QuizNotifier extends StateNotifier<QuizState> {
           ),
     );
 
+    final effectiveWordProblemsEnabled = wordProblemsEnabled ?? true;
+
     final firstQuestion = _questionGenerator.generateQuestion(
       ageGroup: ageGroup,
       operationType: operationType,
       difficulty: difficulty,
       difficultyStepsByOperation: steps,
       gradeLevel: gradeLevel,
+      wordProblemsEnabledOverride: effectiveWordProblemsEnabled,
     );
 
     final session = QuizSession(
@@ -111,6 +115,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
       difficulty: difficulty,
       questions: [firstQuestion],
       targetQuestionCount: count,
+      wordProblemsEnabled: effectiveWordProblemsEnabled,
       difficultyStepsByOperation: steps,
       startTime: DateTime.now(),
     );
@@ -133,8 +138,11 @@ class QuizNotifier extends StateNotifier<QuizState> {
     required AgeGroup ageGroup,
     int? gradeLevel,
     Map<OperationType, int>? initialDifficultyStepsByOperation,
+    bool? wordProblemsEnabled,
   }) {
     if (questions.isEmpty) return;
+
+    final effectiveWordProblemsEnabled = wordProblemsEnabled ?? true;
 
     final steps = Map<OperationType, int>.unmodifiable(
       initialDifficultyStepsByOperation ??
@@ -152,6 +160,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
       difficulty: difficulty,
       questions: questions,
       targetQuestionCount: questions.length,
+      wordProblemsEnabled: effectiveWordProblemsEnabled,
       difficultyStepsByOperation: steps,
       startTime: DateTime.now(),
     );
@@ -286,6 +295,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
         difficulty: session.difficulty,
         difficultyStepsByOperation: state.difficultyStepsByOperation,
         gradeLevel: session.gradeLevel,
+        wordProblemsEnabledOverride: session.wordProblemsEnabled,
       );
       updatedQuestions = [...updatedQuestions, nextQuestion];
     }

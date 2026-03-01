@@ -121,6 +121,8 @@ class _FakeQuestionGeneratorService extends QuestionGeneratorService {
     Map<OperationType, int>? difficultyStepsByOperation,
     int? difficultyStep,
     int? gradeLevel,
+    bool? wordProblemsEnabledOverride,
+    double? wordProblemsChanceOverride,
   }) {
     return _question;
   }

@@ -68,16 +68,23 @@ class QuestionGeneratorService {
     Map<OperationType, int>? difficultyStepsByOperation,
     int? difficultyStep,
     int? gradeLevel,
+    bool? wordProblemsEnabledOverride,
+    double? wordProblemsChanceOverride,
   }) {
+    final wordProblemsEnabled =
+        wordProblemsEnabledOverride ?? _wordProblemsEnabled;
+    final wordProblemsChance =
+        wordProblemsChanceOverride ?? _wordProblemsChance;
+
     final operation = operationType == OperationType.mixed
         ? _getRandomOperation()
         : operationType;
 
-    final shouldTryWordProblem = _wordProblemsEnabled &&
+    final shouldTryWordProblem = wordProblemsEnabled &&
         gradeLevel != null &&
         gradeLevel >= 1 &&
         gradeLevel <= 3 &&
-        _random.nextDouble() < _wordProblemsChance &&
+        _random.nextDouble() < wordProblemsChance &&
         (operation == OperationType.addition ||
             operation == OperationType.subtraction);
 

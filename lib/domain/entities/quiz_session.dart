@@ -15,6 +15,7 @@ class QuizSession extends Equatable {
     required this.difficulty,
     required this.questions,
     required this.targetQuestionCount,
+    this.wordProblemsEnabled = true,
     this.difficultyStepsByOperation = const {},
     this.currentQuestionIndex = 0,
     this.correctAnswers = 0,
@@ -33,6 +34,12 @@ class QuizSession extends Equatable {
   final DifficultyLevel difficulty;
   final List<Question> questions;
   final int targetQuestionCount;
+
+  /// Whether short word problems can be generated during this session.
+  ///
+  /// This is controlled by the parent (PIN) and is applied when the next
+  /// question is generated lazily.
+  final bool wordProblemsEnabled;
 
   /// Internal per-operation difficulty steps (e.g. 1..10).
   ///
@@ -91,6 +98,7 @@ class QuizSession extends Equatable {
     DifficultyLevel? difficulty,
     List<Question>? questions,
     int? targetQuestionCount,
+    bool? wordProblemsEnabled,
     Map<OperationType, int>? difficultyStepsByOperation,
     int? currentQuestionIndex,
     int? correctAnswers,
@@ -109,6 +117,7 @@ class QuizSession extends Equatable {
       difficulty: difficulty ?? this.difficulty,
       questions: questions ?? this.questions,
       targetQuestionCount: targetQuestionCount ?? this.targetQuestionCount,
+      wordProblemsEnabled: wordProblemsEnabled ?? this.wordProblemsEnabled,
       difficultyStepsByOperation:
           difficultyStepsByOperation ?? this.difficultyStepsByOperation,
       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
@@ -131,6 +140,7 @@ class QuizSession extends Equatable {
         difficulty,
         questions,
         targetQuestionCount,
+        wordProblemsEnabled,
         difficultyStepsByOperation,
         currentQuestionIndex,
         correctAnswers,

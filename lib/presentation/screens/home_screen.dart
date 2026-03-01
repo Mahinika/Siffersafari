@@ -8,6 +8,7 @@ import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
+import '../../core/providers/word_problems_settings_provider.dart';
 import '../../core/utils/page_transitions.dart';
 import '../../data/repositories/local_storage_repository.dart';
 import '../../domain/entities/user_progress.dart';
@@ -101,12 +102,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       defaultDifficulty: effectiveDifficulty,
     );
 
+    final repo = getIt<LocalStorageRepository>();
+    final rawWordProblemsEnabled = repo.getSetting(
+      wordProblemsEnabledKey(user.userId),
+      defaultValue: true,
+    );
+    final wordProblemsEnabled =
+        rawWordProblemsEnabled is bool ? rawWordProblemsEnabled : true;
+
     ref.read(quizProvider.notifier).startSession(
           ageGroup: effectiveAgeGroup,
           gradeLevel: user.gradeLevel,
           operationType: operationType,
           difficulty: effectiveDifficulty,
           initialDifficultyStepsByOperation: steps,
+          wordProblemsEnabled: wordProblemsEnabled,
         );
 
     context.pushSmooth(const QuizScreen());

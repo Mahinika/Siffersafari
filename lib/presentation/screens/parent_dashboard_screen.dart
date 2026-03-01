@@ -6,6 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/user_provider.dart';
+import '../../core/providers/word_problems_settings_provider.dart';
 import '../../data/repositories/local_storage_repository.dart';
 import '../../domain/enums/operation_type.dart';
 import '../widgets/themed_background_scaffold.dart';
@@ -88,6 +89,10 @@ class _DashboardBody extends ConsumerWidget {
     settingsNotifier.ensureLoaded(userId);
     final allowedOps =
         ref.watch(parentSettingsProvider)[userId] ?? _defaultAllowedOps();
+
+    final wordProblemsEnabled = ref.watch(wordProblemsEnabledProvider(userId));
+    final wordProblemsNotifier =
+        ref.read(wordProblemsEnabledProvider(userId).notifier);
 
     return ListView(
       children: [
@@ -182,6 +187,28 @@ class _DashboardBody extends ConsumerWidget {
                 ),
               ),
               const Divider(height: 1),
+              SwitchListTile(
+                title: Text(
+                  'Textuppgifter',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: mutedOnPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                subtitle: Text(
+                  'Ibland visas en kort text istället för bara tal (Åk 1–3, +/−).',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: subtleOnPrimary,
+                      ),
+                ),
+                value: wordProblemsEnabled,
+                activeThumbColor: accentColor,
+                activeTrackColor: accentColor.withValues(alpha: 0.35),
+                onChanged: (value) {
+                  wordProblemsNotifier.setEnabled(value);
+                },
+              ),
+              const Divider(height: 1),
               ..._baseOps().map((op) {
                 final isOn = allowedOps.contains(op);
                 final canTurnOff = allowedOps.length > 1;
@@ -225,8 +252,9 @@ class _DashboardBody extends ConsumerWidget {
               const SizedBox(height: AppConstants.smallPadding),
               if (user.gradeLevel == null)
                 Padding(
-                  padding:
-                      const EdgeInsets.only(bottom: AppConstants.defaultPadding),
+                  padding: const EdgeInsets.only(
+                    bottom: AppConstants.defaultPadding,
+                  ),
                   child: Text(
                     'Sätt Årskurs (Åk) för att få en enkel Under/I linje/Över-indikator.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -237,8 +265,9 @@ class _DashboardBody extends ConsumerWidget {
                 )
               else
                 Padding(
-                  padding:
-                      const EdgeInsets.only(bottom: AppConstants.defaultPadding),
+                  padding: const EdgeInsets.only(
+                    bottom: AppConstants.defaultPadding,
+                  ),
                   child: _BenchmarkSection(
                     userId: user.userId,
                     gradeLevel: user.gradeLevel!,
@@ -600,7 +629,8 @@ class _BenchmarkSection extends ConsumerWidget {
       final currentStep = DifficultyConfig.clampDifficultyStep(
         currentStoredSteps[op.name] ?? 2,
       );
-      final nextStep = DifficultyConfig.clampDifficultyStep(currentStep + delta);
+      final nextStep =
+          DifficultyConfig.clampDifficultyStep(currentStep + delta);
       if (nextStep == currentStep) return;
 
       final updatedSteps = {
@@ -608,9 +638,9 @@ class _BenchmarkSection extends ConsumerWidget {
         op.name: nextStep,
       };
 
-      await ref
-          .read(userProvider.notifier)
-          .saveUser(currentUser.copyWith(operationDifficultySteps: updatedSteps));
+      await ref.read(userProvider.notifier).saveUser(
+            currentUser.copyWith(operationDifficultySteps: updatedSteps),
+          );
     }
 
     return Column(
@@ -651,9 +681,8 @@ class _BenchmarkSection extends ConsumerWidget {
                   operation: op,
                   difficultyStep: step,
                 );
-          final currentStep = step == null
-              ? null
-              : DifficultyConfig.clampDifficultyStep(step);
+          final currentStep =
+              step == null ? null : DifficultyConfig.clampDifficultyStep(step);
           final avg = _averageSuccessRate(latest);
           final recommendedStep = currentStep == null
               ? null
@@ -706,10 +735,11 @@ class _BenchmarkSection extends ConsumerWidget {
                         if (currentStep != null && recommendedStep != null)
                           Text(
                             'Nu: Steg $currentStep • Rekommenderat (85%): Steg $recommendedStep',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: subtleOnPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: subtleOnPrimary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                           ),
                         const SizedBox(height: 6),
                         Row(

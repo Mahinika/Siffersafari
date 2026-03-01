@@ -10,7 +10,9 @@ import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
+import '../../core/providers/word_problems_settings_provider.dart';
 import '../../core/services/audio_service.dart';
+import '../../data/repositories/local_storage_repository.dart';
 import '../../domain/entities/question.dart';
 import '../../domain/entities/quiz_session.dart';
 import '../../domain/enums/operation_type.dart';
@@ -364,12 +366,22 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                         defaultDifficulty: effectiveDifficulty,
                       );
 
+                      final repo = getIt<LocalStorageRepository>();
+                      final rawWordProblemsEnabled = repo.getSetting(
+                        wordProblemsEnabledKey(user.userId),
+                        defaultValue: true,
+                      );
+                      final wordProblemsEnabled = rawWordProblemsEnabled is bool
+                          ? rawWordProblemsEnabled
+                          : true;
+
                       ref.read(quizProvider.notifier).startSession(
                             ageGroup: effectiveAgeGroup,
                             gradeLevel: user.gradeLevel,
                             operationType: session.operationType,
                             difficulty: effectiveDifficulty,
                             initialDifficultyStepsByOperation: steps,
+                            wordProblemsEnabled: wordProblemsEnabled,
                           );
 
                       Navigator.of(context).pushAndRemoveUntil(
@@ -435,6 +447,15 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                         defaultDifficulty: effectiveDifficulty,
                       );
 
+                      final repo = getIt<LocalStorageRepository>();
+                      final rawWordProblemsEnabled = repo.getSetting(
+                        wordProblemsEnabledKey(user.userId),
+                        defaultValue: true,
+                      );
+                      final wordProblemsEnabled = rawWordProblemsEnabled is bool
+                          ? rawWordProblemsEnabled
+                          : true;
+
                       final count = DifficultyConfig.getQuestionsPerSession(
                         effectiveAgeGroup,
                       );
@@ -452,6 +473,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                               operationType: session.operationType,
                               difficulty: effectiveDifficulty,
                               initialDifficultyStepsByOperation: steps,
+                              wordProblemsEnabled: wordProblemsEnabled,
                             );
                       } else {
                         ref.read(quizProvider.notifier).startCustomSession(
@@ -461,6 +483,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                               ageGroup: effectiveAgeGroup,
                               gradeLevel: user.gradeLevel,
                               initialDifficultyStepsByOperation: steps,
+                              wordProblemsEnabled: wordProblemsEnabled,
                             );
                       }
 
