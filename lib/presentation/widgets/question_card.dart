@@ -53,47 +53,68 @@ class QuestionCard extends StatelessWidget {
               ),
             ],
           ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (!isEquationPrompt) ...[
-                  Text(
-                    question.operationType.symbol,
-                    style: (isWordProblem
-                            ? Theme.of(context).textTheme.displayMedium
-                            : Theme.of(context).textTheme.displayLarge)
-                        ?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: questionTextColor ?? scheme.onSurface,
-                    ),
-                  ),
-                  SizedBox(height: AppConstants.defaultPadding.h),
-                ],
-                Text(
-                  question.questionText,
-                  style: (isWordProblem
-                          ? Theme.of(context).textTheme.headlineSmall
-                          : Theme.of(context).textTheme.displayLarge)
-                      ?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: questionTextColor ?? scheme.onSurface,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: isWordProblem ? 4 : 1,
-                  overflow:
-                      isWordProblem ? TextOverflow.visible : TextOverflow.fade,
-                ),
-                SizedBox(height: AppConstants.smallPadding.h),
-                Text(
-                  'Vad blir resultatet?',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: subtitleTextColor ??
-                            scheme.onSurface.withValues(alpha: 0.70),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // On some layouts (short cards / smaller devices), large typography
+              // can overflow vertically. Keep the same UI but scale down styles
+              // slightly when height is tight.
+              final compact = constraints.maxHeight < 210;
+
+              final symbolStyle = (isWordProblem || compact)
+                  ? Theme.of(context).textTheme.displayMedium
+                  : Theme.of(context).textTheme.displayLarge;
+
+              final questionStyle = isWordProblem
+                  ? Theme.of(context).textTheme.headlineSmall
+                  : (compact
+                      ? Theme.of(context).textTheme.headlineLarge
+                      : Theme.of(context).textTheme.displayLarge);
+
+              final symbolGap = compact
+                  ? AppConstants.smallPadding.h
+                  : AppConstants.defaultPadding.h;
+
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (!isEquationPrompt) ...[
+                      Text(
+                        question.operationType.symbol,
+                        style: symbolStyle?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: questionTextColor ?? scheme.onSurface,
+                        ),
                       ),
+                      SizedBox(height: symbolGap),
+                    ],
+                    Text(
+                      question.questionText,
+                      style: questionStyle?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: questionTextColor ?? scheme.onSurface,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: isWordProblem ? 4 : 1,
+                      overflow: isWordProblem
+                          ? TextOverflow.ellipsis
+                          : TextOverflow.fade,
+                    ),
+                    SizedBox(height: AppConstants.smallPadding.h),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Vad blir resultatet?',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: subtitleTextColor ??
+                                  scheme.onSurface.withValues(alpha: 0.70),
+                            ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
