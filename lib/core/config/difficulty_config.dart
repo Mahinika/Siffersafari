@@ -226,6 +226,20 @@ class DifficultyConfig {
     final t =
         (step - minDifficultyStep) / (maxDifficultyStep - minDifficultyStep);
 
+    // For Åk 4–6 (+/−) we use a step-table to avoid big "jumps".
+    // A pure linear interpolation up to 10 000 / 100 000 becomes too steep.
+    if (grade >= 4 && grade <= 6) {
+      if (operationType == OperationType.addition ||
+          operationType == OperationType.subtraction) {
+        final maxVal = switch (grade) {
+          4 => const <int>[20, 50, 100, 200, 500, 1000, 2000, 4000, 7000, 10000],
+          5 => const <int>[50, 100, 200, 500, 1000, 2000, 5000, 10000, 30000, 100000],
+          _ => const <int>[100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000],
+        }[step - 1];
+        return NumberRange(0, maxVal);
+      }
+    }
+
     int cap;
     switch (operationType) {
       case OperationType.addition:
@@ -236,6 +250,7 @@ class DifficultyConfig {
           3 => 1000,
           4 => 10000,
           5 => 100000,
+          6 => 100000,
           _ => 1000000,
         };
       case OperationType.multiplication:
@@ -276,9 +291,9 @@ class DifficultyConfig {
 
     final startMax = switch (operationType) {
       OperationType.addition || OperationType.subtraction => 10,
-      OperationType.multiplication || OperationType.division => grade >= 4
-          ? 10
-          : 5,
+      OperationType.multiplication ||
+      OperationType.division =>
+        grade >= 4 ? 10 : 5,
       _ => 5,
     };
 

@@ -7,6 +7,32 @@ import 'package:math_game_app/domain/enums/age_group.dart';
 import 'package:math_game_app/domain/enums/difficulty_level.dart';
 import 'package:math_game_app/domain/enums/operation_type.dart';
 
+bool _hasCarry(int a, int b) {
+  var x = a;
+  var y = b;
+  while (x > 0 || y > 0) {
+    if ((x % 10) + (y % 10) >= 10) return true;
+    x ~/= 10;
+    y ~/= 10;
+  }
+  return false;
+}
+
+bool _hasBorrow(int a, int b) {
+  var x = a;
+  var y = b;
+  var borrow = 0;
+  while (x > 0 || y > 0) {
+    final da = (x % 10) - borrow;
+    final db = y % 10;
+    if (da < db) return true;
+    borrow = da < db ? 1 : 0;
+    x ~/= 10;
+    y ~/= 10;
+  }
+  return false;
+}
+
 void main() {
   group('QuestionGeneratorService', () {
     late QuestionGeneratorService service;
@@ -91,8 +117,7 @@ void main() {
       );
     });
 
-    test('M3 (Åk 4–6): multiplikation step<=6 har alltid en tabell-faktor',
-        () {
+    test('M3 (Åk 4–6): multiplikation step<=6 har alltid en tabell-faktor', () {
       final seeded = QuestionGeneratorService(random: Random(1));
 
       final question = seeded.generateQuestion(
@@ -103,8 +128,9 @@ void main() {
         difficultyStep: 6,
       );
 
-      final minFactor =
-          question.operand1 < question.operand2 ? question.operand1 : question.operand2;
+      final minFactor = question.operand1 < question.operand2
+          ? question.operand1
+          : question.operand2;
       expect(minFactor, lessThanOrEqualTo(12));
       expect(minFactor, greaterThanOrEqualTo(1));
     });
@@ -124,6 +150,226 @@ void main() {
       expect(question.operand2, greaterThanOrEqualTo(1));
       expect(question.operand1 % question.operand2, 0);
       expect(question.correctAnswer, question.operand1 ~/ question.operand2);
+    });
+
+    test('M3 (Åk 4–6): addition step<=3 undviker växling (carry)', () {
+      final seeded = QuestionGeneratorService(random: Random(3));
+
+      final question = seeded.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.addition,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 4,
+        difficultyStep: 3,
+      );
+
+      expect(_hasCarry(question.operand1, question.operand2), isFalse);
+    });
+
+    test('M3 (Åk 4–6): addition step>=8 kräver växling (carry)', () {
+      final seeded = QuestionGeneratorService(random: Random(4));
+
+      final question = seeded.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.addition,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 5,
+        difficultyStep: 8,
+      );
+
+      expect(_hasCarry(question.operand1, question.operand2), isTrue);
+    });
+
+    test('M3 (Åk 4–6): subtraktion step<=3 undviker växling (borrow)', () {
+      final seeded = QuestionGeneratorService(random: Random(5));
+
+      final question = seeded.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.subtraction,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 6,
+        difficultyStep: 3,
+      );
+
+      final a = question.operand1 >= question.operand2
+          ? question.operand1
+          : question.operand2;
+      final b = question.operand1 >= question.operand2
+          ? question.operand2
+          : question.operand1;
+      expect(_hasBorrow(a, b), isFalse);
+    });
+
+    test('M3 (Åk 4–6): subtraktion step>=8 kräver växling (borrow)', () {
+      final seeded = QuestionGeneratorService(random: Random(6));
+
+      final question = seeded.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.subtraction,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 4,
+        difficultyStep: 9,
+      );
+
+      final a = question.operand1 >= question.operand2
+          ? question.operand1
+          : question.operand2;
+      final b = question.operand1 >= question.operand2
+          ? question.operand2
+          : question.operand1;
+      expect(_hasBorrow(a, b), isTrue);
+    });
+
+    test('M3 (Åk 4–6): multiplikation step10 har alltid en tabell-faktor', () {
+      final seeded = QuestionGeneratorService(random: Random(7));
+
+      final question = seeded.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.multiplication,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 6,
+        difficultyStep: 10,
+      );
+
+      final minFactor = question.operand1 < question.operand2
+          ? question.operand1
+          : question.operand2;
+      expect(minFactor, lessThanOrEqualTo(12));
+      expect(minFactor, greaterThanOrEqualTo(1));
+    });
+
+    test('M3 (Åk 4–6): division step10 har liten divisor och inget rest', () {
+      final seeded = QuestionGeneratorService(random: Random(8));
+
+      final question = seeded.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.division,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 6,
+        difficultyStep: 10,
+      );
+
+      expect(question.operand2, lessThanOrEqualTo(12));
+      expect(question.operand2, greaterThanOrEqualTo(1));
+      expect(question.operand1 % question.operand2, 0);
+      expect(question.correctAnswer, question.operand1 ~/ question.operand2);
+    });
+
+    test('M4 (Åk 4–6): Mix kan generera statistikfråga (prompt med "=")', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(9),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 300; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 4,
+          difficultyStep: 5,
+        );
+
+        final prompt = q.promptText;
+        if (prompt == null) continue;
+        if (prompt.startsWith('Median') ||
+            prompt.startsWith('Typvärde') ||
+            prompt.startsWith('Medelvärde')) {
+          expect(prompt, contains('= ?'));
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M4 (Åk 4–6): Medelvärde-uppgift ger alltid heltalssvar', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(10),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? meanPrompt;
+      int? meanAnswer;
+      for (var i = 0; i < 600; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 6,
+          difficultyStep: 9,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Medelvärde')) {
+          meanPrompt = prompt;
+          meanAnswer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(meanPrompt, isNotNull);
+      expect(meanAnswer, isNotNull);
+
+      final match = RegExp(r'Talen: ([0-9, ]+)').firstMatch(meanPrompt!);
+      expect(match, isNotNull);
+
+      final numbers = match!
+          .group(1)!
+          .split(',')
+          .map((s) => int.parse(s.trim()))
+          .toList();
+
+      final sum = numbers.fold<int>(0, (acc, v) => acc + v);
+      expect(sum % numbers.length, 0);
+      expect(meanAnswer, sum ~/ numbers.length);
+    });
+
+    test('M4 (Åk 4–6): Variationsbredd-uppgift ger max-min', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(11),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 600; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 5,
+          difficultyStep: 10,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Variationsbredd')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+
+      final match = RegExp(r'Talen: ([0-9, ]+)').firstMatch(prompt!);
+      expect(match, isNotNull);
+
+      final numbers = match!
+          .group(1)!
+          .split(',')
+          .map((s) => int.parse(s.trim()))
+          .toList();
+
+      final minVal = numbers.reduce((a, b) => a < b ? a : b);
+      final maxVal = numbers.reduce((a, b) => a > b ? a : b);
+      expect(answer, maxVal - minVal);
     });
 
     test('Unit (QuestionGeneratorService): respekterar talintervall för young',

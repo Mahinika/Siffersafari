@@ -210,6 +210,52 @@ void main() {
     });
   });
 
+  group('DifficultyConfig.curriculumNumberRangeForStep (M3 Åk 4–6)', () {
+    test('Åk 4 (+): step-tabell är monotont ökande och slutar på 10 000', () {
+      final maxByStep = List<int>.generate(
+        10,
+        (i) => DifficultyConfig.curriculumNumberRangeForStep(
+          gradeLevel: 4,
+          operationType: OperationType.addition,
+          difficultyStep: i + 1,
+        ).max,
+      );
+
+      expect(maxByStep.first, 20);
+      expect(maxByStep.last, 10000);
+      for (var i = 1; i < maxByStep.length; i++) {
+        expect(maxByStep[i], greaterThanOrEqualTo(maxByStep[i - 1]));
+      }
+    });
+
+    test('Åk 5 (−): step-tabell är monotont ökande och slutar på 100 000', () {
+      final maxByStep = List<int>.generate(
+        10,
+        (i) => DifficultyConfig.curriculumNumberRangeForStep(
+          gradeLevel: 5,
+          operationType: OperationType.subtraction,
+          difficultyStep: i + 1,
+        ).max,
+      );
+
+      expect(maxByStep.first, 50);
+      expect(maxByStep.last, 100000);
+      for (var i = 1; i < maxByStep.length; i++) {
+        expect(maxByStep[i], greaterThanOrEqualTo(maxByStep[i - 1]));
+      }
+    });
+
+    test('Åk 6 (+): step-tabell slutar på 100 000', () {
+      final range = DifficultyConfig.curriculumNumberRangeForStep(
+        gradeLevel: 6,
+        operationType: OperationType.addition,
+        difficultyStep: 10,
+      );
+
+      expect(range.max, 100000);
+    });
+  });
+
   group('DifficultyConfig.effectiveAgeGroup', () {
     test('använder fallback när gradeLevel saknas', () {
       expect(
@@ -379,8 +425,7 @@ void main() {
       expect(r6.max, 299);
     });
 
-    test('division skalar upp men hålls mer konservativ än multiplikation',
-        () {
+    test('division skalar upp men hålls mer konservativ än multiplikation', () {
       final r4 = DifficultyConfig.curriculumNumberRangeForStep(
         gradeLevel: 4,
         operationType: OperationType.division,
