@@ -22,6 +22,32 @@ utan att bygga om appen i ett steg.
 - **Föräldern har sista ordet**: förälderns val av räknesätt begränsar alltid.
 - **Fallback**: om Åk saknas eller data saknas → använd nuvarande logik.
 
+## Källor (Skolverket)
+- Lgr22 (grundskolan, webbvisning):
+  - https://www.skolverket.se/undervisning/grundskolan/laroplan-lgr22-for-grundskolan-samt-for-forskoleklassen-och-fritidshemmet
+  - (Sidan anger även “Läroplan gäller från 2025-08-01”.)
+- Kursplan i matematik (grundskolan, ämneskod `GRGRMAT01`, webbvisning):
+  - https://www.skolverket.se/undervisning/grundskolan/laroplan-lgr22-for-grundskolan-samt-for-forskoleklassen-och-fritidshemmet#/curriculums/LGR22/GRGRMAT01?schoolType=GR&tosHeading=Kursplaner#GRGRMAT01
+  - (Sidan anger även “Ämne gäller från 2022-07-01”.)
+- Kommentarmaterial till kursplanen i matematik – grundskolan (publikationssida):
+  - https://www.skolverket.se/publikationer?id=9790
+- Kommentarmaterial (översiktssida):
+  - https://www.skolverket.se/undervisning/grundskolan/kommentarmaterial-till-grundskolan
+
+## Kursplanens struktur (hur vi mappar till appen)
+- Skolverkets kursplan för matematik är uppbyggd som:
+  - **Ämnets syfte** (inkl. en lista över centrala förmågor, t.ex. begrepp, metoder, problemlösning, resonemang och uttrycksformer).
+  - **Centralt innehåll** uppdelat per stadie: **Åk 1–3**, **Åk 4–6**, **Åk 7–9**.
+    - Återkommande innehållsområden: *Taluppfattning och tals användning*, *Algebra*, *Geometri*, *Sannolikhet och statistik*, *Samband och förändring*, *Problemlösning*.
+    - Det finns också inslag av **digitala verktyg** och **programmering/stegvisa instruktioner** i centralt innehåll.
+  - **Kriterier/betygskriterier** i slutet av **Åk 3**, **Åk 6**, **Åk 9**.
+- Vår plan använder Åk som **guide** för vilka tal/strategier som är rimliga, men vi låter alltid förälderns val överstyra (som idag).
+- Roadmap-mapping:
+  - **M1/M2** ≈ börja täcka centralt innehåll Åk 1–3 för de delar som passar vår nuvarande quiz-form (tal, räknesätt, enkla mönster/likheter, enkel problemlösning).
+  - **M3** ≈ skala upp mot centralt innehåll Åk 4–6 (t.ex. större tal, bråk/decimal/procent, fler strategier).
+  - **M4/M5b** ≈ de delar som behöver ny representation/UI (t.ex. geometri, grafer/diagram).
+  - **M5a** ≈ sådant som kan visas som text + svar (t.ex. negativa tal, procent, potenser).
+
 ## Definitioner (så vi pratar samma språk)
 - **Åk-styrning**: används för att välja talområde + regler för vilka tal som är “bra” att träna.
 - **Intern step (1–10)**: vår finare skala per räknesätt som redan finns (adaptiv svårighet).
@@ -61,6 +87,7 @@ utan att bygga om appen i ett steg.
   - Åk 1: mer 0–10, 0–20, tiokompisar, 10−x.
   - Åk 2: 0–100, undvik tiotalsövergång tidigt, introducera gradvis.
   - Åk 3: 0–1000 för +/−, tabeller som fokus.
+- Kursplan-koppling (Skolverket): primärt *Taluppfattning och tals användning* + delar av *Algebra* (likhet/mönster) + *Problemlösning* i Åk 1–3. (Geometri/statistik kan komma senare som egna moduler i M4.)
 - Acceptance:
   - 95% av frågor i Åk 1 ligger inom 0–20 för +/− (tidiga steps).
   - Tiokompisar dyker upp "ofta nog" men inte alltid.
@@ -86,6 +113,7 @@ utan att bygga om appen i ett steg.
   - större spann (+/− upp till 10 000 / 100 000), mer växling.
   - ×/÷: tvåsiffrigt gånger ensiffrigt, division med rest (om vi vill).
 - Obs: division med rest kräver beslut om svar-format (heltal + rest).
+- Kursplan-koppling (Skolverket): centralt innehåll Åk 4–6 inkluderar bl.a. bråk/decimal/procent, koordinatsystem/grafer, statistik (medelvärde/median/typvärde) och programmering i visuella miljöer. Vi tar detta stegvis och håller oss till quiz-format där det går.
 - Acceptance:
   - Talområde skalar upp utan att skapa “hopp” (step 1–10 känns jämn).
   - Division med rest är antingen avstängt eller har tydligt svar-format.
@@ -119,6 +147,8 @@ utan att bygga om appen i ett steg.
 - Acceptance:
   - M5a: kan köras i quizflödet utan ny skärm.
   - M5b: varje modul har egen minimal rendering + enhetstester.
+
+> Notis: I Skolverkets centrala innehåll Åk 7–9 finns även programmering (visuell och textbaserad) samt mer fokus på funktioner, förändringstakt och modeller. Det matchar väl med att vi delar M5 i “text funkar” (M5a) och “kräver visualisering” (M5b).
 
 ## Mätetal (enkla och lokala)
 - **Range compliance:** andel frågor inom förväntat talområde per Åk/operation/step.
