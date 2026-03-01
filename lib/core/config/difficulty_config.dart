@@ -214,8 +214,10 @@ class DifficultyConfig {
   /// - Åk2: within 0–100 for +/−, and small ×/÷ if enabled by parent.
   /// - Åk3: within 0–1000 for +/−, and times tables.
   ///
-  /// Higher grades are mapped to larger caps, but the app currently generates
-  /// integer-only arithmetic (no negatives/decimals/bråk yet).
+  /// Higher grades are mapped to larger caps.
+  ///
+  /// Note: M5a-start är påbörjad för Åk 7–9 (+/−) med negativa heltal i
+  /// generatorn. Bråk/decimaler hanteras fortfarande inte i kärnflödet.
   static NumberRange curriculumNumberRangeForStep({
     required int gradeLevel,
     required OperationType operationType,
@@ -232,9 +234,42 @@ class DifficultyConfig {
       if (operationType == OperationType.addition ||
           operationType == OperationType.subtraction) {
         final maxVal = switch (grade) {
-          4 => const <int>[20, 50, 100, 200, 500, 1000, 2000, 4000, 7000, 10000],
-          5 => const <int>[50, 100, 200, 500, 1000, 2000, 5000, 10000, 30000, 100000],
-          _ => const <int>[100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000],
+          4 => const <int>[
+              20,
+              50,
+              100,
+              200,
+              500,
+              1000,
+              2000,
+              4000,
+              7000,
+              10000,
+            ],
+          5 => const <int>[
+              50,
+              100,
+              200,
+              500,
+              1000,
+              2000,
+              5000,
+              10000,
+              30000,
+              100000,
+            ],
+          _ => const <int>[
+              100,
+              200,
+              500,
+              1000,
+              2000,
+              5000,
+              10000,
+              20000,
+              50000,
+              100000,
+            ],
         }[step - 1];
         return NumberRange(0, maxVal);
       }

@@ -11,6 +11,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'core/constants/app_constants.dart';
 import 'core/di/injection.dart';
 import 'core/providers/app_theme_provider.dart';
+import 'core/theme/app_theme_config.dart';
+import 'domain/enums/app_theme.dart';
 import 'presentation/screens/app_entry_screen.dart';
 
 Future<void> main() async {
@@ -38,34 +40,63 @@ Future<void> main() async {
     }).sendPort,
   );
 
-  String? bootstrapError;
+  // Register services/repositories up front so providers (e.g. theme) can
+  // resolve GetIt dependencies during the first build.
+  // Hive boxes are opened later in [_initializeAsync].
+  await _measureAsync(
+    'initializeDependencies(initializeHive: false)',
+    () => initializeDependencies(initializeHive: false),
+  );
+
+  final initCompleter = Completer<String?>();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Important: run heavy init *after* the first frame has fully rasterized.
+    // A post-frame callback still runs on the UI thread; by scheduling another
+    // task we avoid blocking first-frame rasterization.
+    Future<void>(() async {
+      try {
+        initCompleter.complete(await _initializeAsync());
+      } catch (e, st) {
+        debugPrint('Deferred initialization failed: $e');
+        debugPrintStack(stackTrace: st);
+        initCompleter.complete(e.toString());
+      }
+    });
+  });
+
+  // Show app immediately with loading indicator while Hive boxes open in background
+  runApp(
+    ProviderScope(
+      child: MathGameApp(
+        initFuture: initCompleter.future,
+      ),
+    ),
+  );
+}
+
+Future<String?> _initializeAsync() async {
   try {
     await _measureAsync('Hive.initFlutter', () => Hive.initFlutter());
+
     await _measureAsync(
       'initializeDependencies(openQuizHistoryBox: false)',
       () => initializeDependencies(openQuizHistoryBox: false),
     );
-  } catch (e, st) {
-    bootstrapError = e.toString();
-    debugPrint('Bootstrap failed: $e');
-    debugPrintStack(stackTrace: st);
-  }
 
-  runApp(
-    ProviderScope(
-      child: MathGameApp(
-        bootstrapError: bootstrapError,
-      ),
-    ),
-  );
-
-  if (bootstrapError == null) {
-    // Open the potentially large history box in the background.
+    // Open quiz_history box after core dependencies (non-blocking)
     unawaited(
       _measureAsync('Hive.openBox(quiz_history)', () async {
         await Hive.openBox('quiz_history');
-      }).catchError((_) {}),
+      }).catchError((e) {
+        debugPrint('quiz_history box open failed: $e');
+      }),
     );
+
+    return null; // Success
+  } catch (e, st) {
+    debugPrint('Initialization failed: $e');
+    debugPrintStack(stackTrace: st);
+    return e.toString();
   }
 }
 
@@ -85,26 +116,49 @@ Future<T> _measureAsync<T>(String name, Future<T> Function() fn) async {
 }
 
 class MathGameApp extends ConsumerWidget {
-  const MathGameApp({super.key, required this.bootstrapError});
+  const MathGameApp({super.key, required this.initFuture});
 
-  final String? bootstrapError;
+  final Future<String?> initFuture;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final defaultTheme = AppThemeConfig.forTheme(AppTheme.space).themeData();
+
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        final theme = ref.watch(appThemeDataProvider);
+        return FutureBuilder<String?>(
+          future: initFuture,
+          builder: (context, snapshot) {
+            final isDone = snapshot.connectionState == ConnectionState.done;
+            final initError = isDone ? snapshot.data : null;
 
-        return MaterialApp(
-          title: 'Siffersafari',
-          debugShowCheckedModeBanner: false,
-          theme: theme,
-          home: bootstrapError == null
-              ? const AppEntryScreen()
-              : _BootstrapErrorScreen(error: bootstrapError!),
+            final theme = (isDone && initError == null)
+                ? ref.watch(appThemeDataProvider)
+                : defaultTheme;
+
+            final Widget home;
+            if (!isDone) {
+              home = const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            } else if (initError != null) {
+              home = _BootstrapErrorScreen(error: initError);
+            } else {
+              home = const AppEntryScreen();
+            }
+
+            return MaterialApp(
+              title: 'Siffersafari',
+              debugShowCheckedModeBanner: false,
+              theme: theme,
+              home: home,
+            );
+          },
         );
       },
     );

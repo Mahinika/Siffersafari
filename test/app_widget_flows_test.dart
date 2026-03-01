@@ -198,15 +198,35 @@ void main() {
       });
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MathGameApp(bootstrapError: null),
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
         ),
       );
 
-      // Let post-frame callbacks + first frame settle.
-      await pumpUntilFound(tester, find.text(AppConstants.appName));
+      // Boot shows a short loading state; wait for the first real Home UI.
+      await pumpUntilFound(
+        tester,
+        find.text('Skapa profil'),
+        timeout: const Duration(seconds: 8),
+      );
 
-      expect(find.text(AppConstants.appName), findsOneWidget);
+      final titleFinder = find.text(AppConstants.appName);
+      if (titleFinder.evaluate().isEmpty) {
+        final texts = tester
+            .widgetList<Text>(find.byType(Text))
+            .map((t) => t.data ?? t.textSpan?.toPlainText())
+            .whereType<String>()
+            .where((s) => s.trim().isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+        fail(
+          'Kunde inte hitta app-titeln "${AppConstants.appName}". '
+          'Tillgängliga texter: ${texts.take(80).toList()}',
+        );
+      }
+
+      expect(titleFinder, findsOneWidget);
     },
   );
 
@@ -238,8 +258,8 @@ void main() {
       await repository.saveUserProgress(user2);
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MathGameApp(bootstrapError: null),
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
         ),
       );
 
@@ -273,8 +293,8 @@ void main() {
       await repository.saveSetting('onboarding_done_$userId', true);
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MathGameApp(bootstrapError: null),
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
         ),
       );
 
@@ -350,8 +370,8 @@ void main() {
       await repository.saveSetting('onboarding_done_$userId', true);
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MathGameApp(bootstrapError: null),
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
         ),
       );
 
@@ -418,8 +438,8 @@ void main() {
       await repository.saveSetting('onboarding_done_$userId', true);
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MathGameApp(bootstrapError: null),
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
         ),
       );
 
@@ -484,8 +504,8 @@ void main() {
       await repository.saveSetting('onboarding_done_$userId', true);
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MathGameApp(bootstrapError: null),
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
         ),
       );
 
@@ -534,8 +554,8 @@ void main() {
       await pinService.setPin('1234');
 
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MathGameApp(bootstrapError: null),
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
         ),
       );
 
@@ -581,8 +601,8 @@ void main() {
 
       // First run: onboarding should appear.
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MathGameApp(bootstrapError: null),
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
         ),
       );
 
@@ -601,8 +621,8 @@ void main() {
 
       // Second run: onboarding should not be shown again.
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MathGameApp(bootstrapError: null),
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
         ),
       );
 

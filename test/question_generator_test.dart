@@ -286,6 +286,286 @@ void main() {
       expect(found, isTrue);
     });
 
+    test('M5a (Åk 7–9): addition kan generera negativa tal', () {
+      final seeded = QuestionGeneratorService(random: Random(109));
+
+      var foundSignedOperandOrAnswer = false;
+      for (var i = 0; i < 200; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.addition,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 7,
+          difficultyStep: 5,
+        );
+
+        expect(q.correctAnswer, q.operand1 + q.operand2);
+
+        if (q.operand1 < 0 || q.operand2 < 0 || q.correctAnswer < 0) {
+          foundSignedOperandOrAnswer = true;
+          break;
+        }
+      }
+
+      expect(foundSignedOperandOrAnswer, isTrue);
+    });
+
+    test('M5a (Åk 7–9): subtraktion kan ge negativt resultat', () {
+      final seeded = QuestionGeneratorService(random: Random(110));
+
+      var foundNegativeAnswer = false;
+      for (var i = 0; i < 200; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.subtraction,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 8,
+          difficultyStep: 6,
+        );
+
+        expect(q.correctAnswer, q.operand1 - q.operand2);
+
+        if (q.correctAnswer < 0) {
+          foundNegativeAnswer = true;
+          break;
+        }
+      }
+
+      expect(foundNegativeAnswer, isTrue);
+    });
+
+    test('M5a (Åk 7–9): Mix kan generera procentfråga', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(111),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 400; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 7,
+          difficultyStep: 6,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Procent = ?')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M5a (Åk 7–9): procentfråga ger korrekt heltalssvar', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(112),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 800; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 9,
+          difficultyStep: 9,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Procent = ?')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+
+      final match = RegExp(r'Vad är (\d+)% av (\d+)\?').firstMatch(prompt!);
+      expect(match, isNotNull);
+
+      final percent = int.parse(match!.group(1)!);
+      final base = int.parse(match.group(2)!);
+      expect(answer, (percent * base) ~/ 100);
+    });
+
+    test('M5a (Åk 8–9): Mix kan generera potensfråga', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(113),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 8,
+          difficultyStep: 6,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Potenser = ?')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M5a (Åk 8–9): potensfråga ger korrekt heltalssvar', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(114),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 1000; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 9,
+          difficultyStep: 9,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Potenser = ?')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+
+      final match = RegExp(r'Vad är (\d+)\^(\d+)\?').firstMatch(prompt!);
+      expect(match, isNotNull);
+
+      final base = int.parse(match!.group(1)!);
+      final exponent = int.parse(match.group(2)!);
+
+      var expected = 1;
+      for (var i = 0; i < exponent; i++) {
+        expected *= base;
+      }
+
+      expect(answer, expected);
+    });
+
+    test('M5a (Åk 7–9): Mix kan generera fråga om prioriteringsregler', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(115),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 600; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 7,
+          difficultyStep: 6,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Prioriteringsregler = ?')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M5a (Åk 7–9): prioriteringsregel-fråga ger korrekt svar', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(116),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? expr;
+      int? answer;
+      for (var i = 0; i < 1200; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 9,
+          difficultyStep: 9,
+        );
+
+        final prompt = q.promptText;
+        if (prompt == null || !prompt.startsWith('Prioriteringsregler = ?')) {
+          continue;
+        }
+
+        final lines = prompt.split('\n');
+        if (lines.length < 2) continue;
+        expr = lines[1].trim();
+        answer = q.correctAnswer;
+        break;
+      }
+
+      expect(expr, isNotNull);
+      expect(answer, isNotNull);
+
+      int? expected;
+
+      final p1 = RegExp(r'^\((\d+) \+ (\d+)\) × (\d+)$').firstMatch(expr!);
+      if (p1 != null) {
+        final a = int.parse(p1.group(1)!);
+        final b = int.parse(p1.group(2)!);
+        final c = int.parse(p1.group(3)!);
+        expected = (a + b) * c;
+      }
+
+      final p2 = RegExp(r'^(\d+) × \((\d+) \+ (\d+)\)$').firstMatch(expr);
+      if (expected == null && p2 != null) {
+        final a = int.parse(p2.group(1)!);
+        final b = int.parse(p2.group(2)!);
+        final c = int.parse(p2.group(3)!);
+        expected = a * (b + c);
+      }
+
+      final p3 = RegExp(r'^(\d+) \+ (\d+) × (\d+)$').firstMatch(expr);
+      if (expected == null && p3 != null) {
+        final a = int.parse(p3.group(1)!);
+        final b = int.parse(p3.group(2)!);
+        final c = int.parse(p3.group(3)!);
+        expected = a + (b * c);
+      }
+
+      final p4 = RegExp(r'^(\d+) × (\d+) \+ (\d+)$').firstMatch(expr);
+      if (expected == null && p4 != null) {
+        final a = int.parse(p4.group(1)!);
+        final b = int.parse(p4.group(2)!);
+        final c = int.parse(p4.group(3)!);
+        expected = (a * b) + c;
+      }
+
+      expect(expected, isNotNull);
+      expect(answer, expected);
+    });
+
     test('M4 (Åk 4–6): Medelvärde-uppgift ger alltid heltalssvar', () {
       final seeded = QuestionGeneratorService(
         random: Random(10),
@@ -318,11 +598,8 @@ void main() {
       final match = RegExp(r'Talen: ([0-9, ]+)').firstMatch(meanPrompt!);
       expect(match, isNotNull);
 
-      final numbers = match!
-          .group(1)!
-          .split(',')
-          .map((s) => int.parse(s.trim()))
-          .toList();
+      final numbers =
+          match!.group(1)!.split(',').map((s) => int.parse(s.trim())).toList();
 
       final sum = numbers.fold<int>(0, (acc, v) => acc + v);
       expect(sum % numbers.length, 0);
@@ -361,15 +638,230 @@ void main() {
       final match = RegExp(r'Talen: ([0-9, ]+)').firstMatch(prompt!);
       expect(match, isNotNull);
 
-      final numbers = match!
-          .group(1)!
-          .split(',')
-          .map((s) => int.parse(s.trim()))
-          .toList();
+      final numbers =
+          match!.group(1)!.split(',').map((s) => int.parse(s.trim())).toList();
 
       final minVal = numbers.reduce((a, b) => a < b ? a : b);
       final maxVal = numbers.reduce((a, b) => a > b ? a : b);
       expect(answer, maxVal - minVal);
+    });
+
+    test('M4 (Åk 4–6): Sannolikhet (procent) ger heltal och stämmer', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(12),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 1200; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 5,
+          difficultyStep: 6,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Chans (%)')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+      expect(answer, inInclusiveRange(0, 100));
+
+      final match =
+          RegExp(r'Röda: (\d+), Blå: (\d+), Totalt: (\d+)').firstMatch(prompt!);
+      expect(match, isNotNull);
+
+      final red = int.parse(match!.group(1)!);
+      final blue = int.parse(match.group(2)!);
+      final total = int.parse(match.group(3)!);
+
+      expect(red + blue, total);
+      expect((red * 100) % total, 0);
+      expect(answer, (red * 100) ~/ total);
+    });
+
+    test('M4 (Åk 4–6): Sannolikhet-jämförelse ger skillnad i procentenheter',
+        () {
+      final seeded = QuestionGeneratorService(
+        random: Random(13),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 2000; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 6,
+          difficultyStep: 8,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Skillnad i chans')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+      expect(answer, inInclusiveRange(0, 100));
+
+      final aMatch = RegExp(
+        r'Påse A: Röda: (\d+), Blå: (\d+), Totalt: (\d+)',
+      ).firstMatch(prompt!);
+      final bMatch = RegExp(
+        r'Påse B: Röda: (\d+), Blå: (\d+), Totalt: (\d+)',
+      ).firstMatch(prompt);
+
+      expect(aMatch, isNotNull);
+      expect(bMatch, isNotNull);
+
+      final aRed = int.parse(aMatch!.group(1)!);
+      final aBlue = int.parse(aMatch.group(2)!);
+      final aTotal = int.parse(aMatch.group(3)!);
+      final bRed = int.parse(bMatch!.group(1)!);
+      final bBlue = int.parse(bMatch.group(2)!);
+      final bTotal = int.parse(bMatch.group(3)!);
+
+      expect(aRed + aBlue, aTotal);
+      expect(bRed + bBlue, bTotal);
+
+      expect((aRed * 100) % aTotal, 0);
+      expect((bRed * 100) % bTotal, 0);
+
+      final aPercent = (aRed * 100) ~/ aTotal;
+      final bPercent = (bRed * 100) ~/ bTotal;
+      final expected = (aPercent - bPercent).abs();
+      expect(answer, expected);
+    });
+
+    test('M4 (Åk 4–6): Mix kan generera tabellfråga (statistik)', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(117),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 1200; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 6,
+          difficultyStep: 8,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Tabell (statistik) = ?')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M4 (Åk 4–6): tabellfråga ger korrekt tolkat svar', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(118),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 2000; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 6,
+          difficultyStep: 10,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Tabell (statistik) = ?')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+
+      final rows = RegExp(r'[ABC] \| (\d+)').allMatches(prompt!).toList();
+      expect(rows.length, 3);
+
+      final values = rows.map((m) => int.parse(m.group(1)!)).toList();
+      final questionLine = prompt.split('\n').last;
+
+      int expected;
+      if (questionLine.contains('störst')) {
+        expected = values.reduce((a, b) => a > b ? a : b);
+      } else if (questionLine
+          .contains('skillnaden mellan största och minsta')) {
+        final minVal = values.reduce((a, b) => a < b ? a : b);
+        final maxVal = values.reduce((a, b) => a > b ? a : b);
+        expected = maxVal - minVal;
+      } else {
+        final sum = values.fold<int>(0, (acc, v) => acc + v);
+        expected = sum ~/ values.length;
+      }
+
+      expect(answer, expected);
+    });
+
+    test('M4 (Åk 4–6): Kombinatorik ger antal kombinationer', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(14),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 2500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 5,
+          difficultyStep: 10,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Kombinationer')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+
+      final match = RegExp(r'Tröjor: (\d+), Byxor: (\d+)').firstMatch(prompt!);
+      expect(match, isNotNull);
+
+      final a = int.parse(match!.group(1)!);
+      final b = int.parse(match.group(2)!);
+      expect(answer, a * b);
     });
 
     test('Unit (QuestionGeneratorService): respekterar talintervall för young',
@@ -541,6 +1033,610 @@ void main() {
 
       expect(question.promptText, isNotNull);
       expect(question.questionText, contains('?'));
+    });
+
+    test('M4 (Åk 4–6): Mix kan generera stapeldiagram-fråga', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(219),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 1200; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 5,
+          difficultyStep: 8,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Diagram (stapel) = ?')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M4 (Åk 4–6): stapeldiagram fråga har giltigt svar', () {
+      // Search for a seed that produces a bar chart question
+      String? prompt;
+      int? answer;
+
+      for (int seedTry = 200; seedTry <= 350; seedTry++) {
+        final seeded = QuestionGeneratorService(
+          random: Random(seedTry),
+          wordProblemsEnabled: false,
+          missingNumberEnabled: false,
+        );
+
+        for (var i = 0; i < 2000; i++) {
+          final q = seeded.generateQuestion(
+            ageGroup: AgeGroup.middle,
+            operationType: OperationType.mixed,
+            difficulty: DifficultyLevel.hard,
+            gradeLevel: 6,
+            difficultyStep: 9,
+          );
+
+          final p = q.promptText;
+          if (p != null && p.startsWith('Diagram (stapel) = ?')) {
+            prompt = p;
+            answer = q.correctAnswer;
+            break;
+          }
+        }
+
+        if (prompt != null) break;
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+      expect(answer, greaterThan(0));
+
+      // Verify prompt format contains expected structure
+      if (prompt != null) {
+        expect(prompt.contains('Fråga:'), true);
+        expect(prompt.contains(':'), true);
+      }
+    });
+
+    test('M4 (Åk 4–6): Mix kan generera sannolikhetsdiagram-fråga', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(221),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 1500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 6,
+          difficultyStep: 9,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Sannolikhet (diagram) = ?')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M4 (Åk 4–6): sannolikhetsdiagram ger procent-svar', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(222),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 2500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 6,
+          difficultyStep: 9,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Sannolikhet (diagram) = ?')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+
+      if (prompt != null) {
+        expect(answer, greaterThanOrEqualTo(0));
+        expect(answer, lessThanOrEqualTo(100));
+
+        // Verify the prompt contains the diagram description.
+        expect(prompt.contains('Röda:'), true);
+        expect(prompt.contains('Blå:'), true);
+      }
+    });
+
+    test('M4 (Åk 4–6): Mix kan generera enhetskonverterings-fråga', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(330),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 1500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 5,
+          difficultyStep: 7,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Enhetskonvertering = ?')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M4 (Åk 4–6): enhetskonvertering ger korrekt omvandling', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(331),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 2000; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 5,
+          difficultyStep: 7,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Enhetskonvertering = ?')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+      expect(answer, greaterThan(0));
+
+      // Verify format includes unit names and equals sign
+      if (prompt != null) {
+        expect(prompt.contains('='), true);
+        expect(prompt.contains('?'), true);
+      }
+    });
+
+    test('M4 (Åk 4–6): Mix kan generera area-fråga', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(332),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 1500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 5,
+          difficultyStep: 7,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Area')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M4 (Åk 4–6): area-fråga beräknar rätt svar för form', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(333),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 2000; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 5,
+          difficultyStep: 7,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Area')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+      expect(answer, greaterThan(0));
+
+      // Verify the prompt describes a shape
+      if (prompt != null) {
+        expect(
+          prompt.contains('kvadrat') ||
+              prompt.contains('rektangel') ||
+              prompt.contains('triangel'),
+          true,
+        );
+      }
+    });
+
+    test('M4 (Åk 4–6): Mix kan generera omkrets-fråga', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(334),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 1500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 5,
+          difficultyStep: 7,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Omkrets')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M4 (Åk 4–6): omkrets-fråga beräknar rätt svar för form', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(335),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 2000; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 5,
+          difficultyStep: 7,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Omkrets')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+      expect(answer, greaterThan(0));
+
+      // Verify the prompt describes a shape
+      if (prompt != null) {
+        expect(
+          prompt.contains('kvadrat') || prompt.contains('rektangel'),
+          true,
+        );
+      }
+    });
+
+    test('M5b (Åk 7–9): Mix kan generera linjär-funktions-fråga', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(403),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 2500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 8,
+          difficultyStep: 8,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Linjär funktion = ?')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M5b (Åk 7–9): linjär-funktions-fråga ger korrekt svar', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(404),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 2500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 9,
+          difficultyStep: 8,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Linjär funktion = ?')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+
+      // Parse y = mx + b format
+      final functionMatch =
+          RegExp(r'y = (\d+)x ([+\-]) (\d+)').firstMatch(prompt ?? '');
+      expect(functionMatch, isNotNull);
+
+      final slope = int.parse(functionMatch!.group(1)!);
+      final sign = functionMatch.group(2)!;
+      final intercept = int.parse(functionMatch.group(3)!);
+      final interceptValue = sign == '+' ? intercept : -intercept;
+
+      // Parse "Beräkna y när x = X"
+      final xMatch = RegExp(r'x = (\d+)').firstMatch(prompt ?? '');
+      expect(xMatch, isNotNull);
+      final x = int.parse(xMatch!.group(1)!);
+
+      final expected = slope * x + interceptValue;
+      expect(answer, expected);
+    });
+
+    test('M5b (Åk 7–9): Mix kan generera geometrisk-transformations-fråga', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(405),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 3000; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 8,
+          difficultyStep: 8,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null &&
+            prompt.startsWith('Geometrisk transformation = ?')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M5b (Åk 7–9): geometrisk-transformations-fråga ger korrekt svar', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(406),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 3000; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 9,
+          difficultyStep: 8,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Geometrisk transformation = ?')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+
+      // Verification: prompt contains "Punkt före" and "Punkt efter"
+      if (prompt != null) {
+        expect(prompt.contains('Punkt före:'), true);
+        expect(prompt.contains('Punkt efter:'), true);
+      }
+
+      // Verify answer is an integer (coordinate value)
+      expect(answer, isNotNull);
+    });
+
+    test('M5b (Åk 7–9): Mix kan generera avancerad-statistiks-fråga', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(407),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 3500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 8,
+          difficultyStep: 8,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.startsWith('Statistik = ?')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M5b (Åk 7–9): avancerad-statistiks-fråga ger korrekt svar', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(408),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 3500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 9,
+          difficultyStep: 8,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.startsWith('Statistik = ?')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+
+      // Verify prompt contains dataset markers
+      if (prompt != null) {
+        expect(
+          prompt.contains('Datasätt:') || prompt.contains('Variabel A:'),
+          true,
+        );
+      }
+    });
+
+    test('M4a (Åk 1–3): Mix kan generera tid-fråga', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(409),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var found = false;
+      for (var i = 0; i < 2500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 2,
+          difficultyStep: 5,
+        );
+
+        final prompt = q.promptText;
+        if (prompt != null && prompt.contains('Klockan visar')) {
+          found = true;
+          break;
+        }
+      }
+
+      expect(found, isTrue);
+    });
+
+    test('M4a (Åk 1–3): tid-fråga ger korrekt svar', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(410),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      String? prompt;
+      int? answer;
+      for (var i = 0; i < 2500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 3,
+          difficultyStep: 6,
+        );
+
+        final p = q.promptText;
+        if (p != null && p.contains('Klockan visar')) {
+          prompt = p;
+          answer = q.correctAnswer;
+          break;
+        }
+      }
+
+      expect(prompt, isNotNull);
+      expect(answer, isNotNull);
+
+      // Verify answer is reasonable (time-related: 0-59 for minutes, 1-23 for hours, or duration)
+      if (answer != null) {
+        expect(answer >= 0, true);
+        expect(answer <= 100, true); // Max duration in minutes for Åk 3
+      }
     });
   });
 

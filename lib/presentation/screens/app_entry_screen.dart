@@ -22,14 +22,35 @@ class _AppEntryScreenState extends ConsumerState<AppEntryScreen> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    // Kick off loading immediately (don't depend on a post-frame callback).
+    Future<void>(() async {
       if (!mounted) return;
-      await ref.read(userProvider.notifier).loadUsers();
-      if (!mounted) return;
-      setState(() {
-        _didLoad = true;
-      });
+      try {
+        await ref.read(userProvider.notifier).loadUsers();
+      } finally {
+        if (mounted) {
+          setState(() {
+            _didLoad = true;
+          });
+        }
+      }
     });
+
+    // Best-effort precache to reduce first-time image decode jank.
+    if (!const bool.fromEnvironment('FLUTTER_TEST')) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        final cfg = ref.read(appThemeConfigProvider);
+        try {
+          await Future.wait([
+            precacheImage(AssetImage(cfg.backgroundAsset), context),
+            precacheImage(AssetImage(cfg.questHeroAsset), context),
+          ]);
+        } catch (_) {
+          // Ignore precache failures.
+        }
+      });
+    }
   }
 
   @override
@@ -39,7 +60,7 @@ class _AppEntryScreenState extends ConsumerState<AppEntryScreen> {
 
     final themeCfg = ref.watch(appThemeConfigProvider);
     final mutedOnPrimary =
-      Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.70);
+        Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.70);
 
     if (!_didLoad || userState.isLoading) {
       return ThemedBackgroundScaffold(

@@ -19,7 +19,7 @@ utan att bygga om appen i ett steg.
 - “Saknat tal” (t.ex. `? + 3 = 7`): finns och är per barn (på/av).
 - M3 (Åk 4–6): +/− har jämnare talområde per step + gradvis växling; ×/÷ har “tabeller först”-formning.
 - Division med rest: **avstängt** i nuvarande quiz-format (heltal utan rest).
-- M4 (påbörjad): enkla statistikfrågor (typvärde/median/medelvärde/variationsbredd) kan dyka upp i `Mix` för Åk 4–6 utan ny UI.
+- M4 (påbörjad): enkla statistik- och sannolikhetsfrågor (typvärde/median/medelvärde/variationsbredd/chans i %/skillnad i chans) + enkel kombinatorik (kombinationer) kan dyka upp i `Mix` för Åk 4–6 utan ny UI.
 - UI-robusthet: `QuestionCard` har compact-läge + widgettest som fångar RenderFlex-overflow.
 
 ## Vad betyder Åk i appen (konkret)

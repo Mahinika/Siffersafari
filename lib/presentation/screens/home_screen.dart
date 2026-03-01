@@ -500,10 +500,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: Image.asset(
                           questHeroAsset,
                           fit: BoxFit.cover,
+                          cacheWidth: (MediaQuery.sizeOf(context).width *
+                                  MediaQuery.devicePixelRatioOf(context))
+                              .round(),
+                          cacheHeight:
+                              (110 * MediaQuery.devicePixelRatioOf(context))
+                                  .round(),
+                          excludeFromSemantics: true,
                           errorBuilder: (context, error, stackTrace) {
                             return Image.asset(
                               backgroundAsset,
                               fit: BoxFit.cover,
+                              cacheWidth: (MediaQuery.sizeOf(context).width *
+                                      MediaQuery.devicePixelRatioOf(context))
+                                  .round(),
+                              cacheHeight:
+                                  (110 * MediaQuery.devicePixelRatioOf(context))
+                                      .round(),
+                              excludeFromSemantics: true,
                             );
                           },
                         ),

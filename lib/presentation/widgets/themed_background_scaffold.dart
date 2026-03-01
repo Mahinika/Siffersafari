@@ -23,6 +23,11 @@ class ThemedBackgroundScaffold extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cfg = ref.watch(appThemeConfigProvider);
 
+    final size = MediaQuery.sizeOf(context);
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final cacheWidth = (size.width * dpr).round();
+    final cacheHeight = (size.height * dpr).round();
+
     final effectiveExtendBodyBehindAppBar =
         extendBodyBehindAppBar || appBar != null;
     final appBarHeight = appBar?.preferredSize.height ?? 0.0;
@@ -34,19 +39,26 @@ class ThemedBackgroundScaffold extends ConsumerWidget {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              cfg.backgroundAsset,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return ColoredBox(color: cfg.baseBackgroundColor);
-              },
+            child: RepaintBoundary(
+              child: Image.asset(
+                cfg.backgroundAsset,
+                fit: BoxFit.cover,
+                cacheWidth: cacheWidth,
+                cacheHeight: cacheHeight,
+                excludeFromSemantics: true,
+                errorBuilder: (context, error, stackTrace) {
+                  return ColoredBox(color: cfg.baseBackgroundColor);
+                },
+              ),
             ),
           ),
           Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color:
-                    cfg.baseBackgroundColor.withValues(alpha: overlayOpacity),
+            child: RepaintBoundary(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color:
+                      cfg.baseBackgroundColor.withValues(alpha: overlayOpacity),
+                ),
               ),
             ),
           ),

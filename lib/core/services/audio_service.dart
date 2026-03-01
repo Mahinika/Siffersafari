@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 
 /// Service for playing audio feedback and music
 class AudioService {
@@ -105,6 +106,8 @@ class AudioService {
     try {
       await player.play(AssetSource(primary), volume: volume);
     } catch (_) {
+      // Fallback to WAV (larger file, should be converted to MP3 for production)
+      debugPrint('⚠️ Using WAV fallback for $primary - convert to MP3 to reduce APK size');
       await player.play(AssetSource(fallback), volume: volume);
     }
   }

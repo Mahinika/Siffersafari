@@ -225,44 +225,51 @@ class UserNotifier extends StateNotifier<UserState> {
   Future<void> loadUsers() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
-    await _cleanupLegacyDemoUserIfNeeded();
+    try {
+      await _cleanupLegacyDemoUserIfNeeded();
 
-    final users = _repository
-        .getAllUserProfiles()
-        .where((u) => !_isLegacyDemoUser(u))
-        .toList();
+      final users = _repository
+          .getAllUserProfiles()
+          .where((u) => !_isLegacyDemoUser(u))
+          .toList();
 
-    final storedActiveUserId = _repository.getSetting(_activeUserIdKey);
-    final storedActiveUser = storedActiveUserId is String
-        ? users.cast<UserProgress?>().firstWhere(
-              (u) => u?.userId == storedActiveUserId,
-              orElse: () => null,
-            )
-        : null;
+      final storedActiveUserId = _repository.getSetting(_activeUserIdKey);
+      final storedActiveUser = storedActiveUserId is String
+          ? users.cast<UserProgress?>().firstWhere(
+                (u) => u?.userId == storedActiveUserId,
+                orElse: () => null,
+              )
+          : null;
 
-    final activeUser =
-        storedActiveUser ?? (users.length == 1 ? users.first : null);
+      final activeUser =
+          storedActiveUser ?? (users.length == 1 ? users.first : null);
 
-    if (activeUser != null) {
-      _syncAudioSettings(activeUser);
-      await _reconcileQuestPointer(activeUser);
+      if (activeUser != null) {
+        _syncAudioSettings(activeUser);
+        await _reconcileQuestPointer(activeUser);
+      }
+
+      final questStatus = activeUser == null
+          ? null
+          : _questProgressionService.getCurrentStatus(
+              user: activeUser,
+              currentQuestId: _readCurrentQuestId(activeUser.userId),
+              completedQuestIds: _readCompletedQuestIds(activeUser.userId),
+              allowedOperations: _effectiveAllowedOperationsFor(activeUser),
+            );
+
+      state = state.copyWith(
+        allUsers: users,
+        activeUser: activeUser,
+        questStatus: questStatus,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString(),
+      );
     }
-
-    final questStatus = activeUser == null
-        ? null
-        : _questProgressionService.getCurrentStatus(
-            user: activeUser,
-            currentQuestId: _readCurrentQuestId(activeUser.userId),
-            completedQuestIds: _readCompletedQuestIds(activeUser.userId),
-            allowedOperations: _effectiveAllowedOperationsFor(activeUser),
-          );
-
-    state = state.copyWith(
-      allUsers: users,
-      activeUser: activeUser,
-      questStatus: questStatus,
-      isLoading: false,
-    );
   }
 
   Future<void> selectUser(String userId) async {

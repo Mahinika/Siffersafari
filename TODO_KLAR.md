@@ -58,6 +58,11 @@ Denna fil samlar alla **klara** checkboxar från TODO.md och FÖRBÄTTRINGAR.md.
 - [x] PIN-kod autentisering (föräldraläge)
 - [x] Byt PIN (inne i föräldraläge)
 - [x] Dashboard med grundstatistik (översikt + senaste quiz)
+
+### Fas 7: Prestanda & Testing (påbörjad)
+- [x] Prestanda-baseline etablerad (Pixel_6, 2026-03-01)
+- [x] Fas 1 quick wins implementerat: Async Hive init + MP3-guide dokumenterad
+- [x] Prestanda-jämförelse mätt (blandade resultat, se PRESTANDA_BASELINE.md)
 - [x] Detaljerad analys (MVP: svagaste områden + rekommenderad övning)
 - [x] Anpassningsinställningar (MVP: slå av/på räknesätt per användare)
 - [x] Robust läsning av quiz-historik (fix för Map-cast crash i föräldraläge)
@@ -95,6 +100,24 @@ Denna fil samlar alla **klara** checkboxar från TODO.md och FÖRBÄTTRINGAR.md.
 - [x] M2: Textuppgifter v1 (Åk 1–3) — korta 1-stegs-uppgifter i befintligt quizflöde
 - [x] M2.5: Algebra light (Åk 2–3, +/−) — “obekant tal” (t.ex. \_ + 3 = 10) i befintligt quizflöde
 - [x] M3: Åk 4–6 — större tal, fler strategier (talområde + gradvis växling; division utan rest)
+- [x] M4 (light, ingen ny UI): statistik + sannolikhet i `Mix` för Åk 4–6 (typvärde/median/medelvärde/variationsbredd/chans i %/skillnad i chans) + enkel kombinatorik (kombinationer)
+- [x] M4 delsteg (full): statistik-tabell med tolkning i `Mix` för Åk 4–6 (visualiserad texttabell)
+- [x] M4 delsteg (full): statistik-diagram & sannolikhetsvisualering i `Mix` för Åk 4–6 (ASCII-stapeldiagram + färgade bollar)
+- [x] M4 delsteg (full): geometri/mätning i `Mix` för Åk 4–6 (enhetskonverteringar, area, omkrets)
+- [x] M4 (full, alla delsteg): Slutfört
+- [x] M5a delsteg: negativa tal i +/− för Åk 7–9 (utan ny UI)
+- [x] M5a delsteg: procent i `Mix` för Åk 7–9 (utan ny UI, format: "x % av y")
+- [x] M5a delsteg: potenser i `Mix` för Åk 8–9 (utan ny UI, format: "a^b")
+- [x] M5a delsteg: prioriteringsregler i `Mix` för Åk 7–9 (utan ny UI, med/utan parenteser)
+- [x] M5a (full, alla delsteg): Slutfört — Åk 7–9 utan ny UI (negativa tal, procent, potenser, prioriteringsregler)
+- [x] M5b delstep 1: linjära funktioner (y=mx+b) i `Mix` för Åk 7–9 (textruta med koordinatvisualisering, trigger vid step 8+)
+- [x] M5b delstep 2: geometriska transformationer (spegling/rotation/translation) i `Mix` för Åk 7–9 (textruta, trigger vid step 8+)
+- [x] M5b delstep 3: avancerad statistik (outliers/distributioner/korrelationer) i `Mix` för Åk 7–9 (textruta, trigger vid step 8+)
+- [x] M5b (full, alla delstep): Slutfört — Åk 7–9 med textruta-visualisering (linjära funktioner, geometriska transformationer, avancerad statistik)
+- [x] M4a: tid (klockan) för Åk 1–3 i `Mix` (hel/halv timme Åk 1, + kvart Åk 2, alla minuter + tidsintervall Åk 3, trigger 10% vid roll 0.75–0.85)
+
+### QA / Regression
+- [x] Audit-test: automatisk kontroll av Mix-fördelning (M4 specialfrågor) per Åk 4–6 och step-bucket
 
 ---
 

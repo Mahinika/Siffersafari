@@ -58,6 +58,17 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 - Byt PIN inne i föräldraläge
 - Dashboard med översikt + senaste quiz
 - MVP-analys (svagaste områden + rekommenderad övning)
+
+### Fas 7: Prestanda-optimering (påbörjad)
+- Prestanda-baseline etablerad (Pixel_6, 2026-03-01)
+- Fas 1 implementerad: Async Hive init med FutureBuilder + loading screen
+- **Status**: Blandade resultat
+  - ✅ Frame skips: -26% (253 → 187)
+  - ❌ Cold start: +47% (3.5s → 5.1s)
+  - ❌ Memory: +68% (140 MB → 235 MB)
+  - ❌ APK: +29% (136 MB → 175 MB)
+- **Analys**: Async-pattern gav inte förväntad förbättring; memory/APK-ökning troligen pga M4a/M5a-tillägg
+- **Nästa steg**: Överväg revertering och fokusera på MP3/asset-optimering först
 - Anpassning av aktiva räknesätt per användare
 
 ### Säkerhet & stabilitet
@@ -81,6 +92,15 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 - Lekigare quiz-feedback: snabbbonus ⚡, svit 🔥 och mjuk “ny svit på gång” när sviten bryts
 - **M2: Textuppgifter (word problems)** i befintligt quizflöde (per barn: switch “Textuppgifter”, Åk 1–3 för +/−, och konservativt Åk 3 för ×/÷)
 - **M2.5: Saknat tal** i befintligt quizflöde (per barn: switch “Saknat tal”, +/− för Åk 2–3, och prioritet över textuppgifter om båda är på)
+- **M4 (light, ingen ny UI):** statistik + sannolikhet i `Mix` för Åk 4–6 (typvärde/median/medelvärde/variationsbredd/chans i %/skillnad i chans) + enkel kombinatorik (kombinationer)
+- **M4 (full, delsteg):** visualiserad statistik i texttabell med tolkning i `Mix` för Åk 4–6
+- **M4 (full, alla delsteg): Slutfört** ✅
+- **M5a (utan ny UI): Slutfört** ✅ — negativa tal, procent, potenser, prioriteringsregler för Åk 7–9
+- **M5b delstep 1 (Linjära funktioner): Slutfört** ✅ — textbaserad y=mx+b med koordinatvisualisering för Åk 7–9, trigger vid step 8+ (10% i Mix)
+- **M5b delstep 2 (Geometriska transformationer): Slutfört** ✅ — spegling/rotation/translation i koordinatsystem för Åk 7–9, trigger vid step 8+ (10% i Mix)
+- **M5b delstep 3 (Avancerad statistik): Slutfört** ✅ — outliers/distributioner/korrelationer för Åk 7–9, trigger vid step 8+ (10% i Mix)
+- **M4a (Tid - klockan): Slutfört** ✅ — tidfrågor för Åk 1–3 i Mix (hel/halv timme Åk 1, + kvart Åk 2, alla minuter + tidsintervall Åk 3), trigger 10% vid roll 0.75–0.85
+- **QA:** deterministiskt audit-test som kontrollerar Mix-fördelningen för M4 specialfrågor per Åk 4–6 och step-bucket
 - Demo-seed borttaget (ingen automatisk demo-användare skapas)
 - Multi-user stöd (skapa/välj aktiv användare)
 - Aktiv användare persisteras (`active_user_id`)
@@ -93,11 +113,15 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 ---
 
 ## 📊 Teststatus
-- Senaste verifiering: **52 tester passerar, 0 fail**
+- Senaste verifiering: **59 tester passerar, 0 fail** (M4a + M5b delstep 1-3, +8 nya tester totalt)
 - Tester inkluderar:
   - Enhetstester för kärnlogik (services, difficulty, repetition, progression)
   - Widget-tester för centrala appflöden
   - Integration smoke-test
+  - M4 diagram/sannolikhet/geometri-distribution audit tests
+  - M5a procent/potenser/prioriteringsregler tests
+  - M5b 1-3 tests (linjär funktion, geometrisk transformation, avancerad statistik)
+  - M4a tid-frågor tests (klockan för Åk 1–3)
 
 ---
 
@@ -106,8 +130,19 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 - User testing med målgrupp
 - Tema-bilder/visuella assets (rymd/djungel)
 - Produktionsdeploy: Android signing + Play Store metadata + intern/beta
+- **Läroplan M5b: Åk 7–9**
+  - ✅ Delstep 1: Linjära funktioner (textruta med koordinat-lista)
+  - ✅ Delstep 2: Geometriska transformationer (spegling/rotation/translation)
+  - ✅ Delstep 3: Avancerad statistik-visualisering (outliers, distributioner, korrelationer)
+
+**M5b nu helt slutförd!** 🎉
 
 ---
 
 ## Kommentar
-Detta dokument är uppdaterat per 2026-03-01 efter att quizet fått mer “spel-känsla” (HUD/uppdrag/micro-feedback), samt efter införandet av textuppgifter och "saknat tal" i quizflödet.
+Detta dokument är uppdaterat per 2026-03-01 efter att **M4 full, M5a och M5b (alla delsteps) slutförts**:
+- M4 full: statistik-tabell + diagram + sannolikhets-visualisering + geometri/mätning i Mix för Åk 4–6 ✅
+- M5a: negativa tal + procent + potenser + prioriteringsregler i Mix för Åk 7–9 ✅
+- M5b delstep 1: linjära funktioner med textruta-visualisering i Mix för Åk 7–9 (step 8+) ✅
+- M5b delstep 2: geometriska transformationer (spegling/rotation/translation) i Mix för Åk 7–9 (step 8+) ✅
+- M5b delstep 3: avancerad statistik (outliers, distributioner, korrelationer) i Mix för Åk 7–9 (step 8+) ✅
