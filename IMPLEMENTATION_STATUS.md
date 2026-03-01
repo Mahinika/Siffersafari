@@ -79,6 +79,8 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 - **Säker PIN-lagring** med SHA-256 hash + rate-limiting (5 försök → 5 min lockout)
 - `ParentPinService` skapad i domain/services med full testning
 - Lekigare quiz-feedback: snabbbonus ⚡, svit 🔥 och mjuk “ny svit på gång” när sviten bryts
+- **M2: Textuppgifter (word problems)** i befintligt quizflöde (per barn: switch “Textuppgifter”, Åk 1–3 för +/−, och konservativt Åk 3 för ×/÷)
+- **M2.5: Saknat tal** i befintligt quizflöde (per barn: switch “Saknat tal”, +/− för Åk 2–3, och prioritet över textuppgifter om båda är på)
 - Demo-seed borttaget (ingen automatisk demo-användare skapas)
 - Multi-user stöd (skapa/välj aktiv användare)
 - Aktiv användare persisteras (`active_user_id`)
@@ -104,9 +106,8 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 - User testing med målgrupp
 - Tema-bilder/visuella assets (rymd/djungel)
 - Produktionsdeploy: Android signing + Play Store metadata + intern/beta
-- Dokumentation: API-guide, parent/teacher usage guide, store screenshot guide, policy/terms
 
 ---
 
 ## Kommentar
-Detta dokument är uppdaterat per 2026-03-01 efter att quizet fått mer “spel-känsla” (HUD/uppdrag/micro-feedback) och snabbbonus/svit-koppling till feedback/resultat.
+Detta dokument är uppdaterat per 2026-03-01 efter att quizet fått mer “spel-känsla” (HUD/uppdrag/micro-feedback), samt efter införandet av textuppgifter och "saknat tal" i quizflödet.

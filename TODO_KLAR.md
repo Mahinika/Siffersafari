@@ -90,6 +90,11 @@ Denna fil samlar alla **klara** checkboxar från TODO.md och FÖRBÄTTRINGAR.md.
 - [x] Privacy policy (draft)
 - [x] Terms of service (draft)
 
+### Läroplan/Åk-plan (docs/AK_LAROPLAN_PLAN.md)
+- [x] M1: Åk 1–3 — talområde + constraints för nuvarande räknefrågor (ingen ny UI)
+- [x] M2: Textuppgifter v1 (Åk 1–3) — korta 1-stegs-uppgifter i befintligt quizflöde
+- [x] M2.5: Algebra light (Åk 2–3, +/−) — “obekant tal” (t.ex. \_ + 3 = 10) i befintligt quizflöde
+
 ---
 
 ## Från FÖRBÄTTRINGAR.md
@@ -135,6 +140,9 @@ Denna fil samlar alla **klara** checkboxar från TODO.md och FÖRBÄTTRINGAR.md.
   - [x] Kapning: Start → "Skapa användare" öppnar dialog direkt
   - [x] Kapning: Onboarding hoppar över årskurs om redan vald
   - [x] Kör igenom på emulator och uppdatera siffror (verifiera)
+
+  ### Framtida Förbättringar (Post-MVP)
+  - [x] Ordproblem (word problems)
 
 ---
 
