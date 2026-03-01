@@ -29,6 +29,8 @@ class QuestionCard extends StatelessWidget {
       alpha: 1.0,
     );
 
+    final isWordProblem = question.promptText != null;
+
     return Semantics(
       label: 'Fråga: ${question.questionText}. Vad blir resultatet?',
       child: ExcludeSemantics(
@@ -56,7 +58,10 @@ class QuestionCard extends StatelessWidget {
               children: [
                 Text(
                   question.operationType.symbol,
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                  style: (isWordProblem
+                          ? Theme.of(context).textTheme.displayMedium
+                          : Theme.of(context).textTheme.displayLarge)
+                      ?.copyWith(
                         fontWeight: FontWeight.w900,
                         color: questionTextColor ?? scheme.onSurface,
                       ),
@@ -64,11 +69,17 @@ class QuestionCard extends StatelessWidget {
                 SizedBox(height: AppConstants.defaultPadding.h),
                 Text(
                   question.questionText,
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                  style: (isWordProblem
+                          ? Theme.of(context).textTheme.headlineSmall
+                          : Theme.of(context).textTheme.displayLarge)
+                      ?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: questionTextColor ?? scheme.onSurface,
                       ),
                   textAlign: TextAlign.center,
+                  maxLines: isWordProblem ? 4 : 1,
+                  overflow:
+                      isWordProblem ? TextOverflow.visible : TextOverflow.fade,
                 ),
                 SizedBox(height: AppConstants.smallPadding.h),
                 Text(

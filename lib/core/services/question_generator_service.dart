@@ -6,12 +6,28 @@ import '../../domain/entities/question.dart';
 import '../../domain/enums/age_group.dart';
 import '../../domain/enums/difficulty_level.dart';
 import '../../domain/enums/operation_type.dart';
+import '../config/app_features.dart';
 import '../config/difficulty_config.dart';
 
 /// Service for generating math questions
 class QuestionGeneratorService {
-  final _random = Random();
-  final _uuid = const Uuid();
+  QuestionGeneratorService({
+    Random? random,
+    Uuid? uuid,
+    bool? wordProblemsEnabled,
+    double? wordProblemsChance,
+  })  : _random = random ?? Random(),
+        _uuid = uuid ?? const Uuid(),
+        _wordProblemsEnabled =
+            wordProblemsEnabled ?? AppFeatures.wordProblemsEnabled,
+        _wordProblemsChance =
+            wordProblemsChance ?? AppFeatures.wordProblemsChance;
+
+  final Random _random;
+  final Uuid _uuid;
+
+  final bool _wordProblemsEnabled;
+  final double _wordProblemsChance;
 
   int _randomInRange(NumberRange range) {
     return range.min + _random.nextInt(range.max - range.min + 1);
@@ -57,6 +73,14 @@ class QuestionGeneratorService {
         ? _getRandomOperation()
         : operationType;
 
+    final shouldTryWordProblem = _wordProblemsEnabled &&
+        gradeLevel != null &&
+        gradeLevel >= 1 &&
+        gradeLevel <= 3 &&
+        _random.nextDouble() < _wordProblemsChance &&
+        (operation == OperationType.addition ||
+            operation == OperationType.subtraction);
+
     final step = difficultyStepsByOperation != null
         ? (difficultyStepsByOperation[operation] ??
             DifficultyConfig.initialStepForDifficulty(difficulty))
@@ -77,6 +101,14 @@ class QuestionGeneratorService {
 
     switch (operation) {
       case OperationType.addition:
+        if (shouldTryWordProblem) {
+          return _generateAdditionWordProblem(
+            range,
+            difficulty,
+            gradeLevel: gradeLevel,
+            difficultyStep: step,
+          );
+        }
         return _generateAddition(
           range,
           difficulty,
@@ -84,6 +116,14 @@ class QuestionGeneratorService {
           difficultyStep: step,
         );
       case OperationType.subtraction:
+        if (shouldTryWordProblem) {
+          return _generateSubtractionWordProblem(
+            range,
+            difficulty,
+            gradeLevel: gradeLevel,
+            difficultyStep: step,
+          );
+        }
         return _generateSubtraction(
           range,
           difficulty,
@@ -172,6 +212,31 @@ class QuestionGeneratorService {
     );
   }
 
+  Question _generateAdditionWordProblem(
+    NumberRange range,
+    DifficultyLevel difficulty, {
+    required int? gradeLevel,
+    required int difficultyStep,
+  }) {
+    final base = _generateAddition(
+      range,
+      difficulty,
+      gradeLevel: gradeLevel,
+      difficultyStep: difficultyStep,
+    );
+
+    // Keep prompts short and 1-step.
+    final prompt = _random.nextBool()
+        ? 'Lisa har ${base.operand1} äpplen och får ${base.operand2} till. Hur många har hon nu?'
+        : 'Du har ${base.operand1} kulor och får ${base.operand2} fler. Hur många kulor har du nu?';
+
+    return base.copyWith(
+      promptText: prompt,
+      explanation:
+          '${base.operand1} + ${base.operand2} = ${base.correctAnswer}',
+    );
+  }
+
   Question _generateSubtraction(
     NumberRange range,
     DifficultyLevel difficulty, {
@@ -228,6 +293,30 @@ class QuestionGeneratorService {
       correctAnswer: correctAnswer,
       wrongAnswers: _generateWrongAnswers(correctAnswer, 3),
       explanation: '$operand1 - $operand2 = $correctAnswer',
+    );
+  }
+
+  Question _generateSubtractionWordProblem(
+    NumberRange range,
+    DifficultyLevel difficulty, {
+    required int? gradeLevel,
+    required int difficultyStep,
+  }) {
+    final base = _generateSubtraction(
+      range,
+      difficulty,
+      gradeLevel: gradeLevel,
+      difficultyStep: difficultyStep,
+    );
+
+    final prompt = _random.nextBool()
+        ? 'Du har ${base.operand1} ballonger. ${base.operand2} flyger iväg. Hur många är kvar?'
+        : 'Det finns ${base.operand1} fiskar. ${base.operand2} simmar bort. Hur många är kvar?';
+
+    return base.copyWith(
+      promptText: prompt,
+      explanation:
+          '${base.operand1} - ${base.operand2} = ${base.correctAnswer}',
     );
   }
 

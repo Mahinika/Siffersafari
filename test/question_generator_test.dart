@@ -143,6 +143,25 @@ void main() {
       final allOptions = question.allAnswerOptions;
       expect(allOptions.contains(question.correctAnswer), true);
     });
+
+    test(
+        'Unit (QuestionGeneratorService): kan generera textuppgift för Åk 1–3 (+/−) när påslaget',
+        () {
+      final wordProblemService = QuestionGeneratorService(
+        wordProblemsEnabled: true,
+        wordProblemsChance: 1.0,
+      );
+
+      final question = wordProblemService.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.addition,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 2,
+      );
+
+      expect(question.promptText, isNotNull);
+      expect(question.questionText, contains('?'));
+    });
   });
 
   group('DifficultyConfig', () {

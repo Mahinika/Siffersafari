@@ -26,6 +26,16 @@ Denna fil samlar alla **oklara** checkboxar från TODO.md.
 - [ ] Bråk och decimaler för äldre åldersgrupper
 - [ ] Ordproblem (word problems)
 
+## Läroplan/Åk-plan (docs/AK_LAROPLAN_PLAN.md)
+- [ ] M1: Åk 1–3 — talområde + constraints för nuvarande räknefrågor (ingen ny UI)
+- [ ] M2: Textuppgifter v1 (Åk 1–3) — korta 1-stegs-uppgifter i befintligt quizflöde
+- [ ] M2.5: Algebra light (Åk 1–3) — “obekant tal” (t.ex. \_ + 3 = 10) i befintligt quizflöde
+- [ ] M3: Åk 4–6 — större tal, fler strategier (inkl. beslut om division med rest)
+- [ ] M4: Modul — Geometri + mätning (former, lägesord, längd/massa/volym/tid, symmetri)
+- [ ] M4: Modul — Sannolikhet & statistik (enkla tabeller/diagram)
+- [ ] M5a: Åk 7–9 (utan ny UI) — negativa tal, procent, potenser, prioriteringsregler
+- [ ] M5b: Åk 7–9 (kräver ny UI) — funktioner/grafer, visualiserad geometri, visualiserad statistik
+
 ---
 
 **Senast uppdaterad:** 2026-03-01 (inkl. uppdaterad dokumentation och senaste quiz-“spel-lager”)

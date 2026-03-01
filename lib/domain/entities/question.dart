@@ -12,6 +12,7 @@ class Question extends Equatable {
     required this.operand1,
     required this.operand2,
     required this.correctAnswer,
+    this.promptText,
     this.wrongAnswers = const [],
     this.explanation,
   });
@@ -22,12 +23,13 @@ class Question extends Equatable {
   final int operand1;
   final int operand2;
   final int correctAnswer;
+  final String? promptText;
   final List<int> wrongAnswers;
   final String? explanation;
 
   /// Format the question as a string (e.g., "5 + 3")
   String get questionText {
-    return '$operand1 ${operationType.symbol} $operand2';
+    return promptText ?? '$operand1 ${operationType.symbol} $operand2';
   }
 
   /// Get all answer options (correct + wrong answers)
@@ -47,6 +49,7 @@ class Question extends Equatable {
     int? operand1,
     int? operand2,
     int? correctAnswer,
+    String? promptText,
     List<int>? wrongAnswers,
     String? explanation,
   }) {
@@ -57,6 +60,7 @@ class Question extends Equatable {
       operand1: operand1 ?? this.operand1,
       operand2: operand2 ?? this.operand2,
       correctAnswer: correctAnswer ?? this.correctAnswer,
+      promptText: promptText ?? this.promptText,
       wrongAnswers: wrongAnswers ?? this.wrongAnswers,
       explanation: explanation ?? this.explanation,
     );
@@ -70,6 +74,7 @@ class Question extends Equatable {
         operand1,
         operand2,
         correctAnswer,
+      promptText,
         wrongAnswers,
         explanation,
       ];
