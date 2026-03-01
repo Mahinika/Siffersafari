@@ -150,6 +150,7 @@ void main() {
       final wordProblemService = QuestionGeneratorService(
         wordProblemsEnabled: true,
         wordProblemsChance: 1.0,
+        missingNumberEnabled: false,
       );
 
       final question = wordProblemService.generateQuestion(
@@ -161,6 +162,64 @@ void main() {
 
       expect(question.promptText, isNotNull);
       expect(question.questionText, contains('?'));
+    });
+
+    test(
+        'Unit (QuestionGeneratorService): kan generera saknat tal för Åk 2–3 (+) när påslaget',
+        () {
+      final service = QuestionGeneratorService(
+        missingNumberEnabled: true,
+        missingNumberChance: 1.0,
+        wordProblemsEnabled: false,
+      );
+
+      final question = service.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.addition,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 2,
+      );
+
+      expect(question.promptText, isNotNull);
+      expect(question.questionText, contains('?'));
+      expect(question.questionText, contains('='));
+
+      final sum = question.operand1 + question.operand2;
+      if (question.questionText.startsWith('?')) {
+        expect(question.correctAnswer, question.operand1);
+      } else {
+        expect(question.correctAnswer, question.operand2);
+      }
+      expect(question.questionText.endsWith(sum.toString()), true);
+    });
+
+    test(
+        'Unit (QuestionGeneratorService): kan generera saknat tal för Åk 2–3 (−) när påslaget',
+        () {
+      final service = QuestionGeneratorService(
+        missingNumberEnabled: true,
+        missingNumberChance: 1.0,
+        wordProblemsEnabled: false,
+      );
+
+      final question = service.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.subtraction,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 3,
+      );
+
+      expect(question.promptText, isNotNull);
+      expect(question.questionText, contains('?'));
+      expect(question.questionText, contains('='));
+
+      final result = question.operand1 - question.operand2;
+      if (question.questionText.startsWith('?')) {
+        expect(question.correctAnswer, question.operand1);
+      } else {
+        expect(question.correctAnswer, question.operand2);
+      }
+      expect(question.questionText.endsWith(result.toString()), true);
     });
 
     test(

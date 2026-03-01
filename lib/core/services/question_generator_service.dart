@@ -16,18 +16,27 @@ class QuestionGeneratorService {
     Uuid? uuid,
     bool? wordProblemsEnabled,
     double? wordProblemsChance,
+    bool? missingNumberEnabled,
+    double? missingNumberChance,
   })  : _random = random ?? Random(),
         _uuid = uuid ?? const Uuid(),
         _wordProblemsEnabled =
             wordProblemsEnabled ?? AppFeatures.wordProblemsEnabled,
         _wordProblemsChance =
-            wordProblemsChance ?? AppFeatures.wordProblemsChance;
+            wordProblemsChance ?? AppFeatures.wordProblemsChance,
+        _missingNumberEnabled =
+            missingNumberEnabled ?? AppFeatures.missingNumberEnabled,
+        _missingNumberChance =
+            missingNumberChance ?? AppFeatures.missingNumberChance;
 
   final Random _random;
   final Uuid _uuid;
 
   final bool _wordProblemsEnabled;
   final double _wordProblemsChance;
+
+  final bool _missingNumberEnabled;
+  final double _missingNumberChance;
 
   int _randomInRange(NumberRange range) {
     return range.min + _random.nextInt(range.max - range.min + 1);
@@ -80,6 +89,14 @@ class QuestionGeneratorService {
         ? _getRandomOperation()
         : operationType;
 
+    final shouldTryMissingNumber = _missingNumberEnabled &&
+        gradeLevel != null &&
+        gradeLevel >= 2 &&
+        gradeLevel <= 3 &&
+        (operation == OperationType.addition ||
+            operation == OperationType.subtraction) &&
+        _random.nextDouble() < _missingNumberChance;
+
     final roll = _random.nextDouble();
 
     final shouldTryWordProblemAddSub = wordProblemsEnabled &&
@@ -117,6 +134,14 @@ class QuestionGeneratorService {
 
     switch (operation) {
       case OperationType.addition:
+        if (shouldTryMissingNumber) {
+          return _generateAdditionMissingNumber(
+            range,
+            difficulty,
+            gradeLevel: gradeLevel,
+            difficultyStep: step,
+          );
+        }
         if (shouldTryWordProblemAddSub) {
           return _generateAdditionWordProblem(
             range,
@@ -132,6 +157,14 @@ class QuestionGeneratorService {
           difficultyStep: step,
         );
       case OperationType.subtraction:
+        if (shouldTryMissingNumber) {
+          return _generateSubtractionMissingNumber(
+            range,
+            difficulty,
+            gradeLevel: gradeLevel,
+            difficultyStep: step,
+          );
+        }
         if (shouldTryWordProblemAddSub) {
           return _generateSubtractionWordProblem(
             range,
@@ -267,6 +300,35 @@ class QuestionGeneratorService {
     );
   }
 
+  Question _generateAdditionMissingNumber(
+    NumberRange range,
+    DifficultyLevel difficulty, {
+    required int? gradeLevel,
+    required int difficultyStep,
+  }) {
+    final base = _generateAddition(
+      range,
+      difficulty,
+      gradeLevel: gradeLevel,
+      difficultyStep: difficultyStep,
+    );
+
+    final sum = base.correctAnswer;
+    final missingLeft = _random.nextBool();
+
+    final prompt = missingLeft
+        ? '? + ${base.operand2} = $sum'
+        : '${base.operand1} + ? = $sum';
+    final correctMissing = missingLeft ? base.operand1 : base.operand2;
+
+    return base.copyWith(
+      promptText: prompt,
+      correctAnswer: correctMissing,
+      wrongAnswers: _generateWrongAnswers(correctMissing, 3),
+      explanation: '${base.operand1} + ${base.operand2} = $sum',
+    );
+  }
+
   Question _generateSubtraction(
     NumberRange range,
     DifficultyLevel difficulty, {
@@ -348,6 +410,35 @@ class QuestionGeneratorService {
       promptText: prompt,
       explanation:
           '${base.operand1} - ${base.operand2} = ${base.correctAnswer}',
+    );
+  }
+
+  Question _generateSubtractionMissingNumber(
+    NumberRange range,
+    DifficultyLevel difficulty, {
+    required int? gradeLevel,
+    required int difficultyStep,
+  }) {
+    final base = _generateSubtraction(
+      range,
+      difficulty,
+      gradeLevel: gradeLevel,
+      difficultyStep: difficultyStep,
+    );
+
+    final result = base.correctAnswer;
+    final missingLeft = _random.nextBool();
+
+    final prompt = missingLeft
+        ? '? - ${base.operand2} = $result'
+        : '${base.operand1} - ? = $result';
+    final correctMissing = missingLeft ? base.operand1 : base.operand2;
+
+    return base.copyWith(
+      promptText: prompt,
+      correctAnswer: correctMissing,
+      wrongAnswers: _generateWrongAnswers(correctMissing, 3),
+      explanation: '${base.operand1} - ${base.operand2} = $result',
     );
   }
 

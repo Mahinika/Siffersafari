@@ -30,6 +30,7 @@ class QuestionCard extends StatelessWidget {
     );
 
     final isWordProblem = question.promptText != null;
+    final isEquationPrompt = question.promptText?.contains('=') ?? false;
 
     return Semantics(
       label: 'Fråga: ${question.questionText}. Vad blir resultatet?',
@@ -56,17 +57,19 @@ class QuestionCard extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  question.operationType.symbol,
-                  style: (isWordProblem
-                          ? Theme.of(context).textTheme.displayMedium
-                          : Theme.of(context).textTheme.displayLarge)
-                      ?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: questionTextColor ?? scheme.onSurface,
+                if (!isEquationPrompt) ...[
+                  Text(
+                    question.operationType.symbol,
+                    style: (isWordProblem
+                            ? Theme.of(context).textTheme.displayMedium
+                            : Theme.of(context).textTheme.displayLarge)
+                        ?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: questionTextColor ?? scheme.onSurface,
+                    ),
                   ),
-                ),
-                SizedBox(height: AppConstants.defaultPadding.h),
+                  SizedBox(height: AppConstants.defaultPadding.h),
+                ],
                 Text(
                   question.questionText,
                   style: (isWordProblem
