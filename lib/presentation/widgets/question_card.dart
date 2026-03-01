@@ -62,9 +62,9 @@ class QuestionCard extends StatelessWidget {
                           ? Theme.of(context).textTheme.displayMedium
                           : Theme.of(context).textTheme.displayLarge)
                       ?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: questionTextColor ?? scheme.onSurface,
-                      ),
+                    fontWeight: FontWeight.w900,
+                    color: questionTextColor ?? scheme.onSurface,
+                  ),
                 ),
                 SizedBox(height: AppConstants.defaultPadding.h),
                 Text(
@@ -73,9 +73,9 @@ class QuestionCard extends StatelessWidget {
                           ? Theme.of(context).textTheme.headlineSmall
                           : Theme.of(context).textTheme.displayLarge)
                       ?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: questionTextColor ?? scheme.onSurface,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: questionTextColor ?? scheme.onSurface,
+                  ),
                   textAlign: TextAlign.center,
                   maxLines: isWordProblem ? 4 : 1,
                   overflow:

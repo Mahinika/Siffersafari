@@ -162,6 +162,44 @@ void main() {
       expect(question.promptText, isNotNull);
       expect(question.questionText, contains('?'));
     });
+
+    test(
+        'Unit (QuestionGeneratorService): kan generera textuppgift för Åk 3 (×) när påslaget',
+        () {
+      final wordProblemService = QuestionGeneratorService(
+        wordProblemsEnabled: true,
+        wordProblemsChance: 1.0,
+      );
+
+      final question = wordProblemService.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.multiplication,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 3,
+      );
+
+      expect(question.promptText, isNotNull);
+      expect(question.questionText, contains('?'));
+    });
+
+    test(
+        'Unit (QuestionGeneratorService): kan generera textuppgift för Åk 3 (÷) när påslaget',
+        () {
+      final wordProblemService = QuestionGeneratorService(
+        wordProblemsEnabled: true,
+        wordProblemsChance: 1.0,
+      );
+
+      final question = wordProblemService.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.division,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 3,
+      );
+
+      expect(question.promptText, isNotNull);
+      expect(question.questionText, contains('?'));
+    });
   });
 
   group('DifficultyConfig', () {

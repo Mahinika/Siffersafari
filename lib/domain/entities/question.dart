@@ -74,7 +74,7 @@ class Question extends Equatable {
         operand1,
         operand2,
         correctAnswer,
-      promptText,
+        promptText,
         wrongAnswers,
         explanation,
       ];

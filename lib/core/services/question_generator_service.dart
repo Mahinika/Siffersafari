@@ -80,13 +80,22 @@ class QuestionGeneratorService {
         ? _getRandomOperation()
         : operationType;
 
-    final shouldTryWordProblem = wordProblemsEnabled &&
+    final roll = _random.nextDouble();
+
+    final shouldTryWordProblemAddSub = wordProblemsEnabled &&
         gradeLevel != null &&
         gradeLevel >= 1 &&
         gradeLevel <= 3 &&
-        _random.nextDouble() < wordProblemsChance &&
+        roll < wordProblemsChance &&
         (operation == OperationType.addition ||
             operation == OperationType.subtraction);
+
+    // Conservative rollout: only Åk 3 for ×/÷ text problems.
+    final shouldTryWordProblemMulDiv = wordProblemsEnabled &&
+        gradeLevel == 3 &&
+        roll < wordProblemsChance &&
+        (operation == OperationType.multiplication ||
+            operation == OperationType.division);
 
     final step = difficultyStepsByOperation != null
         ? (difficultyStepsByOperation[operation] ??
@@ -108,7 +117,7 @@ class QuestionGeneratorService {
 
     switch (operation) {
       case OperationType.addition:
-        if (shouldTryWordProblem) {
+        if (shouldTryWordProblemAddSub) {
           return _generateAdditionWordProblem(
             range,
             difficulty,
@@ -123,7 +132,7 @@ class QuestionGeneratorService {
           difficultyStep: step,
         );
       case OperationType.subtraction:
-        if (shouldTryWordProblem) {
+        if (shouldTryWordProblemAddSub) {
           return _generateSubtractionWordProblem(
             range,
             difficulty,
@@ -138,8 +147,20 @@ class QuestionGeneratorService {
           difficultyStep: step,
         );
       case OperationType.multiplication:
+        if (shouldTryWordProblemMulDiv) {
+          return _generateMultiplicationWordProblem(
+            range,
+            difficulty,
+          );
+        }
         return _generateMultiplication(range, difficulty);
       case OperationType.division:
+        if (shouldTryWordProblemMulDiv) {
+          return _generateDivisionWordProblem(
+            range,
+            difficulty,
+          );
+        }
         return _generateDivision(range, difficulty);
       case OperationType.mixed:
         return generateQuestion(
@@ -149,6 +170,8 @@ class QuestionGeneratorService {
           difficultyStepsByOperation: difficultyStepsByOperation,
           difficultyStep: difficultyStep,
           gradeLevel: gradeLevel,
+          wordProblemsEnabledOverride: wordProblemsEnabledOverride,
+          wordProblemsChanceOverride: wordProblemsChanceOverride,
         );
     }
   }
@@ -374,6 +397,39 @@ class QuestionGeneratorService {
     return pick(a, b);
   }
 
+  String _pickMultiplicationPrompt({required int a, required int b}) {
+    final templates = <String Function(int, int)>[
+      (x, y) => 'Du har $y påsar med $x kulor i varje. Hur många kulor är det?',
+      (x, y) =>
+          'Det finns $y rader med $x stolar i varje rad. Hur många stolar?',
+      (x, y) =>
+          'Du bygger $y torn med $x klossar i varje torn. Hur många klossar?',
+      (x, y) =>
+          'I en bok finns $y kapitel med $x sidor i varje. Hur många sidor?',
+      (x, y) =>
+          'Du har $y lådor med $x bollar i varje. Hur många bollar totalt?',
+    ];
+
+    final pick = templates[_random.nextInt(templates.length)];
+    return pick(a, b);
+  }
+
+  String _pickDivisionPrompt({required int a, required int b}) {
+    final templates = <String Function(int, int)>[
+      (x, y) =>
+          'Du har $x godisbitar och delar dem lika på $y barn. Hur många får varje?',
+      (x, y) =>
+          'Det finns $x kort. De delas i $y lika stora högar. Hur många i varje hög?',
+      (x, y) =>
+          'Du har $x äpplen och lägger $y äpplen i varje påse. Hur många påsar blir det?',
+      (x, y) =>
+          'En klass har $x pennor. $y pennor delas ut till varje bord. Hur många bord får pennor?',
+    ];
+
+    final pick = templates[_random.nextInt(templates.length)];
+    return pick(a, b);
+  }
+
   Question _generateMultiplication(
     NumberRange range,
     DifficultyLevel difficulty,
@@ -391,6 +447,31 @@ class QuestionGeneratorService {
       correctAnswer: correctAnswer,
       wrongAnswers: _generateWrongAnswers(correctAnswer, 3),
       explanation: '$operand1 × $operand2 = $correctAnswer',
+    );
+  }
+
+  Question _generateMultiplicationWordProblem(
+    NumberRange range,
+    DifficultyLevel difficulty,
+  ) {
+    // Avoid 0 in story problems.
+    final safeMin = max(1, range.min);
+    final safeMax = max(safeMin, range.max);
+
+    final base = _generateMultiplication(
+      NumberRange(safeMin, safeMax),
+      difficulty,
+    );
+
+    final prompt = _pickMultiplicationPrompt(
+      a: base.operand1,
+      b: base.operand2,
+    );
+
+    return base.copyWith(
+      promptText: prompt,
+      explanation:
+          '${base.operand1} × ${base.operand2} = ${base.correctAnswer}',
     );
   }
 
@@ -413,6 +494,24 @@ class QuestionGeneratorService {
       correctAnswer: quotient,
       wrongAnswers: _generateWrongAnswers(quotient, 3),
       explanation: '$dividend ÷ $divisor = $quotient',
+    );
+  }
+
+  Question _generateDivisionWordProblem(
+    NumberRange range,
+    DifficultyLevel difficulty,
+  ) {
+    final base = _generateDivision(range, difficulty);
+
+    final prompt = _pickDivisionPrompt(
+      a: base.operand1,
+      b: base.operand2,
+    );
+
+    return base.copyWith(
+      promptText: prompt,
+      explanation:
+          '${base.operand1} ÷ ${base.operand2} = ${base.correctAnswer}',
     );
   }
 
