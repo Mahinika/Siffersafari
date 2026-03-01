@@ -97,9 +97,12 @@ sequenceDiagram
 ## FeedbackService
 **Syfte:** Ge åldersanpassad feedback efter varje svar.
 
+**Fil:** `lib/domain/services/feedback_service.dart`
+
 **Beteende (översikt):**
 - Skapar en feedbackmodell som UI visar i `FeedbackDialog`.
 - Kan variera språk/ton baserat på `AgeGroup`.
+- Kan inkludera “spel-metadata” som UI visar (t.ex. 🪙 poäng, ⚡ snabbbonus, 🔥 svit).
 
 ## AchievementService
 **Syfte:** Hantera achievements (låsa upp, namnge, presentera).

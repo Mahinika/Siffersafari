@@ -14,6 +14,18 @@ Appen försöker spela **MP3 först**, och faller tillbaka till **WAV** om MP3 s
 
 I projektet finns enkla, egen-genererade WAV-filer (original) som fungerar direkt.
 
+## Generera lekiga standardljud (lokalt)
+
+Det finns ett litet script som kan (om)generera enkla, barnvänliga standardljud som WAV:
+
+`dart run scripts/generate_sfx_wav.dart --out assets/sounds`
+
+Om du bara vill regenerera ett specifikt ljud (för att inte skriva över andra som du redan gillar), använd `--only`:
+
+`dart run scripts/generate_sfx_wav.dart --out assets/sounds --only celebration`
+
+Scriptet skapar alltid en timestampad backup av befintliga `.wav`-filer innan det skriver över.
+
 ## Rekommendationer:
 
 - Format: MP3, WAV eller OGG

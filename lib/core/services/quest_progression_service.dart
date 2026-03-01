@@ -77,8 +77,13 @@ class QuestProgressionService {
     ),
   ];
 
-  QuestPath questsForUser(UserProgress user) {
+  QuestPath questsForUser(
+    UserProgress user, {
+    Set<OperationType>? allowedOperations,
+  }) {
     final grade = user.gradeLevel;
+
+    QuestPath basePath;
 
     // Grade-based paths (recommended guidance). Keep it simple and predictable.
     // - Åk 1-2: only Easy
@@ -86,51 +91,90 @@ class QuestProgressionService {
     // - Åk 5+: Easy + Medium (Hard quests can be added later)
     if (grade != null) {
       if (grade <= 2) {
-        return defaultQuests
+        basePath = defaultQuests
             .where((q) => q.difficulty == DifficultyLevel.easy)
             .toList(growable: false);
+        return _applyAllowedOperations(
+          basePath: basePath,
+          allowedOperations: allowedOperations,
+        );
       }
       if (grade <= 4) {
-        return defaultQuests
+        basePath = defaultQuests
             .where(
               (q) =>
                   q.difficulty == DifficultyLevel.easy ||
                   q.difficulty == DifficultyLevel.medium,
             )
             .toList(growable: false);
+        return _applyAllowedOperations(
+          basePath: basePath,
+          allowedOperations: allowedOperations,
+        );
       }
-      return defaultQuests
+      basePath = defaultQuests
           .where(
             (q) =>
                 q.difficulty == DifficultyLevel.easy ||
                 q.difficulty == DifficultyLevel.medium,
           )
           .toList(growable: false);
+      return _applyAllowedOperations(
+        basePath: basePath,
+        allowedOperations: allowedOperations,
+      );
     }
 
     // Fallback: age group
     switch (user.ageGroup) {
       case AgeGroup.young:
-        return defaultQuests
+        basePath = defaultQuests
             .where((q) => q.difficulty == DifficultyLevel.easy)
             .toList(growable: false);
+        return _applyAllowedOperations(
+          basePath: basePath,
+          allowedOperations: allowedOperations,
+        );
       case AgeGroup.middle:
-        return defaultQuests
+        basePath = defaultQuests
             .where(
               (q) =>
                   q.difficulty == DifficultyLevel.easy ||
                   q.difficulty == DifficultyLevel.medium,
             )
             .toList(growable: false);
+        return _applyAllowedOperations(
+          basePath: basePath,
+          allowedOperations: allowedOperations,
+        );
       case AgeGroup.older:
-        return defaultQuests
+        basePath = defaultQuests
             .where(
               (q) =>
                   q.difficulty == DifficultyLevel.easy ||
                   q.difficulty == DifficultyLevel.medium,
             )
             .toList(growable: false);
+        return _applyAllowedOperations(
+          basePath: basePath,
+          allowedOperations: allowedOperations,
+        );
     }
+  }
+
+  QuestPath _applyAllowedOperations({
+    required QuestPath basePath,
+    required Set<OperationType>? allowedOperations,
+  }) {
+    final allowed = allowedOperations;
+    if (allowed == null) return basePath;
+
+    final filtered = basePath
+        .where((q) => allowed.contains(q.operation))
+        .toList(growable: false);
+
+    // If filtering would remove everything (should be rare), keep base path.
+    return filtered.isEmpty ? basePath : filtered;
   }
 
   QuestDefinition? questById({required QuestPath path, required String id}) {
@@ -140,8 +184,11 @@ class QuestProgressionService {
     return null;
   }
 
-  String firstQuestId(UserProgress user) {
-    final path = questsForUser(user);
+  String firstQuestId(
+    UserProgress user, {
+    Set<OperationType>? allowedOperations,
+  }) {
+    final path = questsForUser(user, allowedOperations: allowedOperations);
     return (path.isNotEmpty ? path.first : defaultQuests.first).id;
   }
 
@@ -149,8 +196,9 @@ class QuestProgressionService {
     required UserProgress user,
     required String? currentQuestId,
     required Set<String> completedQuestIds,
+    Set<OperationType>? allowedOperations,
   }) {
-    final path = questsForUser(user);
+    final path = questsForUser(user, allowedOperations: allowedOperations);
     final effectivePath = path.isNotEmpty ? path : defaultQuests;
 
     QuestDefinition quest;
@@ -184,8 +232,9 @@ class QuestProgressionService {
   String? nextQuestId({
     required UserProgress user,
     required String currentQuestId,
+    Set<OperationType>? allowedOperations,
   }) {
-    final path = questsForUser(user);
+    final path = questsForUser(user, allowedOperations: allowedOperations);
     final effectivePath = path.isNotEmpty ? path : defaultQuests;
 
     for (var i = 0; i < effectivePath.length; i++) {

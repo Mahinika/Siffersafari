@@ -28,6 +28,14 @@ class FeedbackDialog extends StatefulWidget {
 class _FeedbackDialogState extends State<FeedbackDialog> {
   bool _announced = false;
 
+  List<String> _messageLines(String message) {
+    return message
+        .split('\n')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList(growable: false);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -49,8 +57,13 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
   Widget build(BuildContext context) {
     final isCorrect = widget.feedback.isCorrect;
     const correctColor = AppColors.correctAnswer;
-    const incorrectColor = AppColors.wrongAnswer;
     final scheme = Theme.of(context).colorScheme;
+    final onSurface = scheme.onSurface;
+    final mutedOnSurface = onSurface.withValues(alpha: 0.70);
+    final lines = _messageLines(widget.feedback.message);
+
+    final incorrectAccent = scheme.secondary;
+    final mainColor = isCorrect ? correctColor : incorrectAccent;
     final buttonBackgroundColor = isCorrect
         ? correctColor
         : (widget.continueButtonColor ?? Theme.of(context).colorScheme.primary);
@@ -71,12 +84,23 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Icon
             ExcludeSemantics(
-              child: Icon(
-                isCorrect ? Icons.check_circle : Icons.cancel,
-                color: isCorrect ? correctColor : incorrectColor,
-                size: AppConstants.feedbackDialogIconSize.sp,
+              child: Container(
+                width: (AppConstants.feedbackDialogIconSize + 16).sp,
+                height: (AppConstants.feedbackDialogIconSize + 16).sp,
+                decoration: BoxDecoration(
+                  color: mainColor.withValues(alpha: 0.14),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: mainColor.withValues(alpha: 0.35),
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  isCorrect ? Icons.check_rounded : Icons.psychology_alt_rounded,
+                  color: mainColor,
+                  size: AppConstants.feedbackDialogIconSize.sp,
+                ),
               ),
             ),
 
@@ -91,7 +115,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                   widget.feedback.title,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isCorrect ? correctColor : incorrectColor,
+                        color: mainColor,
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -104,13 +128,42 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
             Semantics(
               label: widget.feedback.message,
               child: ExcludeSemantics(
-                child: Text(
-                  widget.feedback.message,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: widget.messageTextColor ??
-                            scheme.onSurface.withValues(alpha: 0.70),
+                child: Column(
+                  children: [
+                    if (lines.isNotEmpty)
+                      Text(
+                        lines.first,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color:
+                                  widget.messageTextColor ?? mutedOnSurface,
+                              fontWeight: FontWeight.w700,
+                            ),
+                        textAlign: TextAlign.center,
                       ),
-                  textAlign: TextAlign.center,
+                    if (lines.length >= 2) ...[
+                      SizedBox(height: AppConstants.smallPadding.h),
+                      Text(
+                        lines[1],
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(
+                              color: onSurface,
+                              fontWeight: FontWeight.w900,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    if (lines.length >= 3) ...[
+                      SizedBox(height: AppConstants.defaultPadding.h),
+                      ..._buildExtraLines(
+                        context,
+                        lines.sublist(2),
+                        defaultColor: widget.messageTextColor ?? mutedOnSurface,
+                        accentColor: isCorrect ? correctColor : incorrectAccent,
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ),
@@ -130,7 +183,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 foregroundColor: WidgetStatePropertyAll(scheme.onPrimary),
               ),
               child: Text(
-                'Fortsätt',
+                'Nästa!',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: scheme.onPrimary,
                       fontWeight: FontWeight.bold,
@@ -141,5 +194,34 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
         ),
       ),
     );
+  }
+
+  List<Widget> _buildExtraLines(
+    BuildContext context,
+    List<String> extraLines, {
+    required Color defaultColor,
+    required Color accentColor,
+  }) {
+    final widgets = <Widget>[];
+
+    for (final line in extraLines) {
+      final isHintOrMeta = line.startsWith('💡') ||
+          line.startsWith('⚡') ||
+          line.startsWith('🔥') ||
+          line.startsWith('🪙');
+
+      widgets.add(
+        Text(
+          line,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: isHintOrMeta ? accentColor : defaultColor,
+                fontWeight: isHintOrMeta ? FontWeight.w800 : FontWeight.w600,
+              ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    return widgets;
   }
 }

@@ -24,6 +24,11 @@ class QuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final resolvedCardColor = (cardColor ?? scheme.surface).withValues(
+      alpha: 1.0,
+    );
+
     return Semantics(
       label: 'Fråga: ${question.questionText}. Vad blir resultatet?',
       child: ExcludeSemantics(
@@ -32,19 +37,14 @@ class QuestionCard extends StatelessWidget {
               EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding.w),
           padding: EdgeInsets.all(AppConstants.largePadding.w),
           decoration: BoxDecoration(
-            color: cardColor ?? Theme.of(context).colorScheme.surface,
+            color: resolvedCardColor,
             borderRadius: BorderRadius.circular(AppConstants.borderRadius * 2),
             border: Border.all(
-              color: borderColor ??
-                  Theme.of(context)
-                      .colorScheme
-                      .onPrimary
-                      .withValues(alpha: 0.12),
+              color: borderColor ?? scheme.onPrimary.withValues(alpha: 0.12),
             ),
             boxShadow: [
               BoxShadow(
-                color: (shadowColor ?? Theme.of(context).colorScheme.primary)
-                    .withValues(alpha: 0.18),
+                color: (shadowColor ?? scheme.primary).withValues(alpha: 0.18),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -55,16 +55,18 @@ class QuestionCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  question.operationType.emoji,
-                  style: Theme.of(context).textTheme.displayLarge,
+                  question.operationType.symbol,
+                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: questionTextColor ?? scheme.onSurface,
+                      ),
                 ),
                 SizedBox(height: AppConstants.defaultPadding.h),
                 Text(
                   question.questionText,
                   style: Theme.of(context).textTheme.displayLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: questionTextColor ??
-                            Theme.of(context).colorScheme.onSurface,
+                        color: questionTextColor ?? scheme.onSurface,
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -73,10 +75,7 @@ class QuestionCard extends StatelessWidget {
                   'Vad blir resultatet?',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: subtitleTextColor ??
-                            Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.70),
+                            scheme.onSurface.withValues(alpha: 0.70),
                       ),
                 ),
               ],

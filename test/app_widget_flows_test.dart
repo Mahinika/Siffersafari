@@ -87,27 +87,42 @@ class _InMemoryLocalStorageRepository extends LocalStorageRepository {
 }
 
 class _FakeQuestionGeneratorService extends QuestionGeneratorService {
+  static const Question _question = Question(
+    id: 'q1',
+    operationType: OperationType.multiplication,
+    difficulty: DifficultyLevel.easy,
+    operand1: 6,
+    operand2: 7,
+    correctAnswer: 42,
+    wrongAnswers: [41, 43, 40],
+    explanation: '6 × 7 = 42',
+  );
+
   @override
   List<Question> generateQuestions({
-    required ageGroup,
-    required operationType,
-    required difficulty,
+    required AgeGroup ageGroup,
+    required OperationType operationType,
+    required DifficultyLevel difficulty,
     required int count,
+    Map<OperationType, int>? difficultyStepsByOperation,
+    int? difficultyStep,
+    int? gradeLevel,
   }) {
     // Always generate a single deterministic question so the widget tests
     // can finish a quiz quickly and without randomness.
-    return const [
-      Question(
-        id: 'q1',
-        operationType: OperationType.multiplication,
-        difficulty: DifficultyLevel.easy,
-        operand1: 6,
-        operand2: 7,
-        correctAnswer: 42,
-        wrongAnswers: [41, 43, 40],
-        explanation: '6 × 7 = 42',
-      ),
-    ];
+    return const [_question];
+  }
+
+  @override
+  Question generateQuestion({
+    required AgeGroup ageGroup,
+    required OperationType operationType,
+    required DifficultyLevel difficulty,
+    Map<OperationType, int>? difficultyStepsByOperation,
+    int? difficultyStep,
+    int? gradeLevel,
+  }) {
+    return _question;
   }
 }
 
@@ -224,9 +239,9 @@ void main() {
         ),
       );
 
-      await pumpUntilFound(tester, find.text('Välj profil'));
+      await pumpUntilFound(tester, find.text('Välj spelare'));
 
-      expect(find.text('Välj profil'), findsOneWidget);
+      expect(find.text('Välj spelare'), findsOneWidget);
       expect(find.text('Alex'), findsOneWidget);
       expect(find.text('Sam'), findsOneWidget);
     },
@@ -277,24 +292,32 @@ void main() {
 
       expect(find.textContaining('Fråga'), findsOneWidget);
 
-      // Answer correctly (deterministic fake question: correctAnswer = 42).
-      await tester.ensureVisible(find.text('42'));
-      await tester.pump();
-      await tester.tap(find.text('42'));
-      await pumpUntilFound(tester, find.text('Fortsätt'));
+      // Complete the full session (AgeGroup.middle => 10 questions).
+      for (var i = 0; i < 10; i++) {
+        // Answer correctly (deterministic fake question: correctAnswer = 42).
+        await tester.ensureVisible(find.text('42'));
+        await tester.pump();
+        await tester.tap(find.text('42'));
+        await pumpUntilFound(tester, find.text('Nästa!'));
 
-      // Feedback dialog appears.
-      expect(find.text('Fortsätt'), findsOneWidget);
-      await tester.ensureVisible(find.text('Fortsätt'));
-      await tester.tap(find.text('Fortsätt'));
-      await pumpUntilFound(tester, find.text('Spela igen'));
+        // Feedback dialog appears.
+        expect(find.text('Nästa!'), findsOneWidget);
+        await tester.ensureVisible(find.text('Nästa!'));
+        await tester.tap(find.text('Nästa!'));
+
+        if (i < 9) {
+          await pumpUntilFound(tester, find.textContaining('Fråga'));
+        }
+      }
+
+      await pumpUntilFound(tester, find.textContaining('Spela igen'));
 
       // Should reach results.
-      expect(find.text('Spela igen'), findsOneWidget);
+      expect(find.textContaining('Spela igen'), findsOneWidget);
 
       // Practice again.
-      await tester.ensureVisible(find.text('Spela igen'));
-      await tester.tap(find.text('Spela igen'));
+      await tester.ensureVisible(find.textContaining('Spela igen'));
+      await tester.tap(find.textContaining('Spela igen'));
       await pumpUntilFound(tester, find.textContaining('Fråga'));
 
       expect(find.textContaining('Fråga'), findsOneWidget);
@@ -345,18 +368,24 @@ void main() {
       await pumpUntilFound(tester, find.textContaining('Fråga'));
       expect(find.textContaining('Fråga'), findsOneWidget);
 
-      // Answer correctly (deterministic fake question: correctAnswer = 42).
-      await tester.ensureVisible(find.text('42'));
-      await tester.pump();
-      await tester.tap(find.text('42'));
-      await pumpUntilFound(tester, find.text('Fortsätt'));
-      await tester.ensureVisible(find.text('Fortsätt'));
-      await tester.tap(find.text('Fortsätt'));
-      await pumpUntilFound(tester, find.text('Spela igen'));
+      // Complete the full session (AgeGroup.middle => 10 questions).
+      for (var i = 0; i < 10; i++) {
+        await tester.ensureVisible(find.text('42'));
+        await tester.pump();
+        await tester.tap(find.text('42'));
+        await pumpUntilFound(tester, find.text('Nästa!'));
+        await tester.ensureVisible(find.text('Nästa!'));
+        await tester.tap(find.text('Nästa!'));
+        if (i < 9) {
+          await pumpUntilFound(tester, find.textContaining('Fråga'));
+        }
+      }
 
-      // Start the focused mini-pass.
-      await tester.ensureVisible(find.text('Öva på det svåraste (2 min)'));
-      await tester.tap(find.text('Öva på det svåraste (2 min)'));
+      await pumpUntilFound(tester, find.textContaining('Spela igen'));
+
+      // Start the quick practice session.
+      await tester.ensureVisible(find.text('Snabbträna (2 min)'));
+      await tester.tap(find.text('Snabbträna (2 min)'));
       await pumpUntilFound(tester, find.textContaining('Fråga'));
 
       expect(find.textContaining('Fråga'), findsOneWidget);
@@ -406,22 +435,24 @@ void main() {
       await pumpUntilFound(tester, find.textContaining('Fråga'));
       expect(find.textContaining('Fråga'), findsOneWidget);
 
-      // Answer correctly quickly.
-      await tester.ensureVisible(find.text('42'));
-      await tester.pump();
-      await tester.tap(find.text('42'));
-      await pumpUntilFound(tester, find.text('Fortsätt'));
-      await tester.ensureVisible(find.text('Fortsätt'));
-      await tester.tap(find.text('Fortsätt'));
-      await pumpUntilFound(tester, find.text('Spela igen'));
+      // Complete the full session (AgeGroup.middle => 10 questions).
+      for (var i = 0; i < 10; i++) {
+        await tester.ensureVisible(find.text('42'));
+        await tester.pump();
+        await tester.tap(find.text('42'));
+        await pumpUntilFound(tester, find.text('Nästa!'));
+        await tester.ensureVisible(find.text('Nästa!'));
+        await tester.tap(find.text('Nästa!'));
+        if (i < 9) {
+          await pumpUntilFound(tester, find.textContaining('Fråga'));
+        }
+      }
 
-      // With no wrong answers and no slow answers, the hardest panel should show
-      // the empty-state message.
-      expect(find.text('Inget särskilt – riktigt bra jobbat!'), findsOneWidget);
+      await pumpUntilFound(tester, find.textContaining('Spela igen'));
 
-      // The focused mini-pass should still be available and start.
-      await tester.ensureVisible(find.text('Öva på det svåraste (2 min)'));
-      await tester.tap(find.text('Öva på det svåraste (2 min)'));
+      // Quick practice should still be available and start.
+      await tester.ensureVisible(find.text('Snabbträna (2 min)'));
+      await tester.tap(find.text('Snabbträna (2 min)'));
       await pumpUntilFound(tester, find.textContaining('Fråga'));
       expect(find.textContaining('Fråga'), findsOneWidget);
     },
@@ -552,13 +583,13 @@ void main() {
       );
 
       // Wait for onboarding (do NOT use pumpUntilFound; it auto-skips onboarding).
-      final onboardingTitle = find.text('Kom igång');
+      final onboardingTitle = find.text('Nu kör vi!');
       final steps = (const Duration(seconds: 4).inMilliseconds / 50).ceil();
       for (var i = 0; i < steps; i++) {
         if (onboardingTitle.evaluate().isNotEmpty) break;
         await tester.pump(const Duration(milliseconds: 50));
       }
-      expect(find.text('Kom igång'), findsOneWidget);
+      expect(find.text('Nu kör vi!'), findsOneWidget);
 
       // Finish onboarding quickly via skip.
       await tester.tap(find.text('Hoppa över'));
@@ -572,7 +603,7 @@ void main() {
       );
 
       await pumpFor(tester, const Duration(milliseconds: 800));
-      expect(find.text('Kom igång'), findsNothing);
+      expect(find.text('Nu kör vi!'), findsNothing);
     },
   );
 }

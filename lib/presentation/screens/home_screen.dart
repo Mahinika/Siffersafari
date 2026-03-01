@@ -34,13 +34,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   static String _onboardingDoneKey(String userId) => 'onboarding_done_$userId';
 
-  OperationType _recommendedOperation(Set<OperationType> allowedOps) {
-    const priority = <OperationType>[
-      OperationType.multiplication,
-      OperationType.addition,
-      OperationType.subtraction,
-      OperationType.division,
-    ];
+  OperationType _recommendedOperation({
+    required Set<OperationType> allowedOps,
+    required int? gradeLevel,
+  }) {
+    // If we know the child's grade, keep the recommendation conservative for
+    // younger grades.
+    final priority = (gradeLevel != null && gradeLevel <= 2)
+        ? const <OperationType>[
+            OperationType.addition,
+            OperationType.subtraction,
+            OperationType.multiplication,
+            OperationType.division,
+          ]
+        : const <OperationType>[
+            OperationType.multiplication,
+            OperationType.addition,
+            OperationType.subtraction,
+            OperationType.division,
+          ];
 
     for (final operation in priority) {
       if (allowedOps.contains(operation)) return operation;
@@ -66,7 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final user = ref.read(userProvider).activeUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Skapa en användare först.')),
+        const SnackBar(content: Text('Skapa en profil först!')),
       );
       context.pushSmooth(const SettingsScreen());
       return;
@@ -84,10 +96,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       gradeLevel: user.gradeLevel,
     );
 
+    final steps = DifficultyConfig.buildDifficultySteps(
+      storedSteps: user.operationDifficultySteps,
+      defaultDifficulty: effectiveDifficulty,
+    );
+
     ref.read(quizProvider.notifier).startSession(
           ageGroup: effectiveAgeGroup,
+          gradeLevel: user.gradeLevel,
           operationType: operationType,
           difficulty: effectiveDifficulty,
+          initialDifficultyStepsByOperation: steps,
         );
 
     context.pushSmooth(const QuizScreen());
@@ -144,7 +163,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       });
     }
 
-    final allowedOps = user == null
+    final parentAllowedOps = user == null
         ? <OperationType>{
             OperationType.addition,
             OperationType.subtraction,
@@ -158,6 +177,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               OperationType.multiplication,
               OperationType.division,
             });
+
+    final allowedOps = DifficultyConfig.effectiveAllowedOperations(
+      parentAllowedOperations: parentAllowedOps,
+      gradeLevel: user?.gradeLevel,
+    );
 
     final operationCards = <Widget>[];
     if (allowedOps.contains(OperationType.addition)) {
@@ -197,7 +221,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     }
 
-    final recommendedOperation = _recommendedOperation(allowedOps);
+    final recommendedOperation = _recommendedOperation(
+      allowedOps: allowedOps,
+      gradeLevel: user?.gradeLevel,
+    );
 
     return ThemedBackgroundScaffold(
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -232,7 +259,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Text(
               user != null
                   ? '👋 Hej ${user.name}!'
-                  : '🚀 Välkommen till mattespelet! 🚀',
+                  : '🚀 Dags för matte-äventyr! 🚀',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: mutedOnPrimary,
                   ),
@@ -258,7 +285,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onPressed: () {
                   showCreateUserDialog(context: context, ref: ref);
                 },
-                child: const Text('Skapa användare'),
+                child: const Text('Skapa profil'),
               ),
               const SizedBox(height: AppConstants.largePadding),
             ],
@@ -280,17 +307,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: [
                         _buildStatItem(
                           context,
-                          'Totala Poäng',
+                          'Poäng',
                           user.totalPoints.toString(),
                         ),
                         _buildStatItem(
                           context,
-                          'Streak',
+                          'Sviten',
                           '${user.currentStreak} 🔥',
                         ),
                         _buildStatItem(
                           context,
-                          'Quiz',
+                          'Rundor',
                           user.totalQuizzesTaken.toString(),
                         ),
                       ],
@@ -343,7 +370,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Aktivt uppdrag',
+                          'Ditt uppdrag',
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
                                     color: mutedOnPrimary,
@@ -365,7 +392,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(height: AppConstants.smallPadding),
                     Text(
                       userState.questStatus?.quest.title ??
-                          'Inget uppdrag valt ännu',
+                          'Välj ett uppdrag så kör vi!',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: mutedOnPrimary,
                             fontWeight: FontWeight.w600,
@@ -472,7 +499,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         const SizedBox(width: AppConstants.smallPadding),
                         Text(
-                          'Nästa uppdrag',
+                          'Nästa äventyr',
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
                                     color: mutedOnPrimary,
@@ -512,7 +539,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Framsteg',
+                          'På väg',
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: subtleOnPrimary,

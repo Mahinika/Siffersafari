@@ -8,19 +8,19 @@ part 'operation_type.g.dart';
 @HiveType(typeId: 2)
 enum OperationType {
   @HiveField(0)
-  addition('Addition', '+', '➕'),
+  addition('Plusraketer', '+', '🚀'),
 
   @HiveField(1)
-  subtraction('Subtraktion', '-', '➖'),
+  subtraction('Minusgrottor', '-', '🕳️'),
 
   @HiveField(2)
-  multiplication('Multiplikation', '×', '✖️'),
+  multiplication('Gånger-djungeln', '×', '🌿'),
 
   @HiveField(3)
-  division('Division', '÷', '➗'),
+  division('Delat-isbanan', '÷', '🧊'),
 
   @HiveField(4)
-  mixed('Blandad', '?', '🔀');
+  mixed('Mix-äventyret', '?', '🧩');
 
   const OperationType(this.displayName, this.symbol, this.emoji);
 

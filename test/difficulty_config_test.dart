@@ -5,6 +5,211 @@ import 'package:math_game_app/domain/enums/difficulty_level.dart';
 import 'package:math_game_app/domain/enums/operation_type.dart';
 
 void main() {
+  group('DifficultyConfig.effectiveAllowedOperations', () {
+    test('utan Åk: returnerar exakt parent set', () {
+      final parent = <OperationType>{
+        OperationType.division,
+      };
+
+      final effective = DifficultyConfig.effectiveAllowedOperations(
+        parentAllowedOperations: parent,
+        gradeLevel: null,
+      );
+
+      expect(effective, parent);
+    });
+
+    test('om Åk-filter ger tomt: faller tillbaka till parent set', () {
+      // Åk 1–2 visar normalt bara +/−, men om föräldern har valt bara ÷
+      // så ska ÷ ändå visas (föräldern har sista ordet).
+      final parent = <OperationType>{
+        OperationType.division,
+      };
+
+      final effective = DifficultyConfig.effectiveAllowedOperations(
+        parentAllowedOperations: parent,
+        gradeLevel: 1,
+      );
+
+      expect(effective, parent);
+      expect(effective.contains(OperationType.division), isTrue);
+    });
+  });
+
+  group('DifficultyConfig grade benchmark', () {
+    test('expectedDifficultyStepForGrade är konservativ i låg Åk', () {
+      expect(
+        DifficultyConfig.expectedDifficultyStepForGrade(
+          gradeLevel: 1,
+          operation: OperationType.addition,
+        ),
+        2,
+      );
+      expect(
+        DifficultyConfig.expectedDifficultyStepForGrade(
+          gradeLevel: 1,
+          operation: OperationType.division,
+        ),
+        1,
+      );
+    });
+
+    test('compareDifficultyStepToGrade klassar under/i linje/över', () {
+      // Åk 4: plus expected 5.
+      final expected = DifficultyConfig.expectedDifficultyStepForGrade(
+        gradeLevel: 4,
+        operation: OperationType.addition,
+      );
+      expect(expected, 5);
+
+      final under = DifficultyConfig.compareDifficultyStepToGrade(
+        gradeLevel: 4,
+        operation: OperationType.addition,
+        difficultyStep: expected - 3,
+      );
+      expect(under.level, GradeBenchmarkLevel.under);
+
+      final inline = DifficultyConfig.compareDifficultyStepToGrade(
+        gradeLevel: 4,
+        operation: OperationType.addition,
+        difficultyStep: expected + 1,
+      );
+      expect(inline.level, GradeBenchmarkLevel.inline);
+
+      // Med tolerans ±2 ska även +2 vara i linje.
+      final inline2 = DifficultyConfig.compareDifficultyStepToGrade(
+        gradeLevel: 4,
+        operation: OperationType.addition,
+        difficultyStep: expected + 2,
+      );
+      expect(inline2.level, GradeBenchmarkLevel.inline);
+
+      final over = DifficultyConfig.compareDifficultyStepToGrade(
+        gradeLevel: 4,
+        operation: OperationType.addition,
+        difficultyStep: expected + 3,
+      );
+      expect(over.level, GradeBenchmarkLevel.over);
+    });
+  });
+
+  group('DifficultyConfig.parentSuggestedAdjustmentSteps', () {
+    test('returnerar större steg när man rör sig mot indikatorn', () {
+      // Under (delta=-6): om föräldern trycker "Svårare" -> större steg.
+      const under = GradeBenchmark(
+        expectedStep: 6,
+        actualStep: 0,
+        delta: -6,
+        level: GradeBenchmarkLevel.under,
+      );
+      expect(
+        DifficultyConfig.parentSuggestedAdjustmentSteps(
+          benchmark: under,
+          makeHarder: true,
+        ),
+        3,
+      );
+
+      // Over (delta=+4): om föräldern trycker "Lättare" -> större steg.
+      const over = GradeBenchmark(
+        expectedStep: 4,
+        actualStep: 8,
+        delta: 4,
+        level: GradeBenchmarkLevel.over,
+      );
+      expect(
+        DifficultyConfig.parentSuggestedAdjustmentSteps(
+          benchmark: over,
+          makeHarder: false,
+        ),
+        2,
+      );
+    });
+
+    test('är försiktig (1 steg) om föräldern går emot indikatorn', () {
+      const under = GradeBenchmark(
+        expectedStep: 5,
+        actualStep: 2,
+        delta: -3,
+        level: GradeBenchmarkLevel.under,
+      );
+      expect(
+        DifficultyConfig.parentSuggestedAdjustmentSteps(
+          benchmark: under,
+          makeHarder: false,
+        ),
+        1,
+      );
+    });
+  });
+
+  group('DifficultyConfig.recommendedDifficultyStepForTraining', () {
+    test('returnerar null om data saknas', () {
+      expect(
+        DifficultyConfig.recommendedDifficultyStepForTraining(
+          currentStep: 5,
+          averageSuccessRate: null,
+        ),
+        isNull,
+      );
+    });
+
+    test('håller steget nära 85% och justerar i små steg', () {
+      expect(
+        DifficultyConfig.recommendedDifficultyStepForTraining(
+          currentStep: 5,
+          averageSuccessRate: 0.85,
+        ),
+        5,
+      );
+      expect(
+        DifficultyConfig.recommendedDifficultyStepForTraining(
+          currentStep: 5,
+          averageSuccessRate: 0.90,
+        ),
+        6,
+      );
+      expect(
+        DifficultyConfig.recommendedDifficultyStepForTraining(
+          currentStep: 5,
+          averageSuccessRate: 0.96,
+        ),
+        7,
+      );
+      expect(
+        DifficultyConfig.recommendedDifficultyStepForTraining(
+          currentStep: 5,
+          averageSuccessRate: 0.80,
+        ),
+        4,
+      );
+      expect(
+        DifficultyConfig.recommendedDifficultyStepForTraining(
+          currentStep: 5,
+          averageSuccessRate: 0.60,
+        ),
+        3,
+      );
+    });
+
+    test('clamp: går aldrig under 1 eller över 10', () {
+      expect(
+        DifficultyConfig.recommendedDifficultyStepForTraining(
+          currentStep: 10,
+          averageSuccessRate: 0.99,
+        ),
+        10,
+      );
+      expect(
+        DifficultyConfig.recommendedDifficultyStepForTraining(
+          currentStep: 1,
+          averageSuccessRate: 0.0,
+        ),
+        1,
+      );
+    });
+  });
+
   group('DifficultyConfig.effectiveAgeGroup', () {
     test('använder fallback när gradeLevel saknas', () {
       expect(

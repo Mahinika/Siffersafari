@@ -1,10 +1,10 @@
 # Siffersafari
 
-Ett pedagogiskt mattespel för barn (6-13+ år) som lär grundläggande matematik genom interaktiva övningar, quiz och progressionssystem.
+Ett pedagogiskt mattespel för barn (6–12 år) som lär grundläggande matematik genom interaktiva övningar, quiz och progressionssystem.
 
 Fokus: **Android-only**, **offline-first**, flera barnprofiler.
 
-## Status (2026-02-28)
+## Status (2026-03-01)
 
 Projektet är i ett fungerande MVP+-läge med:
 - Quizflöde (hem → quiz → resultat)
@@ -12,14 +12,14 @@ Projektet är i ett fungerande MVP+-läge med:
 - Profilval vid start när flera profiler finns
 - Enkel profil-avatar (emoji) per barn
 - Årskurs per användare (Åk 1-9) som styr effektiv svårighet
-- Progression (poäng, nivå, titel, medalj, streak)
+- Progression (poäng, nivå, titel, medalj, svit/streak, snabbbonus ⚡)
 - Föräldraläge (PIN, dashboard, rekommenderad övning, räknesätt per användare)
 	- PIN lagras som **SHA-256-hash** (inte klartext)
 	- **Rate-limiting**: 5 felaktiga försök → 5 min lockout
 - Onboarding och widget-test
 - Global felhantering (för bättre diagnostik vid oväntade fel)
 
-Senaste verifiering: 52 tester passerar, 0 fail.
+Senaste verifiering: alla tester passerar lokalt (senast 2026-03-01).
 
 ## Funktioner
 
@@ -29,7 +29,7 @@ Senaste verifiering: 52 tester passerar, 0 fail.
 - **Föräldra/Lärardashboard**: Detaljerad analys och framstegsvisualisering
 - **Lokal datalagring (Hive)**: Kärnflödet använder lokal persistens
 - **Temabaserad Design**: Engagerande teman (rymd, djungel)
-- **Belöningssystem**: Stjärnor, medaljer, streaks för motivation
+- **Belöningssystem**: Stjärnor, medaljer, svit/streak och snabbbonus ⚡ för motivation
 
 ## Känd scope just nu
 

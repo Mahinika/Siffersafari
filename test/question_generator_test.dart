@@ -98,10 +98,14 @@ void main() {
         count: 20,
       );
 
-      final range = DifficultyConfig.getNumberRange(
+      // Generatorn använder interna difficulty-steps och interpolerar mellan
+      // easy/medium/hard. Verifiera därför mot step-baserad range.
+      final step =
+          DifficultyConfig.initialStepForDifficulty(DifficultyLevel.easy);
+      final range = DifficultyConfig.getNumberRangeForStep(
         AgeGroup.young,
         OperationType.addition,
-        DifficultyLevel.easy,
+        step,
       );
 
       for (final question in questions) {

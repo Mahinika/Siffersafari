@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/config/difficulty_config.dart';
 import '../../core/di/injection.dart';
 import '../../core/services/achievement_service.dart';
 import '../../core/services/audio_service.dart';
@@ -9,6 +10,7 @@ import '../../domain/entities/quest.dart';
 import '../../domain/entities/quiz_session.dart';
 import '../../domain/entities/user_progress.dart';
 import '../../domain/enums/age_group.dart';
+import '../../domain/enums/operation_type.dart';
 
 class UserState {
   const UserState({
@@ -73,6 +75,44 @@ class UserNotifier extends StateNotifier<UserState> {
   final AudioService _audioService;
   final QuestProgressionService _questProgressionService;
 
+  static const _baseOperations = <OperationType>{
+    OperationType.addition,
+    OperationType.subtraction,
+    OperationType.multiplication,
+    OperationType.division,
+  };
+
+  Set<OperationType> _readParentAllowedOperations(String userId) {
+    final raw = _repository.getSetting(_allowedOpsKey(userId));
+    if (raw is List) {
+      final ops = raw
+          .whereType<String>()
+          .map(_operationFromName)
+          .whereType<OperationType>()
+          .where(_baseOperations.contains)
+          .toSet();
+
+      if (ops.isNotEmpty) return ops;
+    }
+
+    return {..._baseOperations};
+  }
+
+  OperationType? _operationFromName(String name) {
+    for (final op in OperationType.values) {
+      if (op.name == name) return op;
+    }
+    return null;
+  }
+
+  Set<OperationType> _effectiveAllowedOperationsFor(UserProgress user) {
+    final parentAllowed = _readParentAllowedOperations(user.userId);
+    return DifficultyConfig.effectiveAllowedOperations(
+      parentAllowedOperations: parentAllowed,
+      gradeLevel: user.gradeLevel,
+    );
+  }
+
   Set<String> _readCompletedQuestIds(String userId) {
     final raw = _repository.getSetting(_questCompletedKey(userId));
     if (raw is List) {
@@ -90,9 +130,14 @@ class UserNotifier extends StateNotifier<UserState> {
   Future<void> _ensureQuestInitialized(UserProgress user) async {
     final current = _readCurrentQuestId(user.userId);
     if (current != null) return;
+
+    final allowedOps = _effectiveAllowedOperationsFor(user);
     await _repository.saveSetting(
       _questCurrentKey(user.userId),
-      _questProgressionService.firstQuestId(user),
+      _questProgressionService.firstQuestId(
+        user,
+        allowedOperations: allowedOps,
+      ),
     );
     await _repository.saveSetting(_questCompletedKey(user.userId), <String>[]);
   }
@@ -116,10 +161,13 @@ class UserNotifier extends StateNotifier<UserState> {
 
     final completed = _readCompletedQuestIds(user.userId);
     final current = _readCurrentQuestId(user.userId);
+
+    final allowedOps = _effectiveAllowedOperationsFor(user);
     final status = _questProgressionService.getCurrentStatus(
       user: user,
       currentQuestId: current,
       completedQuestIds: completed,
+      allowedOperations: allowedOps,
     );
 
     if (current != status.quest.id) {
@@ -192,8 +240,8 @@ class UserNotifier extends StateNotifier<UserState> {
             )
         : null;
 
-    final activeUser = storedActiveUser ??
-      (users.length == 1 ? users.first : null);
+    final activeUser =
+        storedActiveUser ?? (users.length == 1 ? users.first : null);
 
     if (activeUser != null) {
       _syncAudioSettings(activeUser);
@@ -206,6 +254,7 @@ class UserNotifier extends StateNotifier<UserState> {
             user: activeUser,
             currentQuestId: _readCurrentQuestId(activeUser.userId),
             completedQuestIds: _readCompletedQuestIds(activeUser.userId),
+            allowedOperations: _effectiveAllowedOperationsFor(activeUser),
           );
 
     state = state.copyWith(
@@ -230,10 +279,13 @@ class UserNotifier extends StateNotifier<UserState> {
 
     _syncAudioSettings(user);
     await _reconcileQuestPointer(user);
+
+    final allowedOps = _effectiveAllowedOperationsFor(user);
     final questStatus = _questProgressionService.getCurrentStatus(
       user: user,
       currentQuestId: _readCurrentQuestId(user.userId),
       completedQuestIds: _readCompletedQuestIds(user.userId),
+      allowedOperations: allowedOps,
     );
     await _repository.saveSetting(_activeUserIdKey, userId);
     state = state.copyWith(activeUser: user, questStatus: questStatus);
@@ -305,6 +357,13 @@ class UserNotifier extends StateNotifier<UserState> {
       ...reward.unlockedIds.where((id) => !user.achievements.contains(id)),
     ];
 
+    final updatedSteps = {
+      ...user.operationDifficultySteps,
+      ...session.difficultyStepsByOperation.map(
+        (k, v) => MapEntry(k.name, v),
+      ),
+    };
+
     final updatedUser = user.copyWith(
       totalQuizzesTaken: user.totalQuizzesTaken + 1,
       totalQuestionsAnswered:
@@ -316,17 +375,24 @@ class UserNotifier extends StateNotifier<UserState> {
       lastSessionDate: now,
       masteryLevels: updatedMastery,
       achievements: updatedAchievements,
+      operationDifficultySteps: updatedSteps,
     );
 
     await _reconcileQuestPointer(user);
     final completedQuestIds = _readCompletedQuestIds(user.userId);
     final currentQuestId = _readCurrentQuestId(user.userId) ??
-        _questProgressionService.firstQuestId(user);
+        _questProgressionService.firstQuestId(
+          user,
+          allowedOperations: _effectiveAllowedOperationsFor(user),
+        );
+
+    final allowedOps = _effectiveAllowedOperationsFor(updatedUser);
 
     final beforeQuestStatus = _questProgressionService.getCurrentStatus(
       user: updatedUser,
       currentQuestId: currentQuestId,
       completedQuestIds: completedQuestIds,
+      allowedOperations: allowedOps,
     );
 
     // If current quest is completed, mark it done and advance.
@@ -339,6 +405,7 @@ class UserNotifier extends StateNotifier<UserState> {
       final nextId = _questProgressionService.nextQuestId(
         user: updatedUser,
         currentQuestId: beforeQuestStatus.quest.id,
+        allowedOperations: allowedOps,
       );
       await _setQuestState(
         userId: user.userId,
@@ -355,6 +422,7 @@ class UserNotifier extends StateNotifier<UserState> {
       user: updatedUser,
       currentQuestId: _readCurrentQuestId(user.userId),
       completedQuestIds: _readCompletedQuestIds(user.userId),
+      allowedOperations: allowedOps,
     );
 
     // Save a lightweight quiz history record (for parent/teacher dashboard).

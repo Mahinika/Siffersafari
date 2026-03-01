@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
 import '../../core/providers/parent_settings_provider.dart';
@@ -80,6 +81,7 @@ class _DashboardBody extends ConsumerWidget {
     final user = ref.watch(userProvider).activeUser!;
     final repo = getIt<LocalStorageRepository>();
     final history = repo.getQuizHistory(userId, limit: 5);
+    final recentHistory = repo.getQuizHistory(userId, limit: 50);
     final weakestAreas = _computeWeakestAreas(user.masteryLevels);
 
     final settingsNotifier = ref.read(parentSettingsProvider.notifier);
@@ -221,6 +223,30 @@ class _DashboardBody extends ConsumerWidget {
                     ),
               ),
               const SizedBox(height: AppConstants.smallPadding),
+              if (user.gradeLevel == null)
+                Padding(
+                  padding:
+                      const EdgeInsets.only(bottom: AppConstants.defaultPadding),
+                  child: Text(
+                    'Sätt Årskurs (Åk) för att få en enkel Under/I linje/Över-indikator.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: mutedOnPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                )
+              else
+                Padding(
+                  padding:
+                      const EdgeInsets.only(bottom: AppConstants.defaultPadding),
+                  child: _BenchmarkSection(
+                    userId: user.userId,
+                    gradeLevel: user.gradeLevel!,
+                    allowedOperations: allowedOps,
+                    storedSteps: user.operationDifficultySteps,
+                    quizHistory: recentHistory,
+                  ),
+                ),
               if (weakestAreas.isEmpty)
                 Text(
                   'Spela några quiz till för att få rekommendationer.',
@@ -501,5 +527,237 @@ class _HistoryRow extends StatelessWidget {
       default:
         return raw;
     }
+  }
+}
+
+class _BenchmarkSection extends ConsumerWidget {
+  const _BenchmarkSection({
+    required this.userId,
+    required this.gradeLevel,
+    required this.allowedOperations,
+    required this.storedSteps,
+    required this.quizHistory,
+  });
+
+  final String userId;
+  final int gradeLevel;
+  final Set<OperationType> allowedOperations;
+  final Map<String, int> storedSteps;
+  final List<Map<String, dynamic>> quizHistory;
+
+  List<Map<String, dynamic>> _latestSessionsFor(OperationType op) {
+    final sessions = <Map<String, dynamic>>[];
+    for (final s in quizHistory) {
+      if (s['operationType'] != op.name) continue;
+      sessions.add(s);
+      if (sessions.length >= DifficultyConfig.trainingRecommendationWindow) {
+        break;
+      }
+    }
+    return sessions;
+  }
+
+  double? _averageSuccessRate(List<Map<String, dynamic>> sessions) {
+    if (sessions.isEmpty) return null;
+
+    var sum = 0.0;
+    var count = 0;
+    for (final s in sessions) {
+      final v = s['successRate'];
+      final rate = switch (v) {
+        num n => n.toDouble(),
+        String str => double.tryParse(str),
+        _ => null,
+      };
+      if (rate == null) continue;
+      sum += rate;
+      count++;
+    }
+
+    if (count == 0) return null;
+    return sum / count;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final subtleOnPrimary = onPrimary.withValues(alpha: 0.54);
+    final user = ref.watch(userProvider).activeUser;
+
+    final ops = <OperationType>[
+      OperationType.addition,
+      OperationType.subtraction,
+      OperationType.multiplication,
+      OperationType.division,
+    ].where(allowedOperations.contains).toList(growable: false);
+
+    Future<void> updateStep(OperationType op, int delta) async {
+      final currentUser = user;
+      if (currentUser == null || currentUser.userId != userId) return;
+
+      final currentStoredSteps = currentUser.operationDifficultySteps;
+      final currentStep = DifficultyConfig.clampDifficultyStep(
+        currentStoredSteps[op.name] ?? 2,
+      );
+      final nextStep = DifficultyConfig.clampDifficultyStep(currentStep + delta);
+      if (nextStep == currentStep) return;
+
+      final updatedSteps = {
+        ...currentStoredSteps,
+        op.name: nextStep,
+      };
+
+      await ref
+          .read(userProvider.notifier)
+          .saveUser(currentUser.copyWith(operationDifficultySteps: updatedSteps));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Skolverket-indikator (Åk $gradeLevel)',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: mutedOnPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        const SizedBox(height: AppConstants.smallPadding),
+        Text(
+          'Baserat på appens interna nivå (steg 1–10) per räknesätt.',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: subtleOnPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'Rekommenderat steg bygger på snitt av senaste 3 quiz (mål: 85% rätt).',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: subtleOnPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const SizedBox(height: AppConstants.smallPadding),
+        ...ops.map((op) {
+          final latest = _latestSessionsFor(op);
+          final hasData = latest.isNotEmpty;
+          final step = hasData ? storedSteps[op.name] : null;
+          final benchmark = step == null
+              ? null
+              : DifficultyConfig.compareDifficultyStepToGrade(
+                  gradeLevel: gradeLevel,
+                  operation: op,
+                  difficultyStep: step,
+                );
+          final currentStep = step == null
+              ? null
+              : DifficultyConfig.clampDifficultyStep(step);
+          final avg = _averageSuccessRate(latest);
+          final recommendedStep = currentStep == null
+              ? null
+              : DifficultyConfig.recommendedDifficultyStepForTraining(
+                  currentStep: currentStep,
+                  averageSuccessRate: avg,
+                );
+          final valueText = benchmark == null
+              ? 'Ingen data än'
+              : DifficultyConfig.benchmarkLevelLabel(benchmark.level);
+          final recommendationText = benchmark == null
+              ? ''
+              : DifficultyConfig.benchmarkRecommendationText(
+                  level: benchmark.level,
+                  operation: op,
+                );
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        op.displayName,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: mutedOnPrimary,
+                            ),
+                      ),
+                    ),
+                    const SizedBox(width: AppConstants.smallPadding),
+                    Text(
+                      valueText,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+                if (benchmark != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (currentStep != null && recommendedStep != null)
+                          Text(
+                            'Nu: Steg $currentStep • Rekommenderat (85%): Steg $recommendedStep',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: subtleOnPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: (currentStep == null ||
+                                        currentStep <=
+                                            DifficultyConfig.minDifficultyStep)
+                                    ? null
+                                    : () => updateStep(op, -1),
+                                child: const Text('Lättare'),
+                              ),
+                            ),
+                            const SizedBox(width: AppConstants.smallPadding),
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: (currentStep == null ||
+                                        currentStep >=
+                                            DifficultyConfig.maxDifficultyStep)
+                                    ? null
+                                    : () => updateStep(op, 1),
+                                child: const Text('Svårare'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                if (benchmark != null &&
+                    benchmark.level != GradeBenchmarkLevel.inline &&
+                    recommendationText.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      recommendationText,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: subtleOnPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
   }
 }

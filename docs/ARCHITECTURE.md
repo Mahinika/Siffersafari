@@ -197,7 +197,7 @@ sequenceDiagram
 
 ## Översikt
 
-Detta är ett pedagogiskt mattespel för barn (6-13+ år) som bygger på vetenskaplig forskning om effektiv inlärning av matematik.
+Detta är ett pedagogiskt mattespel för barn (6–12 år) som bygger på vetenskaplig forskning om effektiv inlärning av matematik.
 
 ## Projektstruktur
 
@@ -225,24 +225,20 @@ lib/
 ├── domain/                    # Ren affärslogik (Flutter-fritt)
 │   ├── constants/
 │   │   └── learning_constants.dart
-│   └── services/
-│       ├── adaptive_difficulty_service.dart
-│       ├── spaced_repetition_service.dart
-│       ├── feedback_service.dart
-│       └── parent_pin_service.dart
-│
-├── domain/                    # Domänlogik
 │   ├── entities/             # Entiteter
 │   │   ├── question.dart
 │   │   ├── user_progress.dart
 │   │   └── quiz_session.dart
-│   └── enums/                # Enums
-│       ├── age_group.dart
-│       ├── operation_type.dart
-│       ├── difficulty_level.dart
-│       ├── app_theme.dart
-│       └── mastery_level.dart
-│   └── services/              # Domain services
+│   ├── enums/                # Enums
+│   │   ├── age_group.dart
+│   │   ├── operation_type.dart
+│   │   ├── difficulty_level.dart
+│   │   ├── app_theme.dart
+│   │   └── mastery_level.dart
+│   └── services/
+│       ├── adaptive_difficulty_service.dart
+│       ├── spaced_repetition_service.dart
+│       ├── feedback_service.dart
 │       └── parent_pin_service.dart
 │
 └── presentation/              # Presentation/UI
@@ -267,7 +263,7 @@ lib/
 ### Fas 2: Kärn-Lärsystem (Vecka 3-4)
 
 #### 1. Adaptivt Svårighetssystem
-- **Fil:** `lib/core/services/adaptive_difficulty_service.dart`
+- **Fil:** `lib/domain/services/adaptive_difficulty_service.dart`
 - **Funktionalitet:**
   - Spåra användarens prestanda över senaste 5-10 frågorna
   - Justera svårighetsgrad baserat på framgångsfrekvens
@@ -276,7 +272,7 @@ lib/
   - Om <60% korrekt → minska svårighetsgrad
 
 #### 2. Spaced Repetition System
-- **Fil:** `lib/core/services/spaced_repetition_service.dart`
+- **Fil:** `lib/domain/services/spaced_repetition_service.dart`
 - **Funktionalitet:**
   - Algoritm för att schemalägga repetition av tidigare frågor
   - Intervaller: 2-3 dagar → 1 vecka → 2 veckor
@@ -284,7 +280,7 @@ lib/
   - Balansera nya koncept (70%) med repetition (30%)
 
 #### 3. Feedback-system
-- **Fil:** `lib/core/services/feedback_service.dart`
+- **Fil:** `lib/domain/services/feedback_service.dart`
 - **Funktionalitet:**
   - Generera specifik, konstruktiv feedback för varje fråga
   - Förklara konceptet bakom rätt/fel svar

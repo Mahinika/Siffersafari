@@ -1,4 +1,4 @@
-# Implementeringsstatus - 2026-02-28
+# Implementeringsstatus - 2026-03-01
 
 ## Översikt
 Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräldraläge, onboarding, widget-test och stabil lokal persistens.
@@ -30,6 +30,7 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 - `HomeScreen`, `QuizScreen`, `ResultsScreen`, `SettingsScreen`
 - “Öva mer” startar nytt quiz med samma operation och effektiv svårighet (inkl. årskurs)
 - Återanvändbara widgets (`QuestionCard`, `AnswerButton`, `FeedbackDialog`, `ProgressIndicatorBar`, `StarRating`)
+- Quiz får “spel-lager”: HUD (värld + ⚡/🔥), uppdragstext och korta micro-meddelanden vid milstolpar
 - Riverpod providers för quiz, user, difficulty och parent settings
 - Navigering mellan vyer och stabilt quiz→resultat-flöde
 - Persistens av användardata och quizhistorik efter omstart
@@ -41,7 +42,7 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 
 ### Fas 4: Progression & belöningar
 - Nivåsystem (nivå + titel + progress)
-- Belöningssystem (poäng, medaljindikator, streak)
+- Belöningssystem (poäng, medaljindikator, svit/streak, snabbbonus ⚡)
 - Ljud i flödet (rätt/fel/celebration)
 - Achievement-system
 - “Nästa mål”-visning på hemvyn
@@ -73,10 +74,11 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 
 ---
 
-## ✅ Nyligen färdigställt och stabiliserat (2026-02-28)
+## ✅ Nyligen färdigställt och stabiliserat (2026-03-01)
 - **Global felhantering** i main.dart för proaktiv diagnostik och crashprevention
 - **Säker PIN-lagring** med SHA-256 hash + rate-limiting (5 försök → 5 min lockout)
 - `ParentPinService` skapad i domain/services med full testning
+- Lekigare quiz-feedback: snabbbonus ⚡, svit 🔥 och mjuk “ny svit på gång” när sviten bryts
 - Demo-seed borttaget (ingen automatisk demo-användare skapas)
 - Multi-user stöd (skapa/välj aktiv användare)
 - Aktiv användare persisteras (`active_user_id`)
@@ -107,4 +109,4 @@ Projektet är i ett fungerande MVP+-läge med kärnflöde, progression, föräld
 ---
 
 ## Kommentar
-Detta dokument är uppdaterat per 2026-02-28 efter implementering av global felhantering och säker PIN-lagring, samt efter stabilisering av multi-user/profilval och Pixel_6-flödet.
+Detta dokument är uppdaterat per 2026-03-01 efter att quizet fått mer “spel-känsla” (HUD/uppdrag/micro-feedback) och snabbbonus/svit-koppling till feedback/resultat.

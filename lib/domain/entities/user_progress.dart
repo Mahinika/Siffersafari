@@ -31,6 +31,7 @@ class UserProgress extends Equatable {
     this.unlockedThemes = const [AppTheme.space],
     this.achievements = const [],
     this.masteryLevels = const {},
+    this.operationDifficultySteps = const {},
   });
 
   @HiveField(0)
@@ -93,6 +94,11 @@ class UserProgress extends Equatable {
   @HiveField(16)
   final Map<String, double>
       masteryLevels; // Key: "operation_difficulty", Value: success rate
+
+  /// Internal adaptive difficulty steps (1..10) per operation.
+  /// Key: operation name (e.g. "addition"), Value: step.
+  @HiveField(19)
+  final Map<String, int> operationDifficultySteps;
 
   static const int pointsPerLevel = 200;
 
@@ -169,6 +175,7 @@ class UserProgress extends Equatable {
     List<AppTheme>? unlockedThemes,
     List<String>? achievements,
     Map<String, double>? masteryLevels,
+    Map<String, int>? operationDifficultySteps,
   }) {
     return UserProgress(
       userId: userId ?? this.userId,
@@ -191,6 +198,8 @@ class UserProgress extends Equatable {
       unlockedThemes: unlockedThemes ?? this.unlockedThemes,
       achievements: achievements ?? this.achievements,
       masteryLevels: masteryLevels ?? this.masteryLevels,
+      operationDifficultySteps:
+          operationDifficultySteps ?? this.operationDifficultySteps,
     );
   }
 
@@ -215,5 +224,6 @@ class UserProgress extends Equatable {
         unlockedThemes,
         achievements,
         masteryLevels,
+        operationDifficultySteps,
       ];
 }

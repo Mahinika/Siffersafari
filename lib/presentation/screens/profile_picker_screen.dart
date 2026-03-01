@@ -20,12 +20,12 @@ class ProfilePickerScreen extends ConsumerWidget {
     final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
 
     return ThemedBackgroundScaffold(
-      appBar: AppBar(title: const Text('Välj profil')),
+      appBar: AppBar(title: const Text('Välj spelare')),
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
       body: users.isEmpty
           ? Center(
               child: Text(
-                'Inga profiler ännu.\nBe en förälder skapa en profil.',
+                'Inga spelare ännu.\nBe en förälder skapa en profil.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: mutedOnPrimary,
@@ -37,7 +37,7 @@ class ProfilePickerScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Vem ska spela?',
+                  'Vem vill spela?',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: onPrimary,
                         fontWeight: FontWeight.bold,

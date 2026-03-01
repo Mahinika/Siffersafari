@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:math_game_app/core/services/quest_progression_service.dart';
 import 'package:math_game_app/domain/entities/user_progress.dart';
 import 'package:math_game_app/domain/enums/age_group.dart';
+import 'package:math_game_app/domain/enums/operation_type.dart';
 
 void main() {
   group('QuestProgressionService', () {
@@ -45,6 +46,28 @@ void main() {
       );
       expect(nextAfterDivEasy, isNull);
     });
+
+    test(
+      'Unit (QuestProgressionService): kan filtrera quests till endast division (föräldern har sista ordet)',
+      () {
+        const user = UserProgress(
+          userId: 'u1',
+          name: 'Test',
+          ageGroup: AgeGroup.middle,
+          gradeLevel: 1,
+        );
+
+        final status = service.getCurrentStatus(
+          user: user,
+          currentQuestId: null,
+          completedQuestIds: <String>{},
+          allowedOperations: {OperationType.division},
+        );
+
+        expect(status.quest.operation, OperationType.division);
+        expect(status.quest.id, 'q_div_easy');
+      },
+    );
 
     test(
       'Unit (QuestProgressionService): väljer första quest om currentQuestId ligger utanför path',

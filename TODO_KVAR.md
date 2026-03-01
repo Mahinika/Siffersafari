@@ -28,4 +28,4 @@ Denna fil samlar alla **oklara** checkboxar från TODO.md.
 
 ---
 
-**Senast uppdaterad:** 2026-02-28 (efter implementering av global felhantering + säker PIN)
+**Senast uppdaterad:** 2026-03-01 (inkl. uppdaterad dokumentation och senaste quiz-“spel-lager”)

@@ -38,10 +38,7 @@ class ThemedBackgroundScaffold extends ConsumerWidget {
               cfg.backgroundAsset,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
-                return Image.asset(
-                  'assets/images/splash_background.png',
-                  fit: BoxFit.cover,
-                );
+                return ColoredBox(color: cfg.baseBackgroundColor);
               },
             ),
           ),

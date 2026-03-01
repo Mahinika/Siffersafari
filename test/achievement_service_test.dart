@@ -23,9 +23,11 @@ void main() {
 
       const session = QuizSession(
         sessionId: 's1',
+        ageGroup: AgeGroup.middle,
         operationType: OperationType.addition,
         difficulty: DifficultyLevel.easy,
         questions: [],
+        targetQuestionCount: 0,
         correctAnswers: 0,
         wrongAnswers: 0,
         totalPoints: 0,

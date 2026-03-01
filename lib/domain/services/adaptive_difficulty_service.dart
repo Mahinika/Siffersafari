@@ -10,6 +10,31 @@ class AdaptiveDifficultyService {
     return correctCount / recentResults.length;
   }
 
+  /// Suggest a new internal difficulty step (e.g. 1..10) based on recent
+  /// performance.
+  int suggestDifficultyStep({
+    required int currentStep,
+    required List<bool> recentResults,
+    required int minStep,
+    required int maxStep,
+  }) {
+    if (recentResults.length < LearningConstants.questionsBeforeAdjustment) {
+      return currentStep.clamp(minStep, maxStep);
+    }
+
+    final successRate = calculateSuccessRate(recentResults);
+
+    if (successRate >= LearningConstants.difficultyIncreaseThreshold) {
+      return (currentStep + 1).clamp(minStep, maxStep);
+    }
+
+    if (successRate <= LearningConstants.difficultyDecreaseThreshold) {
+      return (currentStep - 1).clamp(minStep, maxStep);
+    }
+
+    return currentStep.clamp(minStep, maxStep);
+  }
+
   /// Suggest new difficulty based on recent performance
   DifficultyLevel suggestDifficulty({
     required DifficultyLevel currentDifficulty,

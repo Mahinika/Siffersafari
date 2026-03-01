@@ -6,10 +6,10 @@ import 'package:lottie/lottie.dart';
 import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
+import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
-import '../../core/services/achievement_service.dart';
 import '../../core/services/audio_service.dart';
 import '../../domain/entities/question.dart';
 import '../../domain/entities/quiz_session.dart';
@@ -164,6 +164,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final session = quizState.session;
     final reward = userState.lastReward;
 
+    final themeCfg = ref.watch(appThemeConfigProvider);
+
     final scheme = Theme.of(context).colorScheme;
     final onPrimary = scheme.onPrimary;
     final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
@@ -187,6 +189,18 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final stars = _calculateStars(session.successRate);
     final timeText = _formatDuration(session.sessionDuration);
     final hardest = _getHardestQuestions(session);
+    final bonusPoints = reward?.bonusPoints ?? 0;
+    final totalPoints = session.totalPoints + bonusPoints;
+    final panelColor = themeCfg.cardColor.withValues(alpha: 1.0);
+    final didUnlockSomething = reward?.unlockedIds.isNotEmpty ?? false;
+
+    final badgeTeaser = _buildBadgeTeaser(
+      session: session,
+      quizState: quizState,
+      stars: stars,
+      bonusPoints: bonusPoints,
+      didUnlockSomething: didUnlockSomething,
+    );
 
     return ThemedBackgroundScaffold(
       body: LayoutBuilder(
@@ -211,85 +225,96 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                   SizedBox(height: AppConstants.largePadding.h),
 
                   if (shouldCelebrate) ...[
-                    SizedBox(
-                      height: 140.h,
-                      child: Lottie.asset(
-                        'assets/animations/celebration.json',
-                        fit: BoxFit.contain,
-                        repeat: false,
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 650),
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      curve: Curves.easeOutBack,
+                      builder: (context, t, child) {
+                        final scale = 0.85 + (0.15 * t);
+                        return Opacity(
+                          opacity: t.clamp(0.0, 1.0),
+                          child: Transform.scale(
+                            scale: scale,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: SizedBox(
+                        height: 150.h,
+                        child: Lottie.asset(
+                          'assets/animations/celebration.json',
+                          fit: BoxFit.contain,
+                          repeat: false,
+                        ),
                       ),
                     ),
-                    SizedBox(height: AppConstants.largePadding.h),
                   ],
-
                   // Star rating
                   StarRating(stars: stars),
 
-                  SizedBox(height: AppConstants.largePadding.h * 2),
+                  SizedBox(height: AppConstants.largePadding.h),
 
                   // Stats card
                   Container(
                     padding: EdgeInsets.all(AppConstants.largePadding.w),
                     decoration: BoxDecoration(
-                      color: onPrimary.withValues(alpha: 0.1),
+                      color: panelColor,
                       borderRadius:
                           BorderRadius.circular(AppConstants.borderRadius),
+                      border: Border.all(
+                        color: onPrimary.withValues(alpha: 0.15),
+                      ),
                     ),
                     child: Column(
                       children: [
                         _buildStatRow(
                           context,
-                          'Rätt svar',
+                          'Rätt!',
                           '${session.correctAnswers} / ${session.totalQuestions}',
                         ),
                         SizedBox(height: AppConstants.defaultPadding.h),
                         _buildStatRow(
                           context,
-                          'Tid',
+                          'Din tid',
                           timeText,
                         ),
                         SizedBox(height: AppConstants.defaultPadding.h),
                         _buildStatRow(
                           context,
-                          'Poäng',
-                          session.totalPoints.toString(),
+                          'Dina poäng',
+                          totalPoints.toString(),
                         ),
-                        if (userState.questStatus != null) ...[
-                          SizedBox(height: AppConstants.defaultPadding.h),
-                          _buildStatRow(
-                            context,
-                            'Uppdrag',
-                            '${(userState.questStatus!.progress * 100).round()}%',
+                        if (bonusPoints > 0) ...[
+                          SizedBox(height: AppConstants.smallPadding.h),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'Bonus +$bonusPoints!',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
+                                    color: scheme.secondary,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
                           ),
                         ],
-                        if (reward != null && reward.bonusPoints > 0) ...[
-                          SizedBox(height: AppConstants.defaultPadding.h),
-                          _buildStatRow(
-                            context,
-                            'Bonuspoäng',
-                            '+${reward.bonusPoints}',
-                          ),
-                        ],
-                        SizedBox(height: AppConstants.defaultPadding.h),
-                        _buildStatRow(
-                          context,
-                          'Framgångsfrekvens',
-                          '${(session.successRate * 100).toStringAsFixed(0)}%',
-                        ),
                       ],
                     ),
                   ),
 
                   SizedBox(height: AppConstants.largePadding.h),
 
-                  _buildHardestPanel(context, hardest),
+                  _buildBadgePanel(
+                    context,
+                    panelColor: panelColor,
+                    onPrimary: onPrimary,
+                    mutedOnPrimary: mutedOnPrimary,
+                    badgeTeaser: badgeTeaser,
+                  ),
 
-                  if (reward != null && reward.unlockedIds.isNotEmpty) ...[
-                    SizedBox(height: AppConstants.largePadding.h),
-                    _buildAchievementPanel(context, reward),
-                  ],
-
-                  SizedBox(height: AppConstants.largePadding.h * 2),
+                  SizedBox(height: AppConstants.largePadding.h),
 
                   // Buttons
                   ElevatedButton(
@@ -334,29 +359,18 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                         gradeLevel: user.gradeLevel,
                       );
 
-                      final count = DifficultyConfig.getQuestionsPerSession(
-                        effectiveAgeGroup,
+                      final steps = DifficultyConfig.buildDifficultySteps(
+                        storedSteps: user.operationDifficultySteps,
+                        defaultDifficulty: effectiveDifficulty,
                       );
 
-                      final miniQuestions = _buildFocusedMiniPassQuestions(
-                        session,
-                        hardest,
-                        count,
-                      );
-
-                      if (miniQuestions.isEmpty) {
-                        ref.read(quizProvider.notifier).startSession(
-                              ageGroup: effectiveAgeGroup,
-                              operationType: session.operationType,
-                              difficulty: effectiveDifficulty,
-                            );
-                      } else {
-                        ref.read(quizProvider.notifier).startCustomSession(
-                              operationType: session.operationType,
-                              difficulty: effectiveDifficulty,
-                              questions: miniQuestions,
-                            );
-                      }
+                      ref.read(quizProvider.notifier).startSession(
+                            ageGroup: effectiveAgeGroup,
+                            gradeLevel: user.gradeLevel,
+                            operationType: session.operationType,
+                            difficulty: effectiveDifficulty,
+                            initialDifficultyStepsByOperation: steps,
+                          );
 
                       Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(builder: (_) => const QuizScreen()),
@@ -364,7 +378,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                       );
                     },
                     child: Text(
-                      'Öva på det svåraste (2 min)',
+                      'Spela igen!',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: onPrimary,
                             fontWeight: FontWeight.bold,
@@ -416,11 +430,39 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                         gradeLevel: user.gradeLevel,
                       );
 
-                      ref.read(quizProvider.notifier).startSession(
-                            ageGroup: effectiveAgeGroup,
-                            operationType: session.operationType,
-                            difficulty: effectiveDifficulty,
-                          );
+                      final steps = DifficultyConfig.buildDifficultySteps(
+                        storedSteps: user.operationDifficultySteps,
+                        defaultDifficulty: effectiveDifficulty,
+                      );
+
+                      final count = DifficultyConfig.getQuestionsPerSession(
+                        effectiveAgeGroup,
+                      );
+
+                      final miniQuestions = _buildFocusedMiniPassQuestions(
+                        session,
+                        hardest,
+                        count,
+                      );
+
+                      if (miniQuestions.isEmpty) {
+                        ref.read(quizProvider.notifier).startSession(
+                              ageGroup: effectiveAgeGroup,
+                              gradeLevel: user.gradeLevel,
+                              operationType: session.operationType,
+                              difficulty: effectiveDifficulty,
+                              initialDifficultyStepsByOperation: steps,
+                            );
+                      } else {
+                        ref.read(quizProvider.notifier).startCustomSession(
+                              operationType: session.operationType,
+                              difficulty: effectiveDifficulty,
+                              questions: miniQuestions,
+                              ageGroup: effectiveAgeGroup,
+                              gradeLevel: user.gradeLevel,
+                              initialDifficultyStepsByOperation: steps,
+                            );
+                      }
 
                       Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(builder: (_) => const QuizScreen()),
@@ -428,7 +470,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                       );
                     },
                     child: Text(
-                      'Spela igen',
+                      'Snabbträna (2 min)',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: onPrimary,
                             fontWeight: FontWeight.bold,
@@ -446,7 +488,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                       );
                     },
                     child: Text(
-                      'Tillbaka till Start',
+                      'Hem',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             color: mutedOnPrimary,
                             fontWeight: FontWeight.w600,
@@ -490,137 +532,16 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     );
   }
 
-  Widget _buildAchievementPanel(
-    BuildContext context,
-    AchievementReward reward,
-  ) {
-    final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(AppConstants.defaultPadding.w),
-      decoration: BoxDecoration(
-        color: onPrimary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        border: Border.all(
-          color: onPrimary.withValues(alpha: 0.15),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Upplåsta prestationer',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: onPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          SizedBox(height: AppConstants.smallPadding.h),
-          ...reward.unlockedIds.map(
-            (id) => Text(
-              '• ${AchievementService().getDisplayName(id)}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: mutedOnPrimary,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHardestPanel(
-    BuildContext context,
-    List<_HardestQuestion> hardest,
-  ) {
-    final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(AppConstants.defaultPadding.w),
-      decoration: BoxDecoration(
-        color: onPrimary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        border: Border.all(
-          color: onPrimary.withValues(alpha: 0.15),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Svårast idag',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: onPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          SizedBox(height: AppConstants.smallPadding.h),
-          if (hardest.isEmpty)
-            Text(
-              'Inget särskilt – riktigt bra jobbat!',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: mutedOnPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-            )
-          else
-            ...hardest.map((item) {
-              final q = item.question;
-              final time = item.time;
-              final answer = item.answer;
-
-              final detailParts = <String>[];
-              if (answer != null && !item.wasCorrect) {
-                detailParts.add('Du svarade: $answer');
-                detailParts.add('Rätt: ${q.correctAnswer}');
-              }
-              if (time != null && time != Duration.zero) {
-                detailParts.add('Tid: ${time.inSeconds}s');
-              }
-
-              final details = detailParts.join(' • ');
-
-              return Padding(
-                padding: EdgeInsets.only(bottom: AppConstants.smallPadding.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '• ${q.questionText}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: onPrimary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                    ),
-                    if (details.isNotEmpty)
-                      Text(
-                        details,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: mutedOnPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                  ],
-                ),
-              );
-            }),
-        ],
-      ),
-    );
-  }
-
   String _getTitle(int stars) {
     switch (stars) {
       case 3:
-        return 'Fantastiskt jobbat!';
+        return 'Wow! Supersnyggt!';
       case 2:
-        return 'Bra jobbat!';
+        return 'Snyggt jobbat!';
       case 1:
         return 'Bra kämpat!';
       default:
-        return 'Fortsätt öva!';
+        return 'Heja! Prova igen!';
     }
   }
 
@@ -637,6 +558,188 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final seconds = duration.inSeconds % 60;
     return '${minutes}m ${seconds}s';
   }
+
+  Widget _buildBadgePanel(
+    BuildContext context, {
+    required Color panelColor,
+    required Color onPrimary,
+    required Color mutedOnPrimary,
+    required _BadgeTeaser badgeTeaser,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(AppConstants.largePadding.w),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        border: Border.all(
+          color: onPrimary.withValues(alpha: 0.15),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                badgeTeaser.badgeEmoji,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              SizedBox(width: AppConstants.defaultPadding.w),
+              Expanded(
+                child: Text(
+                  badgeTeaser.badgeTitle,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: onPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: AppConstants.smallPadding.h),
+          Text(
+            badgeTeaser.badgeBody,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: mutedOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          SizedBox(height: AppConstants.defaultPadding.h),
+          Text(
+            badgeTeaser.teaser,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: scheme.secondary,
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _BadgeTeaser _buildBadgeTeaser({
+    required QuizSession session,
+    required QuizState quizState,
+    required int stars,
+    required int bonusPoints,
+    required bool didUnlockSomething,
+  }) {
+    final seed = session.sessionId;
+
+    String badgeEmoji;
+    String badgeTitle;
+    String badgeBody;
+
+    if (didUnlockSomething) {
+      badgeEmoji = '🎁';
+      badgeTitle = _pick(
+        seed,
+        const ['Ny skatt!', 'Upplåsning!', 'Du hittade en grej!'],
+      );
+      badgeBody = 'Du låste upp något nytt. Fortsätt så!';
+    } else if (stars >= 3) {
+      badgeEmoji = '🏆';
+      badgeTitle =
+          _pick(seed, const ['Stjärnkapten!', 'Mästarrunda!', 'Tre stjärnor!']);
+      badgeBody =
+          '3 stjärnor i ${session.operationType.emoji} ${session.operationType.displayName}.';
+    } else if (quizState.bestCorrectStreak >= 5) {
+      badgeEmoji = '🔥';
+      badgeTitle =
+          _pick(seed, const ['Svitproffs!', 'Du är i zonen!', 'Eldsvit!']);
+      badgeBody = 'Bästa svit: ${quizState.bestCorrectStreak} rätt i rad.';
+    } else if (quizState.speedBonusCount >= 3) {
+      badgeEmoji = '⚡';
+      badgeTitle =
+          _pick(seed, const ['Blixtläge!', 'Snabbbonus-jägare!', 'Raketfart!']);
+      badgeBody =
+          'Snabbbonusar: ${quizState.speedBonusCount} st (supersnabbt!).';
+    } else if (session.successRate >= 0.7) {
+      badgeEmoji = '🌟';
+      badgeTitle =
+          _pick(seed, const ['Stabil runda!', 'Snyggt flow!', 'Bra tempo!']);
+      badgeBody =
+          'Du är på gång i ${session.operationType.emoji} ${session.operationType.displayName}.';
+    } else {
+      badgeEmoji = '💪';
+      badgeTitle =
+          _pick(seed, const ['Bra kämpat!', 'Du tränar!', 'Heja dig!']);
+      badgeBody = 'Varje runda gör dig lite starkare.';
+    }
+
+    final teaser = _buildTeaser(
+      session: session,
+      quizState: quizState,
+      stars: stars,
+      bonusPoints: bonusPoints,
+    );
+
+    return _BadgeTeaser(
+      badgeEmoji: badgeEmoji,
+      badgeTitle: badgeTitle,
+      badgeBody: badgeBody,
+      teaser: teaser,
+    );
+  }
+
+  String _buildTeaser({
+    required QuizSession session,
+    required QuizState quizState,
+    required int stars,
+    required int bonusPoints,
+  }) {
+    if (stars < 3) {
+      final needed = ((session.totalQuestions * 0.9).ceil())
+          .clamp(1, session.totalQuestions);
+      return 'Nästa mål: 3 stjärnor — sikta på $needed av ${session.totalQuestions} rätt!';
+    }
+
+    if (quizState.speedBonusCount == 0) {
+      return 'Bonusjakt: svara supersnabbt för ⚡!';
+    }
+
+    if (quizState.bestCorrectStreak < 5) {
+      return 'Svitjakt: prova att få 5 rätt i rad 🔥';
+    }
+
+    if (bonusPoints == 0) {
+      return 'Tips: Snabbträna övar på dina klurigaste!';
+    }
+
+    return 'Redo för en ny runda?';
+  }
+
+  String _pick(String seed, List<String> options) {
+    if (options.isEmpty) return '';
+    final index = _stableHash(seed) % options.length;
+    return options[index];
+  }
+
+  int _stableHash(String value) {
+    var hash = 0x811C9DC5;
+    for (final codeUnit in value.codeUnits) {
+      hash ^= codeUnit;
+      hash = (hash * 0x01000193) & 0x7fffffff;
+    }
+    return hash;
+  }
+}
+
+class _BadgeTeaser {
+  const _BadgeTeaser({
+    required this.badgeEmoji,
+    required this.badgeTitle,
+    required this.badgeBody,
+    required this.teaser,
+  });
+
+  final String badgeEmoji;
+  final String badgeTitle;
+  final String badgeBody;
+  final String teaser;
 }
 
 class _HardestQuestion {

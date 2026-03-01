@@ -157,7 +157,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'Kom igång',
+                    'Nu kör vi!',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           color: onPrimary,
                           fontWeight: FontWeight.bold,
@@ -303,12 +303,12 @@ class _OnboardingGradePage extends StatelessWidget {
     final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
     return _OnboardingCard(
       icon: Icons.school,
-      title: 'Välj årskurs',
+      title: 'Vilken årskurs kör du?',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Det hjälper oss att anpassa svårighetsnivån.',
+            'Så fixar vi lagom svår nivå.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: mutedOnPrimary,
                   fontWeight: FontWeight.w600,
@@ -338,7 +338,7 @@ class _OnboardingGradePage extends StatelessWidget {
                 items: [
                   const DropdownMenuItem<int?>(
                     value: null,
-                    child: Text('Ingen'),
+                    child: Text('Vet inte'),
                   ),
                   ..._gradeItems.map(
                     (g) => DropdownMenuItem<int?>(
@@ -380,12 +380,12 @@ class _OnboardingOpsPage extends StatelessWidget {
 
     return _OnboardingCard(
       icon: Icons.grid_view,
-      title: 'Välj räknesätt',
+      title: 'Vad vill du räkna?',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Du kan ändra detta senare i Föräldraläge.',
+            'Det går att ändra senare i Föräldraläge.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: mutedOnPrimary,
                   fontWeight: FontWeight.w600,

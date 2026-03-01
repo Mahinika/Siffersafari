@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../enums/age_group.dart';
 import '../enums/difficulty_level.dart';
 import '../enums/operation_type.dart';
 import 'question.dart';
@@ -8,9 +9,13 @@ import 'question.dart';
 class QuizSession extends Equatable {
   const QuizSession({
     required this.sessionId,
+    required this.ageGroup,
+    this.gradeLevel,
     required this.operationType,
     required this.difficulty,
     required this.questions,
+    required this.targetQuestionCount,
+    this.difficultyStepsByOperation = const {},
     this.currentQuestionIndex = 0,
     this.correctAnswers = 0,
     this.wrongAnswers = 0,
@@ -22,9 +27,17 @@ class QuizSession extends Equatable {
   });
 
   final String sessionId;
+  final AgeGroup ageGroup;
+  final int? gradeLevel;
   final OperationType operationType;
   final DifficultyLevel difficulty;
   final List<Question> questions;
+  final int targetQuestionCount;
+
+  /// Internal per-operation difficulty steps (e.g. 1..10).
+  ///
+  /// Stored in-session so results can persist updated history per child.
+  final Map<OperationType, int> difficultyStepsByOperation;
   final int currentQuestionIndex;
   final int correctAnswers;
   final int wrongAnswers;
@@ -36,15 +49,16 @@ class QuizSession extends Equatable {
 
   /// Get the current question
   Question? get currentQuestion {
+    if (currentQuestionIndex >= targetQuestionCount) return null;
     if (currentQuestionIndex >= questions.length) return null;
     return questions[currentQuestionIndex];
   }
 
   /// Check if the session is complete
-  bool get isComplete => currentQuestionIndex >= questions.length;
+  bool get isComplete => currentQuestionIndex >= targetQuestionCount;
 
   /// Get total questions
-  int get totalQuestions => questions.length;
+  int get totalQuestions => targetQuestionCount;
 
   /// Get success rate
   double get successRate {
@@ -71,9 +85,13 @@ class QuizSession extends Equatable {
 
   QuizSession copyWith({
     String? sessionId,
+    AgeGroup? ageGroup,
+    int? gradeLevel,
     OperationType? operationType,
     DifficultyLevel? difficulty,
     List<Question>? questions,
+    int? targetQuestionCount,
+    Map<OperationType, int>? difficultyStepsByOperation,
     int? currentQuestionIndex,
     int? correctAnswers,
     int? wrongAnswers,
@@ -85,9 +103,14 @@ class QuizSession extends Equatable {
   }) {
     return QuizSession(
       sessionId: sessionId ?? this.sessionId,
+      ageGroup: ageGroup ?? this.ageGroup,
+      gradeLevel: gradeLevel ?? this.gradeLevel,
       operationType: operationType ?? this.operationType,
       difficulty: difficulty ?? this.difficulty,
       questions: questions ?? this.questions,
+      targetQuestionCount: targetQuestionCount ?? this.targetQuestionCount,
+      difficultyStepsByOperation:
+          difficultyStepsByOperation ?? this.difficultyStepsByOperation,
       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
       correctAnswers: correctAnswers ?? this.correctAnswers,
       wrongAnswers: wrongAnswers ?? this.wrongAnswers,
@@ -102,9 +125,13 @@ class QuizSession extends Equatable {
   @override
   List<Object?> get props => [
         sessionId,
+        ageGroup,
+        gradeLevel,
         operationType,
         difficulty,
         questions,
+        targetQuestionCount,
+        difficultyStepsByOperation,
         currentQuestionIndex,
         correctAnswers,
         wrongAnswers,

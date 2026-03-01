@@ -14,7 +14,7 @@ class StarRating extends StatelessWidget {
     final clamped = stars.clamp(0, 3);
     final starColor = Theme.of(context).colorScheme.secondary;
     return Semantics(
-      label: 'Betyg: $clamped av 3 stjärnor',
+      label: 'Stjärnor: $clamped av 3',
       child: ExcludeSemantics(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

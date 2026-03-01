@@ -20,33 +20,46 @@ class QuizState {
     this.isLoading = false,
     this.errorMessage,
     this.feedback,
-    this.nextSuggestedDifficulty,
-    this.recentResults = const [],
+    this.difficultyStepsByOperation = const {},
+    this.recentResultsByOperation = const {},
+    this.correctStreak = 0,
+    this.bestCorrectStreak = 0,
+    this.speedBonusCount = 0,
   });
 
   final QuizSession? session;
   final bool isLoading;
   final String? errorMessage;
   final FeedbackResult? feedback;
-  final DifficultyLevel? nextSuggestedDifficulty;
-  final List<bool> recentResults;
+  final Map<OperationType, int> difficultyStepsByOperation;
+  final Map<OperationType, List<bool>> recentResultsByOperation;
+  final int correctStreak;
+  final int bestCorrectStreak;
+  final int speedBonusCount;
 
   QuizState copyWith({
     QuizSession? session,
     bool? isLoading,
     String? errorMessage,
     FeedbackResult? feedback,
-    DifficultyLevel? nextSuggestedDifficulty,
-    List<bool>? recentResults,
+    Map<OperationType, int>? difficultyStepsByOperation,
+    Map<OperationType, List<bool>>? recentResultsByOperation,
+    int? correctStreak,
+    int? bestCorrectStreak,
+    int? speedBonusCount,
   }) {
     return QuizState(
       session: session ?? this.session,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
       feedback: feedback,
-      nextSuggestedDifficulty:
-          nextSuggestedDifficulty ?? this.nextSuggestedDifficulty,
-      recentResults: recentResults ?? this.recentResults,
+      difficultyStepsByOperation:
+          difficultyStepsByOperation ?? this.difficultyStepsByOperation,
+      recentResultsByOperation:
+          recentResultsByOperation ?? this.recentResultsByOperation,
+      correctStreak: correctStreak ?? this.correctStreak,
+      bestCorrectStreak: bestCorrectStreak ?? this.bestCorrectStreak,
+      speedBonusCount: speedBonusCount ?? this.speedBonusCount,
     );
   }
 }
@@ -67,31 +80,49 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
   void startSession({
     required AgeGroup ageGroup,
+    int? gradeLevel,
     required OperationType operationType,
     required DifficultyLevel difficulty,
+    Map<OperationType, int>? initialDifficultyStepsByOperation,
   }) {
     final count = DifficultyConfig.getQuestionsPerSession(ageGroup);
 
-    final questions = _questionGenerator.generateQuestions(
+    final steps = Map<OperationType, int>.unmodifiable(
+      initialDifficultyStepsByOperation ??
+          DifficultyConfig.buildDifficultySteps(
+            storedSteps: const {},
+            defaultDifficulty: difficulty,
+          ),
+    );
+
+    final firstQuestion = _questionGenerator.generateQuestion(
       ageGroup: ageGroup,
       operationType: operationType,
       difficulty: difficulty,
-      count: count,
+      difficultyStepsByOperation: steps,
+      gradeLevel: gradeLevel,
     );
 
     final session = QuizSession(
       sessionId: _uuid.v4(),
+      ageGroup: ageGroup,
+      gradeLevel: gradeLevel,
       operationType: operationType,
       difficulty: difficulty,
-      questions: questions,
+      questions: [firstQuestion],
+      targetQuestionCount: count,
+      difficultyStepsByOperation: steps,
       startTime: DateTime.now(),
     );
 
     state = state.copyWith(
       session: session,
-      recentResults: const [],
       feedback: null,
-      nextSuggestedDifficulty: null,
+      difficultyStepsByOperation: steps,
+      recentResultsByOperation: const {},
+      correctStreak: 0,
+      bestCorrectStreak: 0,
+      speedBonusCount: 0,
     );
   }
 
@@ -99,22 +130,40 @@ class QuizNotifier extends StateNotifier<QuizState> {
     required OperationType operationType,
     required DifficultyLevel difficulty,
     required List<Question> questions,
+    required AgeGroup ageGroup,
+    int? gradeLevel,
+    Map<OperationType, int>? initialDifficultyStepsByOperation,
   }) {
     if (questions.isEmpty) return;
 
+    final steps = Map<OperationType, int>.unmodifiable(
+      initialDifficultyStepsByOperation ??
+          DifficultyConfig.buildDifficultySteps(
+            storedSteps: const {},
+            defaultDifficulty: difficulty,
+          ),
+    );
+
     final session = QuizSession(
       sessionId: _uuid.v4(),
+      ageGroup: ageGroup,
+      gradeLevel: gradeLevel,
       operationType: operationType,
       difficulty: difficulty,
       questions: questions,
+      targetQuestionCount: questions.length,
+      difficultyStepsByOperation: steps,
       startTime: DateTime.now(),
     );
 
     state = state.copyWith(
       session: session,
-      recentResults: const [],
       feedback: null,
-      nextSuggestedDifficulty: null,
+      difficultyStepsByOperation: steps,
+      recentResultsByOperation: const {},
+      correctStreak: 0,
+      bestCorrectStreak: 0,
+      speedBonusCount: 0,
     );
   }
 
@@ -147,6 +196,14 @@ class QuizNotifier extends StateNotifier<QuizState> {
       difficulty: session.difficulty,
     );
 
+    final gotSpeedBonus = isCorrect && responseTime.inSeconds <= 5;
+    final previousStreak = state.correctStreak;
+    final newStreak = isCorrect ? (state.correctStreak + 1) : 0;
+    final newBestStreak = newStreak > state.bestCorrectStreak
+        ? newStreak
+        : state.bestCorrectStreak;
+    final newSpeedBonusCount = state.speedBonusCount + (gotSpeedBonus ? 1 : 0);
+
     final isLastQuestion =
         session.currentQuestionIndex >= session.questions.length - 1;
 
@@ -159,29 +216,58 @@ class QuizNotifier extends StateNotifier<QuizState> {
       endTime: isLastQuestion ? DateTime.now() : session.endTime,
     );
 
-    final updatedResults = List<bool>.from(state.recentResults)..add(isCorrect);
+    final op = question.operationType;
 
+    final updatedResultsByOperation =
+        Map<OperationType, List<bool>>.from(state.recentResultsByOperation);
+    final updatedOpResults =
+        List<bool>.from(updatedResultsByOperation[op] ?? const [])
+          ..add(isCorrect);
     const maxRecent = AppConstants.questionsBeforeAdjustment;
-    if (updatedResults.length > maxRecent) {
-      updatedResults.removeAt(0);
+    if (updatedOpResults.length > maxRecent) {
+      updatedOpResults.removeAt(0);
     }
+    updatedResultsByOperation[op] = updatedOpResults;
 
-    final suggestedDifficulty = _adaptiveDifficultyService.suggestDifficulty(
-      currentDifficulty: session.difficulty,
-      recentResults: updatedResults,
+    final updatedSteps =
+        Map<OperationType, int>.from(state.difficultyStepsByOperation);
+    final currentStep = updatedSteps[op] ??
+        DifficultyConfig.initialStepForDifficulty(session.difficulty);
+    final suggestedStep = _adaptiveDifficultyService.suggestDifficultyStep(
+      currentStep: currentStep,
+      recentResults: updatedOpResults,
+      minStep: DifficultyConfig.minDifficultyStep,
+      maxStep: DifficultyConfig.maxDifficultyStep,
     );
+    updatedSteps[op] = suggestedStep;
 
     final feedback = _feedbackService.buildFeedback(
       question: question,
       userAnswer: answer,
       ageGroup: ageGroup,
+      pointsEarned: pointsEarned,
+      gotSpeedBonus: gotSpeedBonus,
+      correctStreak: isCorrect ? newStreak : previousStreak,
+    );
+
+    final updatedSessionWithSteps = updatedSession.copyWith(
+      difficultyStepsByOperation:
+          Map<OperationType, int>.unmodifiable(updatedSteps),
     );
 
     state = state.copyWith(
-      session: updatedSession,
-      recentResults: updatedResults,
+      session: updatedSessionWithSteps,
       feedback: feedback,
-      nextSuggestedDifficulty: suggestedDifficulty,
+      difficultyStepsByOperation:
+          Map<OperationType, int>.unmodifiable(updatedSteps),
+      recentResultsByOperation: Map<OperationType, List<bool>>.unmodifiable(
+        updatedResultsByOperation.map(
+          (k, v) => MapEntry(k, List<bool>.unmodifiable(v)),
+        ),
+      ),
+      correctStreak: newStreak,
+      bestCorrectStreak: newBestStreak,
+      speedBonusCount: newSpeedBonusCount,
     );
   }
 
@@ -190,11 +276,24 @@ class QuizNotifier extends StateNotifier<QuizState> {
     if (session == null) return;
 
     final nextIndex = session.currentQuestionIndex + 1;
-    final isComplete = nextIndex >= session.questions.length;
+    final isComplete = nextIndex >= session.totalQuestions;
+
+    var updatedQuestions = session.questions;
+    if (!isComplete && nextIndex >= updatedQuestions.length) {
+      final nextQuestion = _questionGenerator.generateQuestion(
+        ageGroup: session.ageGroup,
+        operationType: session.operationType,
+        difficulty: session.difficulty,
+        difficultyStepsByOperation: state.difficultyStepsByOperation,
+        gradeLevel: session.gradeLevel,
+      );
+      updatedQuestions = [...updatedQuestions, nextQuestion];
+    }
 
     final updatedSession = session.copyWith(
       currentQuestionIndex: nextIndex,
       endTime: isComplete ? DateTime.now() : session.endTime,
+      questions: updatedQuestions,
     );
 
     state = state.copyWith(

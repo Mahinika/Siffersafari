@@ -1,6 +1,6 @@
 # Asset-plan (ComfyUI) – MVP som gör appen tydligt bättre
 
-Det här spelet använder idag främst färger för teman (inte bilder). För att assets ska ge direkt effekt rekommenderas ett **minimalt theme-pack** som vi sedan kopplar in i UI:t.
+Appen har redan stöd för temabaserade bakgrunder via `assets/images/themes/<theme>/background.png`. För att nya assets ska ge direkt effekt rekommenderas ett **minimalt theme-pack** som vi itererar på (bakgrunder först, sedan badges).
 
 ## 1) Prioritet (gör mest skillnad först)
 
