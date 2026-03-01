@@ -85,6 +85,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
     required DifficultyLevel difficulty,
     Map<OperationType, int>? initialDifficultyStepsByOperation,
     bool? wordProblemsEnabled,
+    bool? missingNumberEnabled,
   }) {
     final count = DifficultyConfig.getQuestionsPerSession(ageGroup);
 
@@ -97,6 +98,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
     );
 
     final effectiveWordProblemsEnabled = wordProblemsEnabled ?? true;
+    final effectiveMissingNumberEnabled = missingNumberEnabled ?? true;
 
     final firstQuestion = _questionGenerator.generateQuestion(
       ageGroup: ageGroup,
@@ -105,6 +107,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
       difficultyStepsByOperation: steps,
       gradeLevel: gradeLevel,
       wordProblemsEnabledOverride: effectiveWordProblemsEnabled,
+      missingNumberEnabledOverride: effectiveMissingNumberEnabled,
     );
 
     final session = QuizSession(
@@ -116,6 +119,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
       questions: [firstQuestion],
       targetQuestionCount: count,
       wordProblemsEnabled: effectiveWordProblemsEnabled,
+      missingNumberEnabled: effectiveMissingNumberEnabled,
       difficultyStepsByOperation: steps,
       startTime: DateTime.now(),
     );
@@ -139,10 +143,12 @@ class QuizNotifier extends StateNotifier<QuizState> {
     int? gradeLevel,
     Map<OperationType, int>? initialDifficultyStepsByOperation,
     bool? wordProblemsEnabled,
+    bool? missingNumberEnabled,
   }) {
     if (questions.isEmpty) return;
 
     final effectiveWordProblemsEnabled = wordProblemsEnabled ?? true;
+    final effectiveMissingNumberEnabled = missingNumberEnabled ?? true;
 
     final steps = Map<OperationType, int>.unmodifiable(
       initialDifficultyStepsByOperation ??
@@ -161,6 +167,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
       questions: questions,
       targetQuestionCount: questions.length,
       wordProblemsEnabled: effectiveWordProblemsEnabled,
+      missingNumberEnabled: effectiveMissingNumberEnabled,
       difficultyStepsByOperation: steps,
       startTime: DateTime.now(),
     );
@@ -296,6 +303,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
         difficultyStepsByOperation: state.difficultyStepsByOperation,
         gradeLevel: session.gradeLevel,
         wordProblemsEnabledOverride: session.wordProblemsEnabled,
+        missingNumberEnabledOverride: session.missingNumberEnabled,
       );
       updatedQuestions = [...updatedQuestions, nextQuestion];
     }

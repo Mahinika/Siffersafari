@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
+import '../../core/providers/missing_number_settings_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
@@ -93,6 +94,11 @@ class _DashboardBody extends ConsumerWidget {
     final wordProblemsEnabled = ref.watch(wordProblemsEnabledProvider(userId));
     final wordProblemsNotifier =
         ref.read(wordProblemsEnabledProvider(userId).notifier);
+
+    final missingNumberEnabled =
+        ref.watch(missingNumberEnabledProvider(userId));
+    final missingNumberNotifier =
+        ref.read(missingNumberEnabledProvider(userId).notifier);
 
     return ListView(
       children: [
@@ -206,6 +212,28 @@ class _DashboardBody extends ConsumerWidget {
                 activeTrackColor: accentColor.withValues(alpha: 0.35),
                 onChanged: (value) {
                   wordProblemsNotifier.setEnabled(value);
+                },
+              ),
+              const Divider(height: 1),
+              SwitchListTile(
+                title: Text(
+                  'Saknat tal',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: mutedOnPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                subtitle: Text(
+                  'Ibland visas en ekvation med ? (Åk 2–3, +/−).',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: subtleOnPrimary,
+                      ),
+                ),
+                value: missingNumberEnabled,
+                activeThumbColor: accentColor,
+                activeTrackColor: accentColor.withValues(alpha: 0.35),
+                onChanged: (value) {
+                  missingNumberNotifier.setEnabled(value);
                 },
               ),
               const Divider(height: 1),

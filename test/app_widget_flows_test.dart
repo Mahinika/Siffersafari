@@ -123,6 +123,8 @@ class _FakeQuestionGeneratorService extends QuestionGeneratorService {
     int? gradeLevel,
     bool? wordProblemsEnabledOverride,
     double? wordProblemsChanceOverride,
+    bool? missingNumberEnabledOverride,
+    double? missingNumberChanceOverride,
   }) {
     return _question;
   }

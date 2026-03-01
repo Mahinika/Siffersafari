@@ -79,23 +79,30 @@ class QuestionGeneratorService {
     int? gradeLevel,
     bool? wordProblemsEnabledOverride,
     double? wordProblemsChanceOverride,
+    bool? missingNumberEnabledOverride,
+    double? missingNumberChanceOverride,
   }) {
     final wordProblemsEnabled =
         wordProblemsEnabledOverride ?? _wordProblemsEnabled;
     final wordProblemsChance =
         wordProblemsChanceOverride ?? _wordProblemsChance;
 
+    final missingNumberEnabled =
+        missingNumberEnabledOverride ?? _missingNumberEnabled;
+    final missingNumberChance =
+        missingNumberChanceOverride ?? _missingNumberChance;
+
     final operation = operationType == OperationType.mixed
         ? _getRandomOperation()
         : operationType;
 
-    final shouldTryMissingNumber = _missingNumberEnabled &&
+    final shouldTryMissingNumber = missingNumberEnabled &&
         gradeLevel != null &&
         gradeLevel >= 2 &&
         gradeLevel <= 3 &&
         (operation == OperationType.addition ||
             operation == OperationType.subtraction) &&
-        _random.nextDouble() < _missingNumberChance;
+        _random.nextDouble() < missingNumberChance;
 
     final roll = _random.nextDouble();
 
@@ -205,6 +212,8 @@ class QuestionGeneratorService {
           gradeLevel: gradeLevel,
           wordProblemsEnabledOverride: wordProblemsEnabledOverride,
           wordProblemsChanceOverride: wordProblemsChanceOverride,
+          missingNumberEnabledOverride: missingNumberEnabledOverride,
+          missingNumberChanceOverride: missingNumberChanceOverride,
         );
     }
   }

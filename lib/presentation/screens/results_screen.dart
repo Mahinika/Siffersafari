@@ -7,6 +7,7 @@ import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
 import '../../core/providers/app_theme_provider.dart';
+import '../../core/providers/missing_number_settings_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
@@ -375,6 +376,15 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                           ? rawWordProblemsEnabled
                           : true;
 
+                      final rawMissingNumberEnabled = repo.getSetting(
+                        missingNumberEnabledKey(user.userId),
+                        defaultValue: true,
+                      );
+                      final missingNumberEnabled =
+                          rawMissingNumberEnabled is bool
+                              ? rawMissingNumberEnabled
+                              : true;
+
                       ref.read(quizProvider.notifier).startSession(
                             ageGroup: effectiveAgeGroup,
                             gradeLevel: user.gradeLevel,
@@ -382,6 +392,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                             difficulty: effectiveDifficulty,
                             initialDifficultyStepsByOperation: steps,
                             wordProblemsEnabled: wordProblemsEnabled,
+                            missingNumberEnabled: missingNumberEnabled,
                           );
 
                       Navigator.of(context).pushAndRemoveUntil(
@@ -456,6 +467,15 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                           ? rawWordProblemsEnabled
                           : true;
 
+                      final rawMissingNumberEnabled = repo.getSetting(
+                        missingNumberEnabledKey(user.userId),
+                        defaultValue: true,
+                      );
+                      final missingNumberEnabled =
+                          rawMissingNumberEnabled is bool
+                              ? rawMissingNumberEnabled
+                              : true;
+
                       final count = DifficultyConfig.getQuestionsPerSession(
                         effectiveAgeGroup,
                       );
@@ -474,6 +494,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                               difficulty: effectiveDifficulty,
                               initialDifficultyStepsByOperation: steps,
                               wordProblemsEnabled: wordProblemsEnabled,
+                              missingNumberEnabled: missingNumberEnabled,
                             );
                       } else {
                         ref.read(quizProvider.notifier).startCustomSession(
@@ -484,6 +505,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                               gradeLevel: user.gradeLevel,
                               initialDifficultyStepsByOperation: steps,
                               wordProblemsEnabled: wordProblemsEnabled,
+                              missingNumberEnabled: missingNumberEnabled,
                             );
                       }
 

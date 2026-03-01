@@ -8,6 +8,7 @@ import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
+import '../../core/providers/missing_number_settings_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
 import '../../core/utils/page_transitions.dart';
 import '../../data/repositories/local_storage_repository.dart';
@@ -110,6 +111,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final wordProblemsEnabled =
         rawWordProblemsEnabled is bool ? rawWordProblemsEnabled : true;
 
+    final rawMissingNumberEnabled = repo.getSetting(
+      missingNumberEnabledKey(user.userId),
+      defaultValue: true,
+    );
+    final missingNumberEnabled =
+        rawMissingNumberEnabled is bool ? rawMissingNumberEnabled : true;
+
     ref.read(quizProvider.notifier).startSession(
           ageGroup: effectiveAgeGroup,
           gradeLevel: user.gradeLevel,
@@ -117,6 +125,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           difficulty: effectiveDifficulty,
           initialDifficultyStepsByOperation: steps,
           wordProblemsEnabled: wordProblemsEnabled,
+          missingNumberEnabled: missingNumberEnabled,
         );
 
     context.pushSmooth(const QuizScreen());

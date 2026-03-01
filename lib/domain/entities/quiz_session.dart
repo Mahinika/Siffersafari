@@ -16,6 +16,7 @@ class QuizSession extends Equatable {
     required this.questions,
     required this.targetQuestionCount,
     this.wordProblemsEnabled = true,
+    this.missingNumberEnabled = true,
     this.difficultyStepsByOperation = const {},
     this.currentQuestionIndex = 0,
     this.correctAnswers = 0,
@@ -40,6 +41,12 @@ class QuizSession extends Equatable {
   /// This is controlled by the parent (PIN) and is applied when the next
   /// question is generated lazily.
   final bool wordProblemsEnabled;
+
+  /// Whether “saknat tal” (missing number) can be generated during this session.
+  ///
+  /// This is controlled by the parent (PIN) and is applied when the next
+  /// question is generated lazily.
+  final bool missingNumberEnabled;
 
   /// Internal per-operation difficulty steps (e.g. 1..10).
   ///
@@ -99,6 +106,7 @@ class QuizSession extends Equatable {
     List<Question>? questions,
     int? targetQuestionCount,
     bool? wordProblemsEnabled,
+    bool? missingNumberEnabled,
     Map<OperationType, int>? difficultyStepsByOperation,
     int? currentQuestionIndex,
     int? correctAnswers,
@@ -118,6 +126,7 @@ class QuizSession extends Equatable {
       questions: questions ?? this.questions,
       targetQuestionCount: targetQuestionCount ?? this.targetQuestionCount,
       wordProblemsEnabled: wordProblemsEnabled ?? this.wordProblemsEnabled,
+      missingNumberEnabled: missingNumberEnabled ?? this.missingNumberEnabled,
       difficultyStepsByOperation:
           difficultyStepsByOperation ?? this.difficultyStepsByOperation,
       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
@@ -141,6 +150,7 @@ class QuizSession extends Equatable {
         questions,
         targetQuestionCount,
         wordProblemsEnabled,
+        missingNumberEnabled,
         difficultyStepsByOperation,
         currentQuestionIndex,
         correctAnswers,
