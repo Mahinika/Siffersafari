@@ -63,6 +63,8 @@ Dokumentation (med Mermaid-diagram):
 
 ## Installation (Utveckling)
 
+Bidra gärna: se `CONTRIBUTING.md` för rekommenderad QA-rutin (före commit/push).
+
 ```bash
 # Installera dependencies
 flutter pub get
@@ -89,6 +91,20 @@ powershell -ExecutionPolicy Bypass -File scripts/flutter_pixel6.ps1 -Action run
 Det finns även VS Code tasks som använder samma flöde.
 
 ## Testning
+
+### Rekommenderad QA-rutin (före commit/push)
+
+```bash
+# 1) Statisk analys
+flutter analyze
+
+# 2) Tester: kör minsta relevanta subset för ändringen
+# Exempel:
+flutter test test/question_generator_test.dart
+
+# 3) Vid "stora" commits/merges (många filer, refactor, bred påverkan):
+flutter test
+```
 
 ```bash
 # Enhetstester

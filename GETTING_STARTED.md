@@ -3,6 +3,7 @@
 ## Uppdatering
 
 - 2026-03-01: Aktuell implementationsstatus finns i `README.md` under sektionen **Status (2026-03-01)** och i `IMPLEMENTATION_STATUS.md`.
+- Rekommenderad QA-rutin (före commit/push) finns även sammanfattad i `CONTRIBUTING.md`.
 
 ## Förutsättningar
 
@@ -102,6 +103,20 @@ flutter run --release
 ```
 
 ### Testning
+
+#### Rekommenderad QA-rutin (före commit/push)
+
+```bash
+# 1) Statisk analys
+flutter analyze
+
+# 2) Tester: kör minsta relevanta subset för ändringen
+# Exempel:
+flutter test test/question_generator_test.dart
+
+# 3) Vid "stora" commits/merges (många filer, refactor, bred påverkan):
+flutter test
+```
 
 ```bash
 # Kör alla tester
