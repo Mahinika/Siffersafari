@@ -94,6 +94,7 @@ Denna fil samlar alla **klara** checkboxar från TODO.md och FÖRBÄTTRINGAR.md.
 - [x] M1: Åk 1–3 — talområde + constraints för nuvarande räknefrågor (ingen ny UI)
 - [x] M2: Textuppgifter v1 (Åk 1–3) — korta 1-stegs-uppgifter i befintligt quizflöde
 - [x] M2.5: Algebra light (Åk 2–3, +/−) — “obekant tal” (t.ex. \_ + 3 = 10) i befintligt quizflöde
+- [x] M3: Åk 4–6 — större tal, fler strategier (talområde + gradvis växling; division utan rest)
 
 ---
 

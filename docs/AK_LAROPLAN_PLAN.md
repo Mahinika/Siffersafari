@@ -11,6 +11,29 @@ utan att bygga om appen i ett steg.
 - När en förälder sätter barnets Åk ska quizet automatiskt välja rimliga tal och “typiska” strategier för den Åk.
 - Föräldern kan alltid överstyra räknesätt och svårighet; Åk är en **guide**, inte ett tak.
 
+## Status i appen (2026-03-01)
+- UI-svårighet: **3 nivåer** (lätt/medel/svår).
+- Intern svårighet: **step 1–10 per räknesätt** (adaptiv), sparas per barnprofil.
+- Åk-styrning: används som **talområde + constraints**, med fallback om data saknas.
+- Textuppgifter v1: finns och är per barn (på/av).
+- “Saknat tal” (t.ex. `? + 3 = 7`): finns och är per barn (på/av).
+- M3 (Åk 4–6): +/− har jämnare talområde per step + gradvis växling; ×/÷ har “tabeller först”-formning.
+- Division med rest: **avstängt** i nuvarande quiz-format (heltal utan rest).
+- M4 (påbörjad): enkla statistikfrågor (typvärde/median/medelvärde/variationsbredd) kan dyka upp i `Mix` för Åk 4–6 utan ny UI.
+- UI-robusthet: `QuestionCard` har compact-läge + widgettest som fångar RenderFlex-overflow.
+
+## Vad betyder Åk i appen (konkret)
+- Åk styr **inte** vilka räknesätt som “får” köras; det styr hur vi väljer tal och hur vi bygger upp uppgifter.
+- Föräldern har alltid sista ordet: förälderns val/inställningar begränsar alltid mixen.
+- Målet är “rimliga” frågor som tränar rätt strategi, inte en exakt läroplanssimulation.
+
+## Åk 1–6 (målålder 6–12): app-fokus i korthet
+- Åk 1: trygg taluppfattning och +/− i små tal (tiokompisar, 10−x), minimal kognitiv last.
+- Åk 2: +/− i större tal (0–100) och gradvis tiotalsövergång; tidiga ×/÷ som begrepp (tabeller 2/5/10).
+- Åk 3: +/− upp till 1000; ×/÷ med tabellerna 2–10 som tydligt fokus; enkla textuppgifter.
+- Åk 4–6: större talområden, mer växling och fler strategier; ×/÷ skalar upp men bör fortfarande kännas “jämnt” över step 1–10.
+- Obs: division med rest kräver svar-format och är därför avstängt tills vi bestämmer hur barn ska svara.
+
 ## Icke-mål (för att hålla scope)
 - Inga nya skärmar i M1/M2/M5a (allt ska gå i befintligt quizflöde).
 - Ingen “perfekt läroplanssimulator” — vi siktar på **rimliga** frågor som hjälper barn att träna rätt saker.
@@ -208,6 +231,10 @@ Konsekvens: vår nuvarande app är starkast i *Taluppfattning och tals användni
 
 ## Referens (inskickad text)
 
+> Notis: Texten nedan är bakgrund/underlag. Jag har städat bort rena dialograder (t.ex. “Vill du att jag…”) så att dokumentet håller sig som plan/underlag.
+
+### Årskurs 1
+
 I årskurs 1 handlar matematiken om att bygga en trygg grund: taluppfattning, enkla beräkningar och att förstå hur matematik syns i vardagen. Det viktigaste är förståelse, inte hastighet.
 
 🧮 Centrala områden i matematik åk 1
@@ -280,9 +307,7 @@ Lösa enkla problem och kunna visa hur man tänkt.
 
 Känna igen geometriska former och enkla mönster.
 
-Vill du att jag gör en checklista, övningar, eller en sammanfattning anpassad för ett barn?
-
-Årskurs 2 ?
+### Årskurs 2
 I årskurs 2 bygger man vidare på grunden från åk 1, men nu med större tal, fler strategier och mer problemlösning. Fokus ligger på att bli säkrare, mer flexibel och att förstå hur matematik hänger ihop.
 
 🔢 Taluppfattning i åk 2
@@ -362,9 +387,7 @@ Ha grundläggande förståelse för multiplikation och division.
 
 Kunna lösa och förklara enkla textuppgifter.
 
-Vill du att jag gör en checklista, övningsuppgifter, eller en jämförelse mellan åk 1 och åk 2?
-
-Årskurs 3 ?
+### Årskurs 3
 I årskurs 3 fördjupas allt som eleverna lärt sig i åk 1–2, men nu med större tal, fler strategier och tydligare krav på att kunna resonera, förklara och visa hur man tänker. Det är också året då multiplikation och division blir centrala delar av matematiken.
 
 🔢 Taluppfattning och talområde
@@ -460,9 +483,7 @@ Lösa textuppgifter och förklara sina tankar.
 
 Förstå geometriska former och kunna mäta längd, vikt och volym.
 
-Vill du att jag gör en checklista, övningsuppgifter, eller en sammanfattning anpassad för ett barn i åk 3?
-
-årskurs 4
+### Årskurs 4
 I årskurs 4 tar matematiken ett tydligt steg in i mellanstadiet. Eleverna ska nu arbeta mer systematiskt, använda flera strategier och börja förstå matematik på en mer abstrakt nivå. Talområdet växer, multiplikation och division fördjupas och problemlösning blir mer avancerad.
 
 🔢 Taluppfattning upp till 10 000
@@ -577,9 +598,7 @@ Mäta och rita vinklar, samt beräkna omkrets och area av enkla figurer.
 
 Tolka och skapa diagram och tabeller.
 
-Vill du att jag fortsätter med årskurs 5, eller vill du ha övningar som passar åk 4?
-
-årskurs 5
+### Årskurs 5
 I årskurs 5 breddas matematiken tydligt: eleverna arbetar med större tal, mer avancerade beräkningar, bråk och decimaltal, samt mer systematisk problemlösning. Det är ett år där många nya områden introduceras, samtidigt som tidigare kunskaper ska sitta stabilt.
 
 🔢 Taluppfattning upp till 100 000
@@ -700,9 +719,7 @@ Tolka och skapa olika typer av diagram.
 
 Lösa textuppgifter med flera steg och förklara sina strategier.
 
-Vill du att jag fortsätter med årskurs 6, eller vill du ha övningar som passar åk 5?
-
-Årskurs 6
+### Årskurs 6
 I årskurs 6 avslutar eleverna låg- och mellanstadiets matematik och ska vara redo för högstadiets mer abstrakta och formella arbetssätt. Det innebär att både taluppfattning, bråk, decimaltal, procent, geometri och problemlösning fördjupas och breddas. Kraven är tydligare och eleverna ska kunna visa sina resonemang mer systematiskt.
 
 🔢 Taluppfattning upp till 1 000 000
@@ -840,9 +857,7 @@ Tolka och skapa diagram och förstå statistiska begrepp.
 
 Lösa och förklara textuppgifter med flera steg.
 
-Vill du att jag fortsätter med årskurs 7, eller vill du ha övningar som passar åk 6?
-
-Årskurs 7
+### Årskurs 7
 I årskurs 7 går matematiken in i en ny fas: eleverna börjar arbeta mer algebraiskt, mer abstrakt och med större krav på att kunna resonera, visa metoder och förstå samband. Det är också året då många områden från mellanstadiet fördjupas och kopplas ihop.
 
 🔢 Taluppfattning och tal i bråk- och decimalform
@@ -951,9 +966,7 @@ Tolka och skapa diagram samt förstå statistiska mått.
 
 Resonera tydligt och visa matematiska metoder.
 
-Vill du att jag fortsätter med årskurs 8, eller vill du ha övningar som passar åk 7?
-
-Årskurs 8
+### Årskurs 8
 Årskurs 8 bygger vidare på allt från åk 7 men går tydligt djupare: algebra blir mer avancerad, geometri mer formell och problemlösning mer krävande. Eleverna ska nu kunna arbeta mer abstrakt, mer metodiskt och med större precision.
 
 🔢 Taluppfattning och aritmetik på högstadienivå
@@ -1115,9 +1128,7 @@ Arbeta med procentuella förändringar och bråk i flera steg.
 
 Resonera tydligt och visa matematiska metoder.
 
-Vill du att jag fortsätter med årskurs 9, eller vill du hellre ha övningar som passar åk 8?
-
-Årskurs 9
+### Årskurs 9
 Årskurs 9 är slutåret i grundskolan och matematikens mål är att eleverna ska vara redo för gymnasiets mer abstrakta och teoretiska matematik. Det innebär att alla områden från åk 7–8 fördjupas, och att eleverna ska kunna arbeta mer självständigt, metodiskt och med tydliga resonemang. Nationella proven i matematik bygger också på dessa kunskaper.
 
 🔢 Taluppfattning och aritmetik på hög nivå

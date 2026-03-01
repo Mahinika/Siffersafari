@@ -20,7 +20,6 @@ Denna fil samlar alla **oklara** checkboxar från TODO.md.
 - [ ] Bråk och decimaler för äldre åldersgrupper
 
 ## Läroplan/Åk-plan (docs/AK_LAROPLAN_PLAN.md)
-- [ ] M3: Åk 4–6 — större tal, fler strategier (inkl. beslut om division med rest)
 - [ ] M4: Modul — Geometri + mätning (former, lägesord, längd/massa/volym/tid, symmetri)
 - [ ] M4: Modul — Sannolikhet & statistik (enkla tabeller/diagram)
 - [ ] M5a: Åk 7–9 (utan ny UI) — negativa tal, procent, potenser, prioriteringsregler
