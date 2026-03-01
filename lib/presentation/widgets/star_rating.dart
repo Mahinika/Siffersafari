@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../core/constants/app_constants.dart';
+
 class StarRating extends StatelessWidget {
   const StarRating({
     required this.stars,
@@ -21,7 +23,9 @@ class StarRating extends StatelessWidget {
           children: List.generate(3, (index) {
             final isFilled = index < clamped;
             return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.w),
+              padding: EdgeInsets.symmetric(
+                horizontal: AppConstants.microSpacing8.w,
+              ),
               child: Icon(
                 isFilled ? Icons.star : Icons.star_border,
                 color: starColor,

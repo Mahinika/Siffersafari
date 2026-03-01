@@ -60,8 +60,10 @@ class _AppEntryScreenState extends ConsumerState<AppEntryScreen> {
     final allUsers = userState.allUsers;
 
     final themeCfg = ref.watch(appThemeConfigProvider);
-    final mutedOnPrimary =
-        Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = Theme.of(context)
+        .colorScheme
+        .onPrimary
+        .withValues(alpha: AppOpacities.mutedText);
 
     if (!_didLoad || userState.isLoading) {
       return ThemedBackgroundScaffold(

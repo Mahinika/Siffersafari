@@ -20,8 +20,9 @@ class SettingsScreen extends ConsumerWidget {
 
     final themeCfg = ref.watch(appThemeConfigProvider);
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
-    final subtleOnPrimary = onPrimary.withValues(alpha: 0.54);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
+    final subtleOnPrimary =
+        onPrimary.withValues(alpha: AppOpacities.subtleText);
 
     return ThemedBackgroundScaffold(
       appBar: AppBar(
@@ -34,7 +35,7 @@ class SettingsScreen extends ConsumerWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: onPrimary.withValues(alpha: 0.1),
+                color: onPrimary.withValues(alpha: AppOpacities.panelFill),
                 borderRadius: BorderRadius.circular(AppConstants.borderRadius),
               ),
               child: Column(
@@ -114,7 +115,7 @@ class SettingsScreen extends ConsumerWidget {
             else
               Container(
                 decoration: BoxDecoration(
-                  color: onPrimary.withValues(alpha: 0.1),
+                  color: onPrimary.withValues(alpha: AppOpacities.panelFill),
                   borderRadius:
                       BorderRadius.circular(AppConstants.borderRadius),
                 ),
@@ -179,8 +180,9 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       value: user.soundEnabled,
                       activeThumbColor: themeCfg.accentColor,
-                      activeTrackColor:
-                          themeCfg.accentColor.withValues(alpha: 0.35),
+                      activeTrackColor: themeCfg.accentColor.withValues(
+                        alpha: AppOpacities.highlightStrong,
+                      ),
                       onChanged: (value) async {
                         await ref
                             .read(userProvider.notifier)
@@ -204,8 +206,9 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       value: user.musicEnabled,
                       activeThumbColor: themeCfg.accentColor,
-                      activeTrackColor:
-                          themeCfg.accentColor.withValues(alpha: 0.35),
+                      activeTrackColor: themeCfg.accentColor.withValues(
+                        alpha: AppOpacities.highlightStrong,
+                      ),
                       onChanged: (value) async {
                         await ref
                             .read(userProvider.notifier)

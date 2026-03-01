@@ -131,10 +131,16 @@ class _AnswerButtonState extends State<AnswerButton>
                   borderRadius:
                       BorderRadius.circular(AppConstants.borderRadius),
                 ),
-                elevation: widget.isSelected ? 6 : 3,
+                elevation: widget.isSelected
+                    ? AppConstants.answerButtonElevationSelected
+                    : AppConstants.answerButtonElevationDefault,
                 shadowColor: widget.isSelected
-                    ? backgroundColor.withValues(alpha: 0.5)
-                    : Theme.of(context).shadowColor.withValues(alpha: 0.26),
+                    ? backgroundColor.withValues(
+                        alpha: AppOpacities.buttonShadowSelected,
+                      )
+                    : Theme.of(context).shadowColor.withValues(
+                          alpha: AppOpacities.buttonShadowIdle,
+                        ),
               ),
               child: Text(
                 widget.answer.toString(),

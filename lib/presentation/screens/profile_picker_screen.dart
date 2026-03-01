@@ -17,7 +17,7 @@ class ProfilePickerScreen extends ConsumerWidget {
     final users = userState.allUsers;
     final scheme = Theme.of(context).colorScheme;
     final onPrimary = scheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
 
     return ThemedBackgroundScaffold(
       appBar: AppBar(title: const Text('Välj spelare')),
@@ -96,7 +96,7 @@ class _ProfileTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeCfg = ref.watch(appThemeConfigProvider);
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
 
     return InkWell(
       onTap: onTap,
@@ -104,9 +104,11 @@ class _ProfileTile extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         decoration: BoxDecoration(
-          color: onPrimary.withValues(alpha: 0.1),
+          color: onPrimary.withValues(alpha: AppOpacities.panelFill),
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-          border: Border.all(color: onPrimary.withValues(alpha: 0.15)),
+          border: Border.all(
+            color: onPrimary.withValues(alpha: AppOpacities.borderSubtle),
+          ),
         ),
         child: Row(
           children: [
@@ -114,7 +116,9 @@ class _ProfileTile extends ConsumerWidget {
               width: AppConstants.minTouchTargetSize,
               height: AppConstants.minTouchTargetSize,
               decoration: BoxDecoration(
-                color: themeCfg.accentColor.withValues(alpha: 0.15),
+                color: themeCfg.accentColor.withValues(
+                  alpha: AppOpacities.accentFillSubtle,
+                ),
                 borderRadius: BorderRadius.circular(AppConstants.borderRadius),
               ),
               alignment: Alignment.center,

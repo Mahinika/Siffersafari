@@ -144,9 +144,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final scheme = Theme.of(context).colorScheme;
     final onPrimary = scheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
-    final subtleOnPrimary = onPrimary.withValues(alpha: 0.54);
-    final faintOnPrimary = onPrimary.withValues(alpha: 0.38);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
+    final subtleOnPrimary =
+        onPrimary.withValues(alpha: AppOpacities.subtleText);
+    final faintOnPrimary = onPrimary.withValues(alpha: AppOpacities.faintText);
 
     if (user != null && _loadedAllowedOpsForUserId != user.userId) {
       // Mark as scheduled immediately to avoid multiple callbacks being queued
@@ -323,7 +324,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(AppConstants.defaultPadding),
                 decoration: BoxDecoration(
-                  color: onPrimary.withValues(alpha: 0.1),
+                  color: onPrimary.withValues(alpha: AppOpacities.panelFill),
                   borderRadius:
                       BorderRadius.circular(AppConstants.borderRadius),
                 ),
@@ -388,8 +389,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           BorderRadius.circular(AppConstants.borderRadius),
                       child: LinearProgressIndicator(
                         value: user.levelProgress.clamp(0.0, 1.0),
-                        minHeight: 10,
-                        backgroundColor: onPrimary.withValues(alpha: 0.15),
+                        minHeight: AppConstants.progressBarHeightSmall,
+                        backgroundColor: onPrimary.withValues(
+                          alpha: AppOpacities.progressTrackLight,
+                        ),
                         valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                       ),
                     ),
@@ -433,8 +436,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: LinearProgressIndicator(
                         value: (userState.questStatus?.progress ?? 0.0)
                             .clamp(0.0, 1.0),
-                        minHeight: 10,
-                        backgroundColor: onPrimary.withValues(alpha: 0.15),
+                        minHeight: AppConstants.progressBarHeightSmall,
+                        backgroundColor: onPrimary.withValues(
+                          alpha: AppOpacities.progressTrackLight,
+                        ),
                         valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                       ),
                     ),
@@ -493,7 +498,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 margin: const EdgeInsets.only(top: AppConstants.defaultPadding),
                 padding: const EdgeInsets.all(AppConstants.defaultPadding),
                 decoration: BoxDecoration(
-                  color: onPrimary.withValues(alpha: 0.1),
+                  color: onPrimary.withValues(alpha: AppOpacities.panelFill),
                   borderRadius:
                       BorderRadius.circular(AppConstants.borderRadius),
                 ),
@@ -604,8 +609,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           BorderRadius.circular(AppConstants.borderRadius),
                       child: LinearProgressIndicator(
                         value: userState.questStatus!.progress,
-                        minHeight: 10,
-                        backgroundColor: onPrimary.withValues(alpha: 0.15),
+                        minHeight: AppConstants.progressBarHeightSmall,
+                        backgroundColor: onPrimary.withValues(
+                          alpha: AppOpacities.progressTrackLight,
+                        ),
                         valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                       ),
                     ),
@@ -667,7 +674,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildStatItem(BuildContext context, String label, String value) {
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -717,15 +724,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           borderRadius: BorderRadius.circular(AppConstants.borderRadius * 2),
           boxShadow: [
             BoxShadow(
-              color: themeCfg.primaryActionColor.withValues(alpha: 0.4),
-              blurRadius: 12,
-              spreadRadius: 1,
-              offset: const Offset(0, 6),
+              color: themeCfg.primaryActionColor.withValues(
+                alpha: AppOpacities.operationCardShadowPrimary,
+              ),
+              blurRadius: AppConstants.operationCardShadowPrimaryBlur,
+              spreadRadius: AppConstants.operationCardShadowPrimarySpread,
+              offset: const Offset(
+                0,
+                AppConstants.operationCardShadowPrimaryOffsetY,
+              ),
             ),
             BoxShadow(
-              color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+              color: Theme.of(context)
+                  .shadowColor
+                  .withValues(alpha: AppOpacities.shadowAmbient),
+              blurRadius: AppConstants.operationCardShadowAmbientBlur,
+              offset: const Offset(
+                0,
+                AppConstants.operationCardShadowAmbientOffsetY,
+              ),
             ),
           ],
         ),

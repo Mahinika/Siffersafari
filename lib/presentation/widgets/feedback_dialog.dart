@@ -59,7 +59,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
     const correctColor = AppColors.correctAnswer;
     final scheme = Theme.of(context).colorScheme;
     final onSurface = scheme.onSurface;
-    final mutedOnSurface = onSurface.withValues(alpha: 0.70);
+    final mutedOnSurface = onSurface.withValues(alpha: AppOpacities.mutedText);
     final lines = _messageLines(widget.feedback.message);
 
     final incorrectAccent = scheme.secondary;
@@ -89,15 +89,19 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 width: (AppConstants.feedbackDialogIconSize + 16).sp,
                 height: (AppConstants.feedbackDialogIconSize + 16).sp,
                 decoration: BoxDecoration(
-                  color: mainColor.withValues(alpha: 0.14),
+                  color: mainColor.withValues(alpha: AppOpacities.hudBorder),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: mainColor.withValues(alpha: 0.35),
+                    color: mainColor.withValues(
+                      alpha: AppOpacities.highlightStrong,
+                    ),
                   ),
                 ),
                 alignment: Alignment.center,
                 child: Icon(
-                  isCorrect ? Icons.check_rounded : Icons.psychology_alt_rounded,
+                  isCorrect
+                      ? Icons.check_rounded
+                      : Icons.psychology_alt_rounded,
                   color: mainColor,
                   size: AppConstants.feedbackDialogIconSize.sp,
                 ),
@@ -134,8 +138,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                       Text(
                         lines.first,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color:
-                                  widget.messageTextColor ?? mutedOnSurface,
+                              color: widget.messageTextColor ?? mutedOnSurface,
                               fontWeight: FontWeight.w700,
                             ),
                         textAlign: TextAlign.center,
@@ -144,13 +147,11 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                       SizedBox(height: AppConstants.smallPadding.h),
                       Text(
                         lines[1],
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
-                            ?.copyWith(
-                              color: onSurface,
-                              fontWeight: FontWeight.w900,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: onSurface,
+                                  fontWeight: FontWeight.w900,
+                                ),
                         textAlign: TextAlign.center,
                       ),
                     ],

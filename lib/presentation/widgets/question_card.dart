@@ -78,15 +78,17 @@ class QuestionCard extends StatelessWidget {
                 borderRadius:
                     BorderRadius.circular(AppConstants.borderRadius * 2),
                 border: Border.all(
-                  color:
-                      borderColor ?? scheme.onPrimary.withValues(alpha: 0.12),
+                  color: borderColor ??
+                      scheme.onPrimary
+                          .withValues(alpha: AppOpacities.cardBorder),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color:
-                        (shadowColor ?? scheme.primary).withValues(alpha: 0.18),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
+                    color: (shadowColor ?? scheme.primary)
+                        .withValues(alpha: AppOpacities.cardShadow),
+                    blurRadius: AppConstants.questionCardShadowBlur,
+                    offset:
+                        const Offset(0, AppConstants.questionCardShadowOffsetY),
                   ),
                 ],
               ),
@@ -123,7 +125,8 @@ class QuestionCard extends StatelessWidget {
                         'Vad blir resultatet?',
                         style: textTheme.titleMedium?.copyWith(
                           color: subtitleTextColor ??
-                              scheme.onSurface.withValues(alpha: 0.70),
+                              scheme.onSurface
+                                  .withValues(alpha: AppOpacities.mutedText),
                         ),
                       ),
                     ),

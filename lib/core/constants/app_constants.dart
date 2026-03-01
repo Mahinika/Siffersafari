@@ -1,3 +1,5 @@
+import 'dart:ui' show Offset;
+
 import '../../domain/constants/learning_constants.dart';
 import 'achievement_ids.dart';
 import 'storage_constants.dart';
@@ -5,7 +7,7 @@ import 'ui_constants.dart';
 
 export 'achievement_ids.dart' show AchievementIds;
 export 'storage_constants.dart' show StorageConstants;
-export 'ui_constants.dart' show AppColors, UiConstants;
+export 'ui_constants.dart' show AppColors, AppOpacities, UiConstants;
 
 /// App-wide constants
 class AppConstants {
@@ -50,6 +52,21 @@ class AppConstants {
   static const double largeIconSize = UiConstants.largeIconSize;
   static const double minTouchTargetSize = UiConstants.minTouchTargetSize;
 
+    static const double contentMaxWidth = UiConstants.contentMaxWidth;
+
+  static const double microSpacing2 = UiConstants.microSpacing2;
+  static const double microSpacing4 = UiConstants.microSpacing4;
+  static const double microSpacing6 = UiConstants.microSpacing6;
+  static const double microSpacing8 = UiConstants.microSpacing8;
+
+  static const double progressBarHeightSmall =
+      UiConstants.progressBarHeightSmall;
+  static const double progressBarHeightMedium =
+      UiConstants.progressBarHeightMedium;
+
+    static const double backgroundOverlayOpacity =
+            UiConstants.backgroundOverlayOpacity;
+
   // Animation Durations
   static const Duration microAnimationDuration =
       UiConstants.microAnimationDuration;
@@ -60,10 +77,47 @@ class AppConstants {
   static const Duration longAnimationDuration =
       UiConstants.longAnimationDuration;
 
+  static const Duration pageTransitionSlow = UiConstants.pageTransitionSlow;
+  static const Duration pageTransitionNormal = UiConstants.pageTransitionNormal;
+    static const Offset pageTransitionSlideBeginOffset =
+            UiConstants.pageTransitionSlideBeginOffset;
+
+  static const Duration momentDisplayDuration =
+      UiConstants.momentDisplayDuration;
+  static const Duration celebrationPopDuration =
+      UiConstants.celebrationPopDuration;
+
   // Component sizing
   static const double answerButtonHeight = UiConstants.answerButtonHeight;
   static const double feedbackDialogIconSize =
       UiConstants.feedbackDialogIconSize;
+
+  static const double buttonFontSize = UiConstants.buttonFontSize;
+  static const double minTouchTargetSizeSmall =
+      UiConstants.minTouchTargetSizeSmall;
+
+  // Elevation
+  static const double answerButtonElevationDefault =
+      UiConstants.answerButtonElevationDefault;
+  static const double answerButtonElevationSelected =
+      UiConstants.answerButtonElevationSelected;
+
+  // Shadows
+  static const double questionCardShadowBlur = UiConstants.questionCardShadowBlur;
+  static const double questionCardShadowOffsetY =
+      UiConstants.questionCardShadowOffsetY;
+
+  static const double operationCardShadowPrimaryBlur =
+      UiConstants.operationCardShadowPrimaryBlur;
+  static const double operationCardShadowPrimarySpread =
+      UiConstants.operationCardShadowPrimarySpread;
+  static const double operationCardShadowPrimaryOffsetY =
+      UiConstants.operationCardShadowPrimaryOffsetY;
+
+  static const double operationCardShadowAmbientBlur =
+      UiConstants.operationCardShadowAmbientBlur;
+  static const double operationCardShadowAmbientOffsetY =
+      UiConstants.operationCardShadowAmbientOffsetY;
 
   // Hive Box Names
   static const String userProgressBox = StorageConstants.userProgressBox;

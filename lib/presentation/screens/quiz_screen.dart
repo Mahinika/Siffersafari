@@ -51,7 +51,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     setState(() {
       _momentText = text;
     });
-    _momentTimer = Timer(const Duration(milliseconds: 1600), () {
+    _momentTimer = Timer(AppConstants.momentDisplayDuration, () {
       if (!mounted) return;
       setState(() {
         _momentText = null;
@@ -162,9 +162,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final primaryActionColor = themeCfg.primaryActionColor;
     final accentColor = themeCfg.accentColor;
     final cardColor = themeCfg.cardColor;
-    final cardBorderColor = onPrimary.withValues(alpha: 0.14);
+    final cardBorderColor = onPrimary.withValues(alpha: AppOpacities.hudBorder);
     final lightTextColor = onPrimary;
-    final mutedTextColor = onPrimary.withValues(alpha: 0.70);
+    final mutedTextColor = onPrimary.withValues(alpha: AppOpacities.mutedText);
 
     if (session == null || session.currentQuestion == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -222,7 +222,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             child: ProgressIndicatorBar(
               progress: progress,
               valueColor: accentColor,
-              backgroundColor: onPrimary.withValues(alpha: 0.22),
+              backgroundColor:
+                  onPrimary.withValues(alpha: AppOpacities.progressTrack),
             ),
           ),
 
@@ -344,7 +345,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }) {
     final scheme = Theme.of(context).colorScheme;
     final onPrimary = scheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
 
     final items = <Widget>[];
 
@@ -401,10 +402,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         vertical: (AppConstants.smallPadding / 2).h,
       ),
       decoration: BoxDecoration(
-        color: onPrimary.withValues(alpha: 0.10),
+        color: onPrimary.withValues(alpha: AppOpacities.panelFill),
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         border: Border.all(
-          color: onPrimary.withValues(alpha: 0.18),
+          color: onPrimary.withValues(alpha: AppOpacities.hudBorderStrong),
         ),
       ),
       child: Text(

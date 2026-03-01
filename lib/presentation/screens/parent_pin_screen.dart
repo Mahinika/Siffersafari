@@ -112,7 +112,7 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
     final isLockedOut = _lockoutMinutes != null && _lockoutMinutes! > 0;
     final scheme = Theme.of(context).colorScheme;
     final onPrimary = scheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
     final errorColor = scheme.error;
 
     return ThemedBackgroundScaffold(
@@ -126,7 +126,7 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
           Container(
             padding: const EdgeInsets.all(AppConstants.defaultPadding),
             decoration: BoxDecoration(
-              color: onPrimary.withValues(alpha: 0.1),
+              color: onPrimary.withValues(alpha: AppOpacities.panelFill),
               borderRadius: BorderRadius.circular(AppConstants.borderRadius),
             ),
             child: Column(
@@ -154,7 +154,9 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
                     labelText: 'PIN',
                     labelStyle: TextStyle(color: mutedOnPrimary),
                     filled: true,
-                    fillColor: onPrimary.withValues(alpha: 0.08),
+                    fillColor: onPrimary.withValues(
+                      alpha: AppOpacities.subtleFill,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius:
                           BorderRadius.circular(AppConstants.borderRadius),
@@ -173,7 +175,9 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
                       labelText: 'Bekräfta PIN',
                       labelStyle: TextStyle(color: mutedOnPrimary),
                       filled: true,
-                      fillColor: onPrimary.withValues(alpha: 0.08),
+                      fillColor: onPrimary.withValues(
+                        alpha: AppOpacities.subtleFill,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius:
                             BorderRadius.circular(AppConstants.borderRadius),

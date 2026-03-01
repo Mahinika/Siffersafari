@@ -21,7 +21,7 @@ class ParentDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider).activeUser;
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
 
     return ThemedBackgroundScaffold(
       appBar: AppBar(
@@ -78,8 +78,9 @@ class _DashboardBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final accentColor = Theme.of(context).colorScheme.secondary;
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
-    final subtleOnPrimary = onPrimary.withValues(alpha: 0.54);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
+    final subtleOnPrimary =
+        onPrimary.withValues(alpha: AppOpacities.subtleText);
     final user = ref.watch(userProvider).activeUser!;
     final repo = getIt<LocalStorageRepository>();
     final history = repo.getQuizHistory(userId, limit: 5);
@@ -209,7 +210,8 @@ class _DashboardBody extends ConsumerWidget {
                 ),
                 value: wordProblemsEnabled,
                 activeThumbColor: accentColor,
-                activeTrackColor: accentColor.withValues(alpha: 0.35),
+                activeTrackColor:
+                    accentColor.withValues(alpha: AppOpacities.highlightStrong),
                 onChanged: (value) {
                   wordProblemsNotifier.setEnabled(value);
                 },
@@ -231,7 +233,8 @@ class _DashboardBody extends ConsumerWidget {
                 ),
                 value: missingNumberEnabled,
                 activeThumbColor: accentColor,
-                activeTrackColor: accentColor.withValues(alpha: 0.35),
+                activeTrackColor:
+                    accentColor.withValues(alpha: AppOpacities.highlightStrong),
                 onChanged: (value) {
                   missingNumberNotifier.setEnabled(value);
                 },
@@ -250,7 +253,9 @@ class _DashboardBody extends ConsumerWidget {
                   ),
                   value: isOn,
                   activeThumbColor: accentColor,
-                  activeTrackColor: accentColor.withValues(alpha: 0.35),
+                  activeTrackColor: accentColor.withValues(
+                    alpha: AppOpacities.highlightStrong,
+                  ),
                   onChanged: (!isOn || canTurnOff)
                       ? (value) {
                           settingsNotifier.setOperationAllowed(
@@ -323,7 +328,9 @@ class _DashboardBody extends ConsumerWidget {
                 const SizedBox(height: AppConstants.smallPadding),
                 ...weakestAreas.map(
                   (a) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppConstants.microSpacing6,
+                    ),
                     child: Row(
                       children: [
                         Expanded(
@@ -470,7 +477,7 @@ class _Card extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
       decoration: BoxDecoration(
-        color: onPrimary.withValues(alpha: 0.1),
+        color: onPrimary.withValues(alpha: AppOpacities.panelFill),
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
       ),
       child: child,
@@ -487,9 +494,9 @@ class _StatRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: AppConstants.microSpacing6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -523,7 +530,7 @@ class _HistoryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
     final operation = (history['operationType'] as String?) ?? '-';
     final difficulty = (history['difficulty'] as String?) ?? '-';
     final correct = (history['correctAnswers'] as int?) ?? 0;
@@ -532,7 +539,7 @@ class _HistoryRow extends StatelessWidget {
         ((history['points'] as int?) ?? 0);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: AppConstants.microSpacing8),
       child: Row(
         children: [
           Expanded(
@@ -638,8 +645,9 @@ class _BenchmarkSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
-    final subtleOnPrimary = onPrimary.withValues(alpha: 0.54);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
+    final subtleOnPrimary =
+        onPrimary.withValues(alpha: AppOpacities.subtleText);
     final user = ref.watch(userProvider).activeUser;
 
     final ops = <OperationType>[
@@ -689,7 +697,7 @@ class _BenchmarkSection extends ConsumerWidget {
                 fontWeight: FontWeight.w600,
               ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: AppConstants.microSpacing2),
         Text(
           'Rekommenderat steg bygger på snitt av senaste 3 quiz (mål: 85% rätt).',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -729,7 +737,9 @@ class _BenchmarkSection extends ConsumerWidget {
                 );
 
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.symmetric(
+              vertical: AppConstants.microSpacing6,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -756,7 +766,8 @@ class _BenchmarkSection extends ConsumerWidget {
                 ),
                 if (benchmark != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 4),
+                    padding:
+                        const EdgeInsets.only(top: AppConstants.microSpacing4),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -769,7 +780,7 @@ class _BenchmarkSection extends ConsumerWidget {
                                       fontWeight: FontWeight.w600,
                                     ),
                           ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: AppConstants.microSpacing6),
                         Row(
                           children: [
                             Expanded(
@@ -802,7 +813,8 @@ class _BenchmarkSection extends ConsumerWidget {
                     benchmark.level != GradeBenchmarkLevel.inline &&
                     recommendationText.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(top: 2),
+                    padding:
+                        const EdgeInsets.only(top: AppConstants.microSpacing2),
                     child: Text(
                       recommendationText,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(

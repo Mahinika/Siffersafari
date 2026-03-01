@@ -93,8 +93,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   void dispose() {
-    OnboardingScreen._activeCount =
-        OnboardingScreen._activeCount > 0 ? OnboardingScreen._activeCount - 1 : 0;
+    OnboardingScreen._activeCount = OnboardingScreen._activeCount > 0
+        ? OnboardingScreen._activeCount - 1
+        : 0;
     _controller.dispose();
     super.dispose();
   }
@@ -151,7 +152,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final progress = (_pageIndex + 1) / 2;
     final accentColor = Theme.of(context).colorScheme.secondary;
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
 
     return PopScope(
       canPop: false,
@@ -185,8 +186,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               borderRadius: BorderRadius.circular(AppConstants.borderRadius),
               child: LinearProgressIndicator(
                 value: progress.clamp(0.0, 1.0),
-                minHeight: 10,
-                backgroundColor: onPrimary.withValues(alpha: 0.15),
+                minHeight: AppConstants.progressBarHeightSmall,
+                backgroundColor: onPrimary.withValues(
+                  alpha: AppOpacities.progressTrackLight,
+                ),
                 valueColor: AlwaysStoppedAnimation<Color>(accentColor),
               ),
             ),
@@ -259,10 +262,10 @@ class _OnboardingCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppConstants.largePadding),
         decoration: BoxDecoration(
-          color: onPrimary.withValues(alpha: 0.08),
+          color: onPrimary.withValues(alpha: AppOpacities.subtleFill),
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           border: Border.all(
-            color: onPrimary.withValues(alpha: 0.12),
+            color: onPrimary.withValues(alpha: AppOpacities.cardBorder),
           ),
         ),
         child: Column(
@@ -307,7 +310,7 @@ class _OnboardingGradePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final dropdownBg = Theme.of(context).scaffoldBackgroundColor;
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
     return _OnboardingCard(
       icon: Icons.school,
       title: 'Vilken årskurs kör du?',
@@ -377,7 +380,7 @@ class _OnboardingOpsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final accentColor = Theme.of(context).colorScheme.secondary;
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
     const items = <OperationType>[
       OperationType.addition,
       OperationType.subtraction,

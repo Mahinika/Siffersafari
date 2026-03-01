@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_constants.dart';
+
 /// Custom page transitions for smoother navigation
 class SmoothPageRoute<T> extends PageRouteBuilder<T> {
   SmoothPageRoute({
@@ -8,11 +10,11 @@ class SmoothPageRoute<T> extends PageRouteBuilder<T> {
   }) : super(
           pageBuilder: (context, animation, secondaryAnimation) =>
               builder(context),
-          transitionDuration: const Duration(milliseconds: 300),
-          reverseTransitionDuration: const Duration(milliseconds: 250),
+          transitionDuration: AppConstants.pageTransitionSlow,
+          reverseTransitionDuration: AppConstants.pageTransitionNormal,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             // Fade + slight slide from bottom
-            const begin = Offset(0.0, 0.03);
+            const begin = AppConstants.pageTransitionSlideBeginOffset;
             const end = Offset.zero;
             const curve = Curves.easeOutCubic;
 
@@ -44,8 +46,8 @@ class FadePageRoute<T> extends PageRouteBuilder<T> {
   }) : super(
           pageBuilder: (context, animation, secondaryAnimation) =>
               builder(context),
-          transitionDuration: const Duration(milliseconds: 250),
-          reverseTransitionDuration: const Duration(milliseconds: 200),
+          transitionDuration: AppConstants.pageTransitionNormal,
+          reverseTransitionDuration: AppConstants.shortAnimationDuration,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: CurvedAnimation(

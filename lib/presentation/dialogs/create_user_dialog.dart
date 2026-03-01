@@ -53,7 +53,7 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
   Widget build(BuildContext context) {
     final cfg = ref.watch(appThemeConfigProvider);
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
 
     return AlertDialog(
       scrollable: true,

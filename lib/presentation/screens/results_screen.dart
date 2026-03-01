@@ -171,7 +171,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
 
     final scheme = Theme.of(context).colorScheme;
     final onPrimary = scheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
 
     if (session == null) {
       return ThemedBackgroundScaffold(
@@ -194,7 +194,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final hardest = _getHardestQuestions(session);
     final bonusPoints = reward?.bonusPoints ?? 0;
     final totalPoints = session.totalPoints + bonusPoints;
-    final panelColor = themeCfg.cardColor.withValues(alpha: 1.0);
+    final panelColor = themeCfg.cardColor;
     final didUnlockSomething = reward?.unlockedIds.isNotEmpty ?? false;
 
     final badgeTeaser = _buildBadgeTeaser(
@@ -229,7 +229,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
 
                   if (shouldCelebrate) ...[
                     TweenAnimationBuilder<double>(
-                      duration: const Duration(milliseconds: 650),
+                      duration: AppConstants.celebrationPopDuration,
                       tween: Tween(begin: 0.0, end: 1.0),
                       curve: Curves.easeOutBack,
                       builder: (context, t, child) {
@@ -265,7 +265,9 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                       borderRadius:
                           BorderRadius.circular(AppConstants.borderRadius),
                       border: Border.all(
-                        color: onPrimary.withValues(alpha: 0.15),
+                        color: onPrimary.withValues(
+                          alpha: AppOpacities.borderSubtle,
+                        ),
                       ),
                     ),
                     child: Column(
@@ -551,7 +553,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
 
   Widget _buildStatRow(BuildContext context, String label, String value) {
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -620,7 +622,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         color: panelColor,
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         border: Border.all(
-          color: onPrimary.withValues(alpha: 0.15),
+          color: onPrimary.withValues(alpha: AppOpacities.borderSubtle),
         ),
       ),
       child: Column(

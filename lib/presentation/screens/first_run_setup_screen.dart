@@ -14,8 +14,9 @@ class FirstRunSetupScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final onPrimary = scheme.onPrimary;
-    final mutedOnPrimary = onPrimary.withValues(alpha: 0.70);
-    final subtleOnPrimary = onPrimary.withValues(alpha: 0.54);
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
+    final subtleOnPrimary =
+        onPrimary.withValues(alpha: AppOpacities.subtleText);
 
     final themeCfg = ref.watch(appThemeConfigProvider);
 
@@ -23,7 +24,9 @@ class FirstRunSetupScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
+          constraints: const BoxConstraints(
+            maxWidth: AppConstants.contentMaxWidth,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -33,10 +36,11 @@ class FirstRunSetupScreen extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       AppConstants.appName,
-                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                            color: onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                color: onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                   ),
                 ],

@@ -28,9 +28,10 @@ class ProgressIndicatorBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           child: LinearProgressIndicator(
             value: progress,
-            minHeight: 12.h,
-            backgroundColor:
-                backgroundColor ?? scheme.onPrimary.withValues(alpha: 0.2),
+            minHeight: AppConstants.progressBarHeightMedium.h,
+            backgroundColor: backgroundColor ??
+                scheme.onPrimary
+                    .withValues(alpha: AppOpacities.progressTrackMedium),
             valueColor: AlwaysStoppedAnimation<Color>(
               valueColor ?? fallbackValueColor,
             ),

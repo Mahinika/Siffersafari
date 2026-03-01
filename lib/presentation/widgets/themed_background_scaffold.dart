@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/app_constants.dart';
 import '../../core/providers/app_theme_provider.dart';
 
 class ThemedBackgroundScaffold extends ConsumerWidget {
@@ -8,7 +9,7 @@ class ThemedBackgroundScaffold extends ConsumerWidget {
     required this.body,
     this.appBar,
     this.padding,
-    this.overlayOpacity = 0.72,
+    this.overlayOpacity = AppConstants.backgroundOverlayOpacity,
     this.extendBodyBehindAppBar = false,
     super.key,
   });

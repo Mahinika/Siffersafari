@@ -92,7 +92,7 @@ class AppThemeConfig {
           backgroundColor: primaryActionColor,
           foregroundColor: scheme.onPrimary,
           textStyle: const TextStyle(
-            fontSize: 18,
+            fontSize: AppConstants.buttonFontSize,
             fontWeight: FontWeight.w700,
           ),
           shape: RoundedRectangleBorder(
@@ -112,14 +112,14 @@ class AppThemeConfig {
             borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           ),
           textStyle: const TextStyle(
-            fontSize: 18,
+            fontSize: AppConstants.buttonFontSize,
             fontWeight: FontWeight.w700,
           ),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          minimumSize: const Size(44, 44),
+          minimumSize: const Size.square(AppConstants.minTouchTargetSizeSmall),
           foregroundColor: scheme.secondary,
           textStyle: const TextStyle(
             fontWeight: FontWeight.w700,
@@ -140,9 +140,13 @@ class AppThemeConfig {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: scheme.onPrimary.withValues(alpha: 0.08),
-        labelStyle: TextStyle(color: scheme.onPrimary.withValues(alpha: 0.70)),
-        hintStyle: TextStyle(color: scheme.onPrimary.withValues(alpha: 0.54)),
+        fillColor: scheme.onPrimary.withValues(alpha: AppOpacities.subtleFill),
+        labelStyle: TextStyle(
+          color: scheme.onPrimary.withValues(alpha: AppOpacities.mutedText),
+        ),
+        hintStyle: TextStyle(
+          color: scheme.onPrimary.withValues(alpha: AppOpacities.subtleText),
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           borderSide: BorderSide.none,
@@ -150,7 +154,11 @@ class AppThemeConfig {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           borderSide:
-              BorderSide(color: scheme.onPrimary.withValues(alpha: 0.2)),
+              BorderSide(
+                color: scheme.onPrimary.withValues(
+                  alpha: AppOpacities.borderMedium,
+                ),
+              ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
@@ -161,12 +169,12 @@ class AppThemeConfig {
         textStyle: TextStyle(color: scheme.onPrimary),
         menuStyle: MenuStyle(
           backgroundColor: WidgetStatePropertyAll(
-            baseBackgroundColor.withValues(alpha: 0.98),
+            baseBackgroundColor.withValues(alpha: AppOpacities.menuSurface),
           ),
         ),
       ),
       dividerTheme: DividerThemeData(
-        color: scheme.onPrimary.withValues(alpha: 0.24),
+        color: scheme.onPrimary.withValues(alpha: AppOpacities.divider),
         thickness: 1,
       ),
     );
