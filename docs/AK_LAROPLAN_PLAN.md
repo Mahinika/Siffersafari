@@ -128,6 +128,7 @@ Konsekvens: vår nuvarande app är starkast i *Taluppfattning och tals användni
 - Utöka talområde + constraints:
   - större spann (+/− upp till 10 000 / 100 000), mer växling.
   - ×/÷: tvåsiffrigt gånger ensiffrigt, division med rest (om vi vill).
+- Obs: just nu kör vi division i heltal (utan rest) i quiz-formatet.
 - Obs: division med rest kräver beslut om svar-format (heltal + rest).
 - Kursplan-koppling (Skolverket): centralt innehåll Åk 4–6 inkluderar bl.a. bråk/decimal/procent, koordinatsystem/grafer, statistik (medelvärde/median/typvärde) och programmering i visuella miljöer. Vi tar detta stegvis och håller oss till quiz-format där det går.
 - Acceptance:

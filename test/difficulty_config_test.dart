@@ -361,4 +361,39 @@ void main() {
       expect(middle.max, lessThan(older.max));
     });
   });
+
+  group('DifficultyConfig.curriculumNumberRangeForStep (M3 Åk 4–6)', () {
+    test('multiplikation skalar upp till två-/tresiffriga faktorer', () {
+      final r4 = DifficultyConfig.curriculumNumberRangeForStep(
+        gradeLevel: 4,
+        operationType: OperationType.multiplication,
+        difficultyStep: DifficultyConfig.maxDifficultyStep,
+      );
+      expect(r4.max, 99);
+
+      final r6 = DifficultyConfig.curriculumNumberRangeForStep(
+        gradeLevel: 6,
+        operationType: OperationType.multiplication,
+        difficultyStep: DifficultyConfig.maxDifficultyStep,
+      );
+      expect(r6.max, 299);
+    });
+
+    test('division skalar upp men hålls mer konservativ än multiplikation',
+        () {
+      final r4 = DifficultyConfig.curriculumNumberRangeForStep(
+        gradeLevel: 4,
+        operationType: OperationType.division,
+        difficultyStep: DifficultyConfig.maxDifficultyStep,
+      );
+      expect(r4.max, 20);
+
+      final r6 = DifficultyConfig.curriculumNumberRangeForStep(
+        gradeLevel: 6,
+        operationType: OperationType.division,
+        difficultyStep: DifficultyConfig.maxDifficultyStep,
+      );
+      expect(r6.max, 100);
+    });
+  });
 }

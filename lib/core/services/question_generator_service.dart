@@ -193,12 +193,26 @@ class QuestionGeneratorService {
             difficulty,
           );
         }
+        if (gradeLevel != null && gradeLevel >= 4 && gradeLevel <= 6) {
+          return _generateMultiplicationCurriculum(
+            range,
+            difficulty,
+            difficultyStep: step,
+          );
+        }
         return _generateMultiplication(range, difficulty);
       case OperationType.division:
         if (shouldTryWordProblemMulDiv) {
           return _generateDivisionWordProblem(
             range,
             difficulty,
+          );
+        }
+        if (gradeLevel != null && gradeLevel >= 4 && gradeLevel <= 6) {
+          return _generateDivisionCurriculum(
+            range,
+            difficulty,
+            difficultyStep: step,
           );
         }
         return _generateDivision(range, difficulty);
@@ -550,6 +564,46 @@ class QuestionGeneratorService {
     );
   }
 
+  Question _generateMultiplicationCurriculum(
+    NumberRange range,
+    DifficultyLevel difficulty, {
+    required int difficultyStep,
+  }) {
+    // Åk 4–6: börja med tabeller (<=12) mot större tal och skala sedan upp.
+    // Steg 1–6: minst en faktor i tabell-området.
+    // Steg 7–10: båda faktorer kan vara större.
+    final step = DifficultyConfig.clampDifficultyStep(difficultyStep);
+
+    // Avoid 0 to keep questions meaningful.
+    final safeMin = max(1, range.min);
+    final safeMax = max(safeMin, range.max);
+
+    final smallMax = min(12, safeMax);
+    final allowLargeLarge = step >= 7 && safeMax > smallMax;
+
+    final a = _randomInRange(NumberRange(safeMin, safeMax));
+    final b = allowLargeLarge
+        ? _randomInRange(NumberRange(safeMin, safeMax))
+        : _randomInRange(NumberRange(safeMin, smallMax));
+
+    // Randomize which one is the smaller factor for variety.
+    final swap = _random.nextBool();
+    final operand1 = swap ? b : a;
+    final operand2 = swap ? a : b;
+    final correctAnswer = operand1 * operand2;
+
+    return Question(
+      id: _uuid.v4(),
+      operationType: OperationType.multiplication,
+      difficulty: difficulty,
+      operand1: operand1,
+      operand2: operand2,
+      correctAnswer: correctAnswer,
+      wrongAnswers: _generateWrongAnswers(correctAnswer, 3),
+      explanation: '$operand1 × $operand2 = $correctAnswer',
+    );
+  }
+
   Question _generateMultiplicationWordProblem(
     NumberRange range,
     DifficultyLevel difficulty,
@@ -582,6 +636,42 @@ class QuestionGeneratorService {
     final safeMax = max(safeMin, range.max);
 
     final divisor = _randomInRange(NumberRange(safeMin, safeMax));
+    final quotient = _randomInRange(NumberRange(safeMin, safeMax));
+    final dividend = divisor * quotient;
+
+    return Question(
+      id: _uuid.v4(),
+      operationType: OperationType.division,
+      difficulty: difficulty,
+      operand1: dividend,
+      operand2: divisor,
+      correctAnswer: quotient,
+      wrongAnswers: _generateWrongAnswers(quotient, 3),
+      explanation: '$dividend ÷ $divisor = $quotient',
+    );
+  }
+
+  Question _generateDivisionCurriculum(
+    NumberRange range,
+    DifficultyLevel difficulty, {
+    required int difficultyStep,
+  }) {
+    // Åk 4–6 (quiz-format): håll divisionen i heltal (utan rest) men skala upp.
+    // Steg 1–6: divisor hålls i tabell-området (<=12) för trygg progression.
+    // Steg 7–10: divisor kan bli större.
+    final step = DifficultyConfig.clampDifficultyStep(difficultyStep);
+
+    final safeMin = max(1, range.min);
+    final safeMax = max(safeMin, range.max);
+
+    final smallMax = min(12, safeMax);
+    final allowLargeDivisor = step >= 7 && safeMax > smallMax;
+
+    final divisor = _randomInRange(
+      allowLargeDivisor
+          ? NumberRange(safeMin, safeMax)
+          : NumberRange(safeMin, smallMax),
+    );
     final quotient = _randomInRange(NumberRange(safeMin, safeMax));
     final dividend = divisor * quotient;
 

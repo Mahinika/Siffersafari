@@ -239,8 +239,31 @@ class DifficultyConfig {
           _ => 1000000,
         };
       case OperationType.multiplication:
+        cap = switch (grade) {
+          1 => 5,
+          2 => 10,
+          3 => 12,
+          // M3 (Åk 4–6): skala upp så vi kan få tvåsiffriga/triangulära steg.
+          4 => 99,
+          5 => 199,
+          6 => 299,
+          _ => 299,
+        };
       case OperationType.division:
+        // Note: used for quotient + divisor (dividend becomes divisor * quotient)
+        // Håll detta mer konservativt så dividend inte blir extremt stor.
+        cap = switch (grade) {
+          1 => 5,
+          2 => 10,
+          3 => 12,
+          // M3 (Åk 4–6): större tal, men fortfarande hanterbart i quiz-format.
+          4 => 20,
+          5 => 50,
+          6 => 100,
+          _ => 100,
+        };
       case OperationType.mixed:
+        // Keep mixed conservative to avoid huge operands for × and ÷.
         cap = switch (grade) {
           1 => 5,
           2 => 10,
@@ -253,6 +276,9 @@ class DifficultyConfig {
 
     final startMax = switch (operationType) {
       OperationType.addition || OperationType.subtraction => 10,
+      OperationType.multiplication || OperationType.division => grade >= 4
+          ? 10
+          : 5,
       _ => 5,
     };
 

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:math_game_app/core/config/difficulty_config.dart';
 import 'package:math_game_app/core/services/question_generator_service.dart';
@@ -87,6 +89,41 @@ void main() {
         question.correctAnswer,
         question.operand1 ~/ question.operand2,
       );
+    });
+
+    test('M3 (Åk 4–6): multiplikation step<=6 har alltid en tabell-faktor',
+        () {
+      final seeded = QuestionGeneratorService(random: Random(1));
+
+      final question = seeded.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.multiplication,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 4,
+        difficultyStep: 6,
+      );
+
+      final minFactor =
+          question.operand1 < question.operand2 ? question.operand1 : question.operand2;
+      expect(minFactor, lessThanOrEqualTo(12));
+      expect(minFactor, greaterThanOrEqualTo(1));
+    });
+
+    test('M3 (Åk 4–6): division step<=6 har liten divisor och inget rest', () {
+      final seeded = QuestionGeneratorService(random: Random(2));
+
+      final question = seeded.generateQuestion(
+        ageGroup: AgeGroup.middle,
+        operationType: OperationType.division,
+        difficulty: DifficultyLevel.easy,
+        gradeLevel: 5,
+        difficultyStep: 6,
+      );
+
+      expect(question.operand2, lessThanOrEqualTo(12));
+      expect(question.operand2, greaterThanOrEqualTo(1));
+      expect(question.operand1 % question.operand2, 0);
+      expect(question.correctAnswer, question.operand1 ~/ question.operand2);
     });
 
     test('Unit (QuestionGeneratorService): respekterar talintervall för young',
