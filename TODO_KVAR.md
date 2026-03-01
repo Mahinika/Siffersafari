@@ -10,12 +10,6 @@ Denna fil samlar alla **oklara** checkboxar från TODO.md.
 - [ ] Prestanda-optimering
 - [ ] User testing med målgrupp
 
-## Fas 8: Produktionsdeploy
-- [ ] Android signing för Google Play (keystore, upload key) och release build
-- [ ] App store metadata
-- [ ] Beta-testning (Google Play Internal)
-- [ ] Lansering
-
 ## Tekniska TODO
 - [ ] Skapa tema-bilder för rymd och djungel
 - [ ] Sätt upp custom font (om önskat)

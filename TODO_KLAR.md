@@ -73,8 +73,8 @@ Denna fil samlar alla **klara** checkboxar från TODO.md och FÖRBÄTTRINGAR.md.
 - [x] Widget-tester
 - [x] Integration-tester (smoke)
 
-### Fas 8: Produktionsdeploy
-- [x] Bygga och installera release lokalt (emulator)
+### Fas 8: Lokal build & install
+- [x] Bygga och installera lokalt (emulator)
 
 ### Tekniska TODO
 - [x] Lägg till riktiga ljudfiler i `assets/sounds/`
@@ -86,7 +86,7 @@ Denna fil samlar alla **klara** checkboxar från TODO.md och FÖRBÄTTRINGAR.md.
 ### Dokumentation TODO
 - [x] API-dokumentation för services
 - [x] Usage guide för parents/teachers
-- [x] Screenshot guide för app stores
+- [x] Screenshot guide
 - [x] Privacy policy (draft)
 - [x] Terms of service (draft)
 

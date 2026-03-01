@@ -34,7 +34,7 @@ Senaste verifiering: alla tester passerar lokalt (senast 2026-03-01).
 ## Känd scope just nu
 
 - Offline-funktionalitet är implementerad via lokal lagring men ej fullständigt validerad i testplan.
-- Tillgänglighet, integrationstest, prestandaoptimering och produktionsdeploy återstår.
+- Tillgänglighet, integrationstest och prestandaoptimering återstår.
 
 ## Teknisk Stack
 
