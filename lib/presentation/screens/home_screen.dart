@@ -33,6 +33,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _loadedAllowedOpsForUserId;
   String? _checkedOnboardingForUserId;
+  bool _onboardingPushInFlight = false;
 
   static String _onboardingDoneKey(String userId) => 'onboarding_done_$userId';
 
@@ -148,36 +149,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final faintOnPrimary = onPrimary.withValues(alpha: 0.38);
 
     if (user != null && _loadedAllowedOpsForUserId != user.userId) {
+      // Mark as scheduled immediately to avoid multiple callbacks being queued
+      // during rapid rebuilds.
+      _loadedAllowedOpsForUserId = user.userId;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ref
             .read(parentSettingsProvider.notifier)
             .loadAllowedOperations(user.userId);
-        setState(() {
-          _loadedAllowedOpsForUserId = user.userId;
-        });
       });
     }
 
     if (user != null && _checkedOnboardingForUserId != user.userId) {
+      // Mark as scheduled immediately to avoid pushing onboarding twice.
+      _checkedOnboardingForUserId = user.userId;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
 
+        // Avoid stacking onboarding routes (can happen if Home is recreated
+        // while an onboarding route is already on top).
+        if (_onboardingPushInFlight || OnboardingScreen.isActive) return;
+
         final navigator = Navigator.of(context);
-        setState(() {
-          _checkedOnboardingForUserId = user.userId;
-        });
 
         final repo = getIt<LocalStorageRepository>();
         final done = await repo.getSetting(_onboardingDoneKey(user.userId));
         if (!mounted) return;
 
         if (done != true) {
-          await navigator.push(
-            MaterialPageRoute(
-              builder: (_) => OnboardingScreen(userId: user.userId),
-            ),
-          );
+          _onboardingPushInFlight = true;
+          try {
+            await navigator.push(
+              MaterialPageRoute(
+                builder: (_) => OnboardingScreen(userId: user.userId),
+              ),
+            );
+          } finally {
+            _onboardingPushInFlight = false;
+          }
         }
       });
     }

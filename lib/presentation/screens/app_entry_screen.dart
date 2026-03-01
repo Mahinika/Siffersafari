@@ -5,6 +5,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../widgets/themed_background_scaffold.dart';
+import 'first_run_setup_screen.dart';
 import 'home_screen.dart';
 import 'profile_picker_screen.dart';
 
@@ -82,6 +83,11 @@ class _AppEntryScreenState extends ConsumerState<AppEntryScreen> {
           ),
         ),
       );
+    }
+
+    // First run: if there are no profiles, guide the user through setup.
+    if (allUsers.isEmpty) {
+      return const FirstRunSetupScreen();
     }
 
     // Child-first flow: when multiple profiles exist, always let the child pick.

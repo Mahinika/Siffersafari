@@ -17,6 +17,9 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
   final String userId;
 
+  static int _activeCount = 0;
+  static bool get isActive => _activeCount > 0;
+
   @override
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
@@ -41,6 +44,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
+
+    OnboardingScreen._activeCount++;
 
     // Load persisted onboarding-related settings for this user.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -88,6 +93,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   void dispose() {
+    OnboardingScreen._activeCount =
+        OnboardingScreen._activeCount > 0 ? OnboardingScreen._activeCount - 1 : 0;
     _controller.dispose();
     super.dispose();
   }
