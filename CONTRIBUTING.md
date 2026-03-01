@@ -18,6 +18,14 @@ flutter test test/question_generator_test.dart
 flutter test
 ```
 
+## VS Code-tasks (rekommenderat)
+
+Det finns färdiga tasks i `.vscode/tasks.json` så du kan köra QA med ett klick:
+
+- "QA: Analyze + Test (valfri path)" (standard)
+- "QA: Analyze + Full Test (stora ändringar)"
+- "Pixel_6: Sync + QA (valfri testpath)" (säkrast när du vill vara 100% säker att emulatorn kör senaste APK)
+
 ## Android (rekommenderat): Pixel_6-script för deterministisk install
 
 Om emulatorn ibland verkar köra en gammal APK, använd PowerShell-scriptet som alltid riktar in sig på **Pixel_6** och gör ett deterministiskt build+install-flöde:
