@@ -35,46 +35,62 @@ class QuestionCard extends StatelessWidget {
     return Semantics(
       label: 'Fråga: ${question.questionText}. Vad blir resultatet?',
       child: ExcludeSemantics(
-        child: Container(
-          margin:
-              EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding.w),
-          padding: EdgeInsets.all(AppConstants.largePadding.w),
-          decoration: BoxDecoration(
-            color: resolvedCardColor,
-            borderRadius: BorderRadius.circular(AppConstants.borderRadius * 2),
-            border: Border.all(
-              color: borderColor ?? scheme.onPrimary.withValues(alpha: 0.12),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: (shadowColor ?? scheme.primary).withValues(alpha: 0.18),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // On some layouts (short cards / smaller devices), large typography
+            // can overflow vertically. Keep the same UI but scale down styles
+            // slightly when height is tight.
+            final compact = constraints.maxHeight < 210;
+
+            final textTheme = Theme.of(context).textTheme;
+
+            final cardPadding = compact
+                ? (isWordProblem
+                    ? AppConstants.smallPadding.w
+                    : AppConstants.defaultPadding.w)
+                : AppConstants.largePadding.w;
+
+            final symbolStyle = compact
+                ? textTheme.headlineMedium
+                : (isWordProblem
+                    ? textTheme.displayMedium
+                    : textTheme.displayLarge);
+
+            final questionStyle = isWordProblem
+                ? (compact ? textTheme.titleMedium : textTheme.headlineSmall)
+                : (compact ? textTheme.headlineLarge : textTheme.displayLarge);
+
+            final symbolGap = compact
+                ? (AppConstants.smallPadding.h * 0.25)
+                : AppConstants.defaultPadding.h;
+
+            final subtitleGap = compact ? 0.0 : AppConstants.smallPadding.h;
+
+            final wordProblemMaxLines = compact ? 3 : 4;
+
+            return Container(
+              margin: EdgeInsets.symmetric(
+                horizontal: AppConstants.defaultPadding.w,
               ),
-            ],
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // On some layouts (short cards / smaller devices), large typography
-              // can overflow vertically. Keep the same UI but scale down styles
-              // slightly when height is tight.
-              final compact = constraints.maxHeight < 210;
-
-              final symbolStyle = (isWordProblem || compact)
-                  ? Theme.of(context).textTheme.displayMedium
-                  : Theme.of(context).textTheme.displayLarge;
-
-              final questionStyle = isWordProblem
-                  ? Theme.of(context).textTheme.headlineSmall
-                  : (compact
-                      ? Theme.of(context).textTheme.headlineLarge
-                      : Theme.of(context).textTheme.displayLarge);
-
-              final symbolGap = compact
-                  ? AppConstants.smallPadding.h
-                  : AppConstants.defaultPadding.h;
-
-              return Center(
+              padding: EdgeInsets.all(cardPadding),
+              decoration: BoxDecoration(
+                color: resolvedCardColor,
+                borderRadius:
+                    BorderRadius.circular(AppConstants.borderRadius * 2),
+                border: Border.all(
+                  color:
+                      borderColor ?? scheme.onPrimary.withValues(alpha: 0.12),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color:
+                        (shadowColor ?? scheme.primary).withValues(alpha: 0.18),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -95,27 +111,27 @@ class QuestionCard extends StatelessWidget {
                         color: questionTextColor ?? scheme.onSurface,
                       ),
                       textAlign: TextAlign.center,
-                      maxLines: isWordProblem ? 4 : 1,
+                      maxLines: isWordProblem ? wordProblemMaxLines : 1,
                       overflow: isWordProblem
                           ? TextOverflow.ellipsis
                           : TextOverflow.fade,
                     ),
-                    SizedBox(height: AppConstants.smallPadding.h),
+                    SizedBox(height: subtitleGap),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
                         'Vad blir resultatet?',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: subtitleTextColor ??
-                                  scheme.onSurface.withValues(alpha: 0.70),
-                            ),
+                        style: textTheme.titleMedium?.copyWith(
+                          color: subtitleTextColor ??
+                              scheme.onSurface.withValues(alpha: 0.70),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
