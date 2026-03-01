@@ -232,10 +232,10 @@ class QuestionGeneratorService {
       difficultyStep: difficultyStep,
     );
 
-    // Keep prompts short and 1-step.
-    final prompt = _random.nextBool()
-        ? 'Lisa har ${base.operand1} äpplen och får ${base.operand2} till. Hur många har hon nu?'
-        : 'Du har ${base.operand1} kulor och får ${base.operand2} fler. Hur många kulor har du nu?';
+    final prompt = _pickAdditionPrompt(
+      a: base.operand1,
+      b: base.operand2,
+    );
 
     return base.copyWith(
       promptText: prompt,
@@ -316,15 +316,62 @@ class QuestionGeneratorService {
       difficultyStep: difficultyStep,
     );
 
-    final prompt = _random.nextBool()
-        ? 'Du har ${base.operand1} ballonger. ${base.operand2} flyger iväg. Hur många är kvar?'
-        : 'Det finns ${base.operand1} fiskar. ${base.operand2} simmar bort. Hur många är kvar?';
+    final prompt = _pickSubtractionPrompt(
+      a: base.operand1,
+      b: base.operand2,
+    );
 
     return base.copyWith(
       promptText: prompt,
       explanation:
           '${base.operand1} - ${base.operand2} = ${base.correctAnswer}',
     );
+  }
+
+  // --- Word problem templates (Åk 1–3, 1-step) ---
+  // We keep Swedish prompts short and avoid tricky pluralization.
+
+  String _pickAdditionPrompt({required int a, required int b}) {
+    final templates = <String Function(int, int)>[
+      (x, y) => 'Du har $x kulor och får $y fler. Hur många kulor har du nu?',
+      (x, y) =>
+          'På bordet ligger $x pennor. Du lägger dit $y till. Hur många pennor blir det?',
+      (x, y) =>
+          'Lisa har $x klossar och får $y till. Hur många klossar har hon nu?',
+      (x, y) =>
+          'I en burk finns $x knappar. Du lägger i $y till. Hur många knappar finns nu?',
+      (x, y) => 'Du har $x kort. Du får $y kort till. Hur många kort har du?',
+      (x, y) =>
+          'I en låda ligger $x bollar. Du lägger i $y bollar till. Hur många bollar finns?',
+      (x, y) =>
+          'Det är $x barn i parken. $y barn kommer. Hur många barn är där nu?',
+      (x, y) =>
+          'Du plockar $x stenar och plockar $y till. Hur många stenar har du?',
+    ];
+
+    final pick = templates[_random.nextInt(templates.length)];
+    return pick(a, b);
+  }
+
+  String _pickSubtractionPrompt({required int a, required int b}) {
+    final templates = <String Function(int, int)>[
+      (x, y) => 'Du har $x ballonger. $y flyger iväg. Hur många är kvar?',
+      (x, y) => 'Det finns $x fiskar. $y simmar bort. Hur många är kvar?',
+      (x, y) =>
+          'Du har $x godisbitar. Du äter $y. Hur många godisbitar är kvar?',
+      (x, y) =>
+          'I en skål finns $x frukter. Du tar $y. Hur många frukter är kvar?',
+      (x, y) =>
+          'På en hylla står $x böcker. Du tar bort $y. Hur många böcker står kvar?',
+      (x, y) => 'Du har $x mynt. Du ger bort $y. Hur många mynt har du kvar?',
+      (x, y) =>
+          'Det ligger $x leksaker på golvet. Du plockar upp $y. Hur många ligger kvar?',
+      (x, y) =>
+          'I en låda finns $x klossar. Du tar ut $y. Hur många klossar är kvar?',
+    ];
+
+    final pick = templates[_random.nextInt(templates.length)];
+    return pick(a, b);
   }
 
   Question _generateMultiplication(
