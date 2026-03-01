@@ -121,6 +121,15 @@
       "dependsOrder": "sequence",
       "dependsOn": ["QA: Analyze", "QA: Test (alla)"],
       "problemMatcher": []
+    },
+    {
+      "label": "Pixel_6: Sync + QA (valfri testpath)",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Flutter: Sync (Pixel_6 only)",
+        "QA: Analyze + Test (valfri path)"
+      ],
+      "problemMatcher": []
     }
   ]
 }
