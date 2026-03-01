@@ -668,6 +668,16 @@ void main() {
       expect(find.text('1/2'), findsOneWidget);
       expect(find.text('Vilken årskurs kör du?'), findsOneWidget);
 
+      // Choose a grade (e.g. Åk 3) to better match real user flow.
+      final gradeDropdown = find.byWidgetPredicate(
+        (w) => w is DropdownButton<int?>,
+      );
+      expect(gradeDropdown, findsOneWidget);
+      await tester.tap(gradeDropdown);
+      await pumpFor(tester, const Duration(milliseconds: 200));
+      await tester.tap(find.text('Åk 3').last);
+      await pumpFor(tester, const Duration(milliseconds: 200));
+
       // Step 1 -> Step 2.
       await tester.tap(find.text('Nästa'));
       await pumpFor(
