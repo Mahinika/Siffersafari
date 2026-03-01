@@ -48,6 +48,22 @@ utan att bygga om appen i ett steg.
   - **M4/M5b** ≈ de delar som behöver ny representation/UI (t.ex. geometri, grafer/diagram).
   - **M5a** ≈ sådant som kan visas som text + svar (t.ex. negativa tal, procent, potenser).
 
+## Gap check (Åk 1–3): vad vi har vs vad som saknas
+
+Det här är en snabb reality-check mot “Centralt innehåll i årskurs 1–3” i Skolverkets kursplan för matematik.
+
+| Område (centralt innehåll Åk 1–3) | Nuläge i appen (quiz) | Nästa steg i planen |
+|---|---|---|
+| Taluppfattning & räknesätt | **Delvis täckt**: +/−/×/÷ finns, med Åk-formning för tidiga steg (t.ex. tiokompisar och undvik växling tidigt). Division är idag i praktiken “utan rest”. | **M1**: fortsätt bredda taluppfattning (t.ex. tal i bråkform som enkla bråk som “del av helhet” – kräver svar-format). **M3**: procent/decimal senare. |
+| Algebra | **Låg täckning**: vi gör mest rutinuppgifter. Vi saknar tydliga uppgifter om likhetstecknets betydelse, obekant tal (t.ex. \_ + 3 = 10), och mönster/talföljder som egen frågetyp. | **M1.5/M2**: lägg till “obekant tal”-uppgifter i befintligt UI (text + svar). M4: visuella mönster om vi vill. |
+| Problemlösning | **Delvis**: barn löser problem men nästan alltid som “ren räkning” utan kontext. | **M2**: textuppgifter v1 (kort, 1 steg, låg kognitiv last). |
+| Geometri (inkl. mätning/skala/symmetri) | **Saknas** (ingen representation/uppgiftstyp för former, lägesord, mätning av längd/massa/volym/tid, symmetri). | **M4**: modul för geometri + mätning (bör vara av/på + fallback). |
+| Sannolikhet & statistik (tabeller/diagram) | **Saknas**. | **M4**: modul för enkla tabeller/diagram + tolkning. |
+| Samband & förändring (t.ex. dubbelt/hälften) | **Saknas som eget spår** (kan uppstå i text men vi har inga dedikerade uppgifter). | **M2** (textmallar) eller **M4** (om visualisering behövs). |
+| Programmering/stegvisa instruktioner | **Saknas**. | **M4/M5** (om vi prioriterar det pedagogiska värdet; kräver designbeslut). |
+
+Konsekvens: vår nuvarande app är starkast i *Taluppfattning och tals användning* (via räknesätten) men behöver M2/M4 för att bli mer heltäckande mot kursplanens bredd i Åk 1–3.
+
 ## Definitioner (så vi pratar samma språk)
 - **Åk-styrning**: används för att välja talområde + regler för vilka tal som är “bra” att träna.
 - **Intern step (1–10)**: vår finare skala per räknesätt som redan finns (adaptiv svårighet).
