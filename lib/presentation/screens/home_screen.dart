@@ -15,6 +15,7 @@ import '../../domain/entities/user_progress.dart';
 import '../../domain/enums/difficulty_level.dart';
 import '../../domain/enums/operation_type.dart';
 import '../dialogs/create_user_dialog.dart';
+import '../widgets/mascot_view.dart';
 import '../widgets/themed_background_scaffold.dart';
 import 'onboarding_screen.dart';
 import 'parent_pin_screen.dart';
@@ -299,15 +300,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: AppConstants.defaultPadding),
               SizedBox(
                 height: 120,
-                child: Image.asset(
-                  characterAsset,
-                  fit: BoxFit.contain,
-                  cacheHeight:
-                      (120 * MediaQuery.devicePixelRatioOf(context)).round(),
-                  excludeFromSemantics: true,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox.shrink();
-                  },
+                  child: MascotView(
+                    asset: characterAsset,
+                    height: 120,
+                    fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(height: AppConstants.smallPadding),

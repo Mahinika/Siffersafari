@@ -35,6 +35,22 @@ images/
 - Bakgrunder: minst 1080x1920 (portrait)
 - Karaktärer: 256x256 eller 512x512
 
+## Karaktärsanimationer (frames)
+
+För enkla animationer (t.ex. idle/wave) kan vi använda frame-sekvenser.
+
+Rekommenderad struktur:
+
+```
+images/
+└── characters/
+	└── character_v2/
+		├── idle/idle_000.png
+		└── wave/wave_000.png
+```
+
+Se även `docs/CHARACTER_ANIMATIONS.md`.
+
 ## Optimering:
 
 - Komprimera bilder med TinyPNG eller ImageOptim
