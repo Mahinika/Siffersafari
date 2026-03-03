@@ -175,3 +175,81 @@ Om vi ska göra 50–200+ bilder med samma karaktär är IP-Adapter nästa högs
 - Mer kontroll (pose/uttryck) utan att tappa vem det är
 
 Det kräver custom nodes (lättast via ComfyUI-Manager) + några modeller i rätt mappar.
+
+---
+
+## Pose-pack (Val A): “fulla assets” för animation
+
+Mål: generera ett litet paket med poser (PNG) från en *master reference* (`character_v2`) som du kan använda för enklare animationer (bildbyte + små UI-animationer).
+
+### Baslinje (funkar utan nya ComfyUI-plugins)
+
+Det här använder vår befintliga img2img-workflow och håller identiteten hyfsat bra via låg `denoise`.
+
+- Kör pose-pack scriptet:
+  - `powershell -ExecutionPolicy Bypass -File scripts/generate_character_v2_pose_pack.ps1 -AlphaAll`
+
+Output hamnar i `artifacts/comfyui/pose_pack_YYYYMMDD_HHMMSS/` med en mapp per pose.
+
+Tips om kvalitet:
+- Om identiteten driftar: sänk `-Denoise` (t.ex. 0.25–0.35) och öka `-Steps`.
+- Om friläggningen blir dålig: se till att prompten ger *solid light background*.
+
+### Exportera ditt workflow till repo (så scripts kan använda det)
+
+Om du har byggt ett bättre workflow i ComfyUI (t.ex. med IP-Adapter + OpenPose), exportera det i **API-format** direkt in i repo så kan våra scripts köra det.
+
+1) I ComfyUI: `Workflow → Save (API Format)`
+2) Spara filen som:
+- `scripts/comfyui/workflows/character_v2_pose_pack_api.json`
+
+Pose-pack-scriptet väljer automatiskt den filen om den finns. Annars faller det tillbaka till `img2img_color_api.json`.
+
+Om du vill peka ut en annan fil explicit:
+- `powershell -ExecutionPolicy Bypass -File scripts/generate_character_v2_pose_pack.ps1 -Workflow <din_workflow.json> -AlphaAll`
+
+### Bästa sätt (rekommenderas): IP-Adapter + (ev) OpenPose
+
+För att få *samma karaktär* över många poser med mindre drift är det standard att använda:
+- **IP-Adapter** (referensbild → stabil identitet/stil)
+- **ControlNet OpenPose** (pose-hint → stabil kropp/armar)
+
+Det kräver att du installerar custom nodes + laddar ner modeller.
+
+---
+
+## Installera det som saknas (när du inte har ComfyUI-Manager)
+
+### 1) Installera ComfyUI-Manager (rekommenderas)
+
+I din ComfyUI-mapp:
+- Gå till `ComfyUI/custom_nodes/`
+- Kör:
+  - `git clone https://github.com/ltdrdata/ComfyUI-Manager comfyui-manager`
+- Starta om ComfyUI
+
+Om du saknar Git på Windows: installera Git (standardinstall) först.
+
+### 2) IP-Adapter (för stabil identitet)
+
+Installera custom nodes:
+- `ComfyUI/custom_nodes/`:
+  - `git clone https://github.com/cubiq/ComfyUI_IPAdapter_plus`
+- Starta om ComfyUI
+
+Ladda ner modeller (SDXL):
+- CLIP-Vision encoder till `ComfyUI/models/clip_vision/` (följ filnamn/krav i repo-readme för IPAdapter).
+- IP-Adapter SDXL weights till `ComfyUI/models/ipadapter/` (följ filnamn/krav i repo-readme för IPAdapter).
+
+### 3) OpenPose-preprocessor + ControlNet OpenPose SDXL (för stabil pose)
+
+Installera preprocessors:
+- `ComfyUI/custom_nodes/`:
+  - `git clone https://github.com/Fannovel16/comfyui_controlnet_aux/`
+- Installera dependencies enligt deras README (pip/requirements) och starta om ComfyUI.
+
+Ladda ner ControlNet OpenPose för SDXL (viktigt: SDXL-modell):
+- Exempel: `thibaud/controlnet-openpose-sdxl-1.0` eller `xinsir/controlnet-openpose-sdxl-1.0` (safetensors).
+- Placera i den ControlNet-modellmapp som din ComfyUI-installation använder.
+
+Notis: OpenPose-preprocessor laddar ofta ner annotator-modeller första gången (från HuggingFace). Om du kör offline behöver de laddas ner manuellt.

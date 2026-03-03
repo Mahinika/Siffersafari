@@ -28,6 +28,12 @@ class FeedbackDialog extends StatefulWidget {
 class _FeedbackDialogState extends State<FeedbackDialog> {
   bool _announced = false;
 
+  String _mascotTitle(String title) {
+    const prefix = '${AppConstants.mascotName}: ';
+    if (title.startsWith(prefix)) return title;
+    return '$prefix$title';
+  }
+
   List<String> _messageLines(String message) {
     return message
         .split('\n')
@@ -47,7 +53,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
       final feedback = widget.feedback;
       SemanticsService.sendAnnouncement(
         View.of(context),
-        '${feedback.title}. ${feedback.message}',
+        '${_mascotTitle(feedback.title)}. ${feedback.message}',
         direction,
       );
     });
@@ -76,10 +82,12 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
           borderRadius: BorderRadius.circular(AppConstants.borderRadius * 2),
         );
 
+    final title = _mascotTitle(widget.feedback.title);
+
     return Dialog(
       backgroundColor: dialogBackgroundColor,
       shape: dialogShape,
-      child: Padding(
+      child: SingleChildScrollView(
         padding: EdgeInsets.all(AppConstants.largePadding.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -113,10 +121,12 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
             // Title
             Semantics(
               header: true,
-              label: widget.feedback.title,
+              label: title,
               child: ExcludeSemantics(
                 child: Text(
-                  widget.feedback.title,
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: mainColor,

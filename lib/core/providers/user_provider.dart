@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/difficulty_config.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/constants/settings_keys.dart';
 import '../../data/repositories/local_storage_repository.dart';
 import '../../domain/entities/quest.dart';
@@ -165,7 +166,8 @@ class UserNotifier extends StateNotifier<UserState> {
           ? 'Årskurs ${user.gradeLevel}'
           : user.ageGroup.displayName;
       state = state.copyWith(
-        questNotice: 'Uppdrag anpassat till $label.',
+        questNotice:
+            '${AppConstants.mascotName} anpassade uppdraget till $label.',
       );
     }
   }

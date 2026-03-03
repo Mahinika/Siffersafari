@@ -47,7 +47,7 @@ class FirstRunSetupScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppConstants.largePadding),
               Text(
-                'Välkommen!',
+                'Välkommen! Jag heter ${AppConstants.mascotName}.',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: mutedOnPrimary,
                       fontWeight: FontWeight.bold,

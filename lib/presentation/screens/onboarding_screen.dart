@@ -141,12 +141,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    'Nu kör vi!',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Nu kör vi!',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(
+                              color: onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Jag heter ${AppConstants.mascotName}.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: mutedOnPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ],
                   ),
                 ),
                 Text(
@@ -295,7 +312,7 @@ class _OnboardingGradePage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Så fixar vi lagom svår nivå.',
+            'Så fixar ${AppConstants.mascotName} lagom svår nivå.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: mutedOnPrimary,
                   fontWeight: FontWeight.w600,

@@ -60,6 +60,10 @@ app.*.map.json
 
 # Artifacts (generated UI dumps)
 artifacts/ui*.xml
+artifacts/screenshots/**/ui*.xml
 
 # Artifacts (ComfyUI generations)
 artifacts/comfyui/
+
+# Local generated images (keep out of git)
+assets/images/generated/

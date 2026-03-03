@@ -560,14 +560,18 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
   String _getTitle(int stars) {
     switch (stars) {
       case 3:
-        return 'Wow! Supersnyggt!';
+        return _mascotSays('Wow! Supersnyggt!');
       case 2:
-        return 'Snyggt jobbat!';
+        return _mascotSays('Snyggt jobbat!');
       case 1:
-        return 'Bra kämpat!';
+        return _mascotSays('Bra kämpat!');
       default:
-        return 'Heja! Prova igen!';
+        return _mascotSays('Heja! Prova igen!');
     }
+  }
+
+  String _mascotSays(String text) {
+    return '${AppConstants.mascotName}: $text';
   }
 
   int _calculateStars(double successRate) {
@@ -660,38 +664,45 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
 
     if (didUnlockSomething) {
       badgeEmoji = '🎁';
-      badgeTitle = _pick(
-        seed,
-        const ['Ny skatt!', 'Upplåsning!', 'Du hittade en grej!'],
+      badgeTitle = _mascotSays(
+        _pick(
+          seed,
+          const ['Ny skatt!', 'Upplåsning!', 'Du hittade en grej!'],
+        ),
       );
       badgeBody = 'Du låste upp något nytt. Fortsätt så!';
     } else if (stars >= 3) {
       badgeEmoji = '🏆';
-      badgeTitle =
-          _pick(seed, const ['Stjärnkapten!', 'Mästarrunda!', 'Tre stjärnor!']);
+      badgeTitle = _mascotSays(
+        _pick(seed, const ['Stjärnkapten!', 'Mästarrunda!', 'Tre stjärnor!']),
+      );
       badgeBody =
           '3 stjärnor i ${session.operationType.emoji} ${session.operationType.displayName}.';
     } else if (quizState.bestCorrectStreak >= 5) {
       badgeEmoji = '🔥';
-      badgeTitle =
-          _pick(seed, const ['Svitproffs!', 'Du är i zonen!', 'Eldsvit!']);
+      badgeTitle = _mascotSays(
+        _pick(seed, const ['Svitproffs!', 'Du är i zonen!', 'Eldsvit!']),
+      );
       badgeBody = 'Bästa svit: ${quizState.bestCorrectStreak} rätt i rad.';
     } else if (quizState.speedBonusCount >= 3) {
       badgeEmoji = '⚡';
-      badgeTitle =
-          _pick(seed, const ['Blixtläge!', 'Snabbbonus-jägare!', 'Raketfart!']);
+      badgeTitle = _mascotSays(
+        _pick(seed, const ['Blixtläge!', 'Snabbbonus-jägare!', 'Raketfart!']),
+      );
       badgeBody =
           'Snabbbonusar: ${quizState.speedBonusCount} st (supersnabbt!).';
     } else if (session.successRate >= 0.7) {
       badgeEmoji = '🌟';
-      badgeTitle =
-          _pick(seed, const ['Stabil runda!', 'Snyggt flow!', 'Bra tempo!']);
+      badgeTitle = _mascotSays(
+        _pick(seed, const ['Stabil runda!', 'Snyggt flow!', 'Bra tempo!']),
+      );
       badgeBody =
           'Du är på gång i ${session.operationType.emoji} ${session.operationType.displayName}.';
     } else {
       badgeEmoji = '💪';
-      badgeTitle =
-          _pick(seed, const ['Bra kämpat!', 'Du tränar!', 'Heja dig!']);
+      badgeTitle = _mascotSays(
+        _pick(seed, const ['Bra kämpat!', 'Du tränar!', 'Heja dig!']),
+      );
       badgeBody = 'Varje runda gör dig lite starkare.';
     }
 

@@ -1,15 +1,25 @@
 param(
   [Parameter(Mandatory = $false)]
-  [string]$BuildDir = (Join-Path $PSScriptRoot '..\build'),
+  [string]$BuildDir,
 
   [Parameter(Mandatory = $false)]
-  [string]$OutDir = (Join-Path $PSScriptRoot '..\artifacts\UI TEST 1'),
+  [string]$OutDir,
 
   [Parameter(Mandatory = $false)]
   [string]$ResponseJson
 )
 
 $ErrorActionPreference = 'Stop'
+
+$scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+if ([string]::IsNullOrWhiteSpace($BuildDir)) {
+  $BuildDir = Join-Path $scriptRoot '..\build'
+}
+
+if ([string]::IsNullOrWhiteSpace($OutDir)) {
+  $OutDir = Join-Path $scriptRoot '..\artifacts\UI TEST 1'
+}
 
 function Find-ResponseJson {
   param([string]$Root)

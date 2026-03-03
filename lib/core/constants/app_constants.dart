@@ -17,6 +17,9 @@ class AppConstants {
   static const String appName = 'Siffersafari';
   static const String appVersion = '1.0.0';
 
+  // Mascot
+  static const String mascotName = 'Ville';
+
   // Session Configuration
   static const int questionsPerSession = 10;
   static const int timerDurationSeconds = 30;

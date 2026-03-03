@@ -18,7 +18,7 @@ void main(List<String> args) async {
   final promptText = parsed['prompt'];
   final negativePromptText = parsed['negative'] ?? parsed['neg'];
   final initImagePath = parsed['init'] ?? parsed['initImage'];
-  final outDir = parsed['out'] ?? 'assets/images/generated';
+  final outDir = parsed['out'] ?? 'artifacts/comfyui/out';
   final count = int.tryParse(parsed['count'] ?? parsed['n'] ?? '1') ?? 1;
 
   if (workflowPath == null || promptText == null) {
@@ -49,6 +49,7 @@ void main(List<String> args) async {
   final batchArg = parsed['batch'];
   final denoiseArg = parsed['denoise'];
 
+  // Convention: seed=-1 means "random" (used by our PowerShell wrappers).
   final seed = seedArg == null ? null : int.tryParse(seedArg);
   final steps = stepsArg == null ? null : int.tryParse(stepsArg);
   final width = widthArg == null ? null : int.tryParse(widthArg);
@@ -100,7 +101,8 @@ void main(List<String> args) async {
 
   final imagesSaved = <String>[];
   for (var i = 0; i < count; i++) {
-    final runSeed = seed ?? Random.secure().nextInt(1 << 31);
+    final runSeed =
+        (seed == null || seed < 0) ? Random.secure().nextInt(1 << 31) : seed;
     _applyCommonNumericOverrides(graph, seed: runSeed);
 
     stdout.writeln(
@@ -143,7 +145,7 @@ void main(List<String> args) async {
 
 void _printHelp() {
   stdout.writeln('''
-Generate PNG/JPG via ComfyUI (local) and save into assets.
+Generate PNG/JPG via ComfyUI (local) and save to disk.
 
 Required:
   --workflow <path>   Path to ComfyUI workflow exported in "API format" (JSON)
@@ -153,7 +155,7 @@ Optional:
   --server <url>      Default: COMFYUI_SERVER/COMFYUI_URL or http://127.0.0.1:8000
   --negative <text>   Negative prompt (requires __NEGATIVE_PROMPT__ placeholder)
   --init <path>        Init image (img2img). Requires __INIT_IMAGE__ placeholder
-  --out <dir>         Default: assets/images/generated
+  --out <dir>         Default: artifacts/comfyui/out
   --count <n>         Number of generations (default 1)
   --seed <int>        If omitted, uses random seed per image
   --steps <int>       Overrides KSampler steps (if present)
@@ -170,7 +172,7 @@ Workflow placeholders (recommended):
     __INIT_IMAGE__
 
 Example:
-  dart run scripts/generate_images_comfyui.dart --workflow scripts/comfyui/workflows/txt2img_api.json --prompt "cute friendly space mascot, flat vector, kids app" --negative "scary, gore, realistic" --width 1024 --height 1024 --steps 25 --cfg 6.5 --count 4
+  dart run scripts/generate_images_comfyui.dart --workflow scripts/comfyui/workflows/txt2img_api.json --prompt "cute friendly space mascot, flat vector, kids app" --negative "scary, gore, realistic" --width 1024 --height 1024 --steps 25 --cfg 6.5 --count 4 --out artifacts/comfyui/out
 ''');
 }
 
@@ -406,8 +408,19 @@ Future<Map<String, dynamic>> _waitForOutputs(
     try {
       final res = await _httpJson('GET', uri);
       final item = res[promptId];
-      if (item is Map && item['outputs'] is Map) {
-        return (item['outputs'] as Map).cast<String, dynamic>();
+      if (item is Map) {
+        final status = item['status'];
+        if (status is Map) {
+          final statusStr = status['status_str'];
+          if (statusStr is String && statusStr.toLowerCase() == 'error') {
+            throw StateError('ComfyUI prompt failed: $item');
+          }
+        }
+
+        final outputs = item['outputs'];
+        if (outputs is Map && outputs.isNotEmpty) {
+          return outputs.cast<String, dynamic>();
+        }
       }
     } catch (_) {
       // History endpoint may 404 briefly; keep polling.

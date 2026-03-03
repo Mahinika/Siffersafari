@@ -310,6 +310,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   },
                 ),
               ),
+              const SizedBox(height: AppConstants.smallPadding),
+              Text(
+                AppConstants.mascotName,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: subtleOnPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                textAlign: TextAlign.center,
+              ),
             ],
 
             const SizedBox(height: AppConstants.largePadding * 2),
@@ -428,7 +437,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(height: AppConstants.smallPadding),
                     Text(
                       userState.questStatus?.quest.title ??
-                          'Välj ett uppdrag så kör vi!',
+                          '${AppConstants.mascotName}: Välj ett uppdrag så kör vi!',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: mutedOnPrimary,
                             fontWeight: FontWeight.w600,
