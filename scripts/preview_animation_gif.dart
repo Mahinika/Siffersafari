@@ -72,14 +72,14 @@ void main(List<String> args) {
     }
 
     var frame = decoded.convert(format: img.Format.uint8);
-    targetWidth ??= frame.width;
-    targetHeight ??= frame.height;
-
-    if (frame.width != targetWidth || frame.height != targetHeight) {
+    if (targetWidth == null || targetHeight == null) {
+      targetWidth = frame.width;
+      targetHeight = frame.height;
+    } else if (frame.width != targetWidth || frame.height != targetHeight) {
       frame = img.copyResize(
         frame,
-        width: targetWidth!,
-        height: targetHeight!,
+        width: targetWidth,
+        height: targetHeight,
         interpolation: img.Interpolation.nearest,
       );
     }
