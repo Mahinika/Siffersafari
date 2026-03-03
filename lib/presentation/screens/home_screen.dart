@@ -35,6 +35,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _checkedOnboardingForUserId;
   bool _onboardingPushInFlight = false;
 
+  static const int _danceFrameCount = 16;
+
+  List<String>? _mascotDanceFramesFor(String characterAsset) {
+    if (!characterAsset.endsWith('/character_v2.png')) return null;
+    return List<String>.generate(
+      _danceFrameCount,
+      (i) =>
+          'assets/images/characters/character_v2/dance/dance_${i.toString().padLeft(3, '0')}.png',
+      growable: false,
+    );
+  }
+
   OperationType _recommendedOperation({
     required Set<OperationType> allowedOps,
     required int? gradeLevel,
@@ -302,6 +314,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 height: 120,
                   child: MascotView(
                     asset: characterAsset,
+                  frames: _mascotDanceFramesFor(characterAsset),
+                  fps: 10,
                     height: 120,
                     fit: BoxFit.contain,
                 ),

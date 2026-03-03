@@ -43,3 +43,20 @@ Konvention:
 
 - Använd scripts för att generera pose-pack i `artifacts/comfyui/...`.
 - Välj ut och ev. frilägg de frames du vill använda, och flytta dem sedan manuellt till `assets/images/characters/...` enligt strukturen ovan.
+
+## Snabbstart: "dance" (utan ComfyUI)
+
+Det finns ett litet script som kan skapa en enkel dans-loop genom att göra små förflyttningar/skalningar av en befintlig PNG:
+
+```bash
+dart run scripts/generate_mascot_dance_frames.dart \
+  --in assets/images/themes/jungle/character_v2.png \
+  --out artifacts/mascot_frames/character_v2_dance \
+  --count 16 --size 256
+```
+
+Kopiera sedan frames till assets:
+
+```powershell
+Copy-Item "artifacts/mascot_frames/character_v2_dance\dance_*.png" "assets/images/characters/character_v2/dance/" -Force
+```

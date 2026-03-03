@@ -64,6 +64,7 @@ artifacts/screenshots/**/ui*.xml
 
 # Artifacts (ComfyUI generations)
 artifacts/comfyui/
+artifacts/mascot_frames/
 
 # Local generated images (keep out of git)
 assets/images/generated/
