@@ -124,61 +124,133 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
     BuildContext context,
     ParentPinService pinService,
   ) {
-    showDialog(
+    final answerController = TextEditingController();
+    var selectedQuestion = defaultSecurityQuestions.first;
+    String? answerErrorText;
+    var isLoading = false;
+
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Spara backup-koder'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Vi rekommenderar att du sparar dessa backup-koder på en säker plats (t.ex. en anteckningsbok) för att kunna återställa PIN om du glömmer det.',
-                style: TextStyle(height: 1.5),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  final messenger = ScaffoldMessenger.of(context);
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Spara backup-koder'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Vi rekommenderar att du sparar backup-koder på en säker plats (t.ex. en anteckningsbok) för att kunna återställa PIN om du glömmer det.',
+                  style: TextStyle(height: 1.5),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  key: ValueKey(selectedQuestion),
+                  initialValue: selectedQuestion,
+                  items: defaultSecurityQuestions
+                      .map(
+                        (q) => DropdownMenuItem<String>(
+                          value: q,
+                          child: Text(
+                            q,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: isLoading
+                      ? null
+                      : (value) {
+                          if (value == null) return;
+                          setDialogState(() {
+                            selectedQuestion = value;
+                          });
+                        },
+                  decoration: const InputDecoration(
+                    labelText: 'Säkerhetsfråga',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: answerController,
+                  enabled: !isLoading,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Svar',
+                    helperText: 'Skiftläge spelar ingen roll.',
+                    errorText: answerErrorText,
+                  ),
+                  onChanged: (_) {
+                    if (answerErrorText == null) return;
+                    setDialogState(() => answerErrorText = null);
+                  },
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          final messenger = ScaffoldMessenger.of(context);
 
-                  try {
-                    final defaultQuestion = defaultSecurityQuestions.first;
-                    final codes = await pinService.setupPinRecovery(
-                      securityQuestion: defaultQuestion,
-                      securityAnswer: 'standard', // Default answer for demo
-                    );
+                          final validationError =
+                              InputValidators.validateSecurityAnswer(
+                            answerController.text,
+                          );
+                          if (validationError != null) {
+                            setDialogState(
+                              () => answerErrorText = validationError,
+                            );
+                            return;
+                          }
 
-                    if (!ctx.mounted) return;
-                    _showCodesForCopying(ctx, codes, pinService);
-                  } catch (e) {
-                    if (!mounted) return;
-                    messenger.showSnackBar(
-                      SnackBar(content: Text('Fel: $e')),
-                    );
-                  }
-                },
-                child: const Text('Ställ in backup-koder'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop(); // Dismiss this dialog
-                  if (!mounted) return;
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => const ParentDashboardScreen(),
-                    ),
-                  );
-                },
-                child: const Text('Hoppa över'),
-              ),
-            ],
+                          final answer = InputValidators.sanitizeSecurityAnswer(
+                            answerController.text,
+                          );
+
+                          setDialogState(() => isLoading = true);
+                          try {
+                            final codes = await pinService.setupPinRecovery(
+                              securityQuestion: selectedQuestion,
+                              securityAnswer: answer,
+                            );
+
+                            if (!ctx.mounted) return;
+                            _showCodesForCopying(ctx, codes, pinService);
+                          } catch (e) {
+                            if (!ctx.mounted) return;
+                            setDialogState(() => isLoading = false);
+                            messenger.showSnackBar(
+                              SnackBar(content: Text('Fel: $e')),
+                            );
+                          }
+                        },
+                  child: Text(
+                    isLoading ? 'Skapar…' : 'Skapa backup-koder',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          Navigator.of(ctx).pop(); // Dismiss this dialog
+                          if (!mounted) return;
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (_) => const ParentDashboardScreen(),
+                            ),
+                          );
+                        },
+                  child: const Text('Hoppa över'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    );
+    ).whenComplete(answerController.dispose);
   }
 
   void _showCodesForCopying(

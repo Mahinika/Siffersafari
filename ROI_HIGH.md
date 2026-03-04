@@ -28,10 +28,15 @@
 	- [x] PIN-validering: längd 4-6, endast siffror, sanitiseringsmask → Applicerad på parent_pin_screen & pin_recovery_screen
 	- [x] Säkerhetssvar-validering: 1-100 tecken, trimmad → Applicerad på pin_recovery_screen
 	- [x] Profilenamn-validering: reserved för framtida use → Definierat i InputValidators
-- [ ] [RESEARCH] Implementera säker hantering av känslig användardata
-  - [ ] Definiera scope och kriterier
-  - [ ] Genomför ändringen
-  - [ ] Verifiera och markera klar
+- [x] [RESEARCH] Implementera säker hantering av känslig användardata — **KLAR: Hashning + dataminimering + export-exkludering**
+  - [x] Definiera scope och kriterier
+  - [x] Genomför ändringen
+  - [x] Verifiera och markera klar
+	- [x] PIN lagras endast som BCrypt-hash (ingen plaintext)
+	- [x] Säkerhetssvar och backup-koder lagras endast som BCrypt-hash (ingen plaintext)
+	- [x] Backup-koder visas bara vid skapande (för att spara offline)
+	- [x] GDPR-export exkluderar PIN-hashar, säkerhetssvar och backup-koder
+	- [x] Recovery-setup kräver användarens svar (ingen hårdkodad “demo”-hemlighet)
 - [x] [RESEARCH] Säkerställ COPPA-compliance för barn under 13 år — **KLAR: Privacy Policy + UI links implementerat**
   - [x] Definiera scope och kriterier
   - [x] Genomför ändringen
