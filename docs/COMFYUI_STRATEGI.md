@@ -42,6 +42,11 @@ Vi vill optimera för:
 - Txt2img ger ofta olika ansikte/kläder mellan generationer.
 - Lösning: använd referens-baserad styrning (IP-Adapter) eller kontrollerande hints (ControlNet) eller img2img med låg denoise.
 
+1b) **Animation: “mer rörelse” kan ge mer drift**
+- Om vi höjer `denoise` för att få tydligare pose (t.ex. spring) driftar ofta hatt/kläder/färger snabbt, särskilt i pixel-stil.
+- Lösning: håll `denoise` låg/medel och styr pose separat (t.ex. OpenPose/ControlNet). Lås identitet med init-bild och helst IP-Adapter.
+- Praktiskt i repo: använd `scripts/generate_character_v2_animation_frames.ps1` med `-StableSeed` (samma seed över alla frames) och gör snabb preview med `scripts/preview_animation_gif.dart`.
+
 2) **Transparens blir halvdålig**
 - Corner flood-fill funkar sämre om bakgrunden har mycket struktur, gradient eller om motivet har glapp i outline.
 - Lösning: designa workflow så att bakgrunden blir *avsiktligt enkel* (t.ex. solid chroma) eller producera en mask (segmentation/SAM) i workflow.
@@ -49,6 +54,10 @@ Vi vill optimera för:
 3) **Karaktär kommer i ”sheet” (två figurer)**
 - Ofta pga prompts som antyder ”character sheet” eller modellens bias.
 - Lösning: styr prompt hårdare (”single character, centered, full body, one subject”) och/eller använd bbox/segmentering för att extrahera största komponenten.
+
+4) **Workflow/validering strular pga miljöskillnader**
+- Samma workflow kan validera olika beroende på vilka samplers/noder som finns i din ComfyUI-install.
+- Lösning: håll dig till verifierat stödda sampler-namn (och undvik att “gissa” nya) samt föredra enklare noder i batch-flöden.
 
 ---
 
@@ -87,6 +96,28 @@ Praktiskt upplägg:
    - laddar referensbild
    - använder IP-Adapter-nod (weight ~0.6–0.9 som start)
    - kombinerar med prompt (för pose/uttryck/rekvisita)
+
+---
+
+## Animation (idle/jump/run/wave): rekommenderat arbetssätt
+
+Mål: få **tydlig rörelse** utan att karaktären byter outfit/hatttyp mellan frames.
+
+1) Generera frames (utan emulator)
+- Script: `scripts/generate_character_v2_animation_frames.ps1`
+- Rekommenderad start:
+  - `-Anim run -Frames 8 -StableSeed`
+  - ev. `-ChainInit` om du behöver mer sammanhängande loop (men håll koll på artefakt-ackumulering)
+  - håll `-Denoise` låg/medel (t.ex. 0.25–0.45) om identiteten driftar
+
+2) Preview (GIF) + snabb inspektion
+- GIF: `dart run scripts/preview_animation_gif.dart --dir <frames-dir> --prefix run_ --fps 10`
+- Inspektera timing/strip: `dart run scripts/inspect_animation_gif.dart --gif <path.gif> --outStrip <path.png>`
+
+3) När prompt inte räcker
+- Om benen/armarna inte “läser” som spring: lägg till pose-signal (OpenPose/ControlNet) i workflow istället för att bara höja `denoise`.
+
+Tips: använd spritesheet-workflows för snabb visuell granskning (t.ex. 4 frames @ 256px, 2×2) men exportera i slutändan **1 PNG per frame** till app-assets.
 
 
 ### Nivå C — Riktigt bra alpha (mask i workflow)

@@ -17,35 +17,150 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
       Future<void> ensureHomeVisible() async {
-        final operationLabels = <String>[
-          'Addition',
-          'Subtraktion',
-          'Multiplikation',
-          'Division',
+        final operationCardKeys = <Key>[
+          const Key('operation_card_addition'),
+          const Key('operation_card_subtraction'),
+          const Key('operation_card_multiplication'),
+          const Key('operation_card_division'),
         ];
 
+        bool hasCreateProfileButton() {
+          return find
+              .widgetWithText(ElevatedButton, 'Skapa profil')
+              .evaluate()
+              .isNotEmpty;
+        }
+
         bool hasOperationCards() {
-          for (final label in operationLabels) {
-            if (find.text(label).evaluate().isNotEmpty) return true;
+          for (final key in operationCardKeys) {
+            if (find.byKey(key).evaluate().isNotEmpty) return true;
           }
           return false;
         }
 
-        for (var attempt = 0; attempt < 3; attempt++) {
-          // Onboarding can block the UI.
-          final onboardingTitle = find.text('Kom igång');
-          if (onboardingTitle.evaluate().isNotEmpty) {
-            final skipButton = find.text('Hoppa över');
-            if (skipButton.evaluate().isNotEmpty) {
+        Future<bool> completeOnboardingIfVisible() async {
+          final isOnboardingVisible =
+              find.text('Hoppa över').evaluate().isNotEmpty &&
+                  (find.text('1/2').evaluate().isNotEmpty ||
+                      find.text('2/2').evaluate().isNotEmpty);
+          if (!isOnboardingVisible) return false;
+
+          // NOTE: The onboarding uses a PageView. Both pages can exist in the
+          // widget tree at the same time, so we must avoid targeting widgets
+          // from the non-visible page.
+
+          // ---- Onboarding step 2: ops (“Vad vill du räkna?”) ----
+          if (find.text('2/2').evaluate().isNotEmpty) {
+            final doneButton = find.widgetWithText(ElevatedButton, 'Klar');
+            if (doneButton.evaluate().isNotEmpty) {
               await it.tap(
                 tester,
-                skipButton,
+                doneButton,
                 after: const Duration(seconds: 3),
               );
-              await tester.pumpAndSettle(const Duration(seconds: 3));
-              if (hasOperationCards()) return;
+              await tester.pumpAndSettle(const Duration(seconds: 2));
+              return true;
+            }
+
+            // Rare race: page jump may not have updated button text yet.
+            final nextButton = find.widgetWithText(ElevatedButton, 'Nästa');
+            if (nextButton.evaluate().isNotEmpty) {
+              await it.tap(
+                tester,
+                nextButton,
+                after: const Duration(seconds: 2),
+              );
+              await tester.pumpAndSettle(const Duration(seconds: 1));
+              return true;
             }
           }
+
+          // ---- Onboarding step 1: grade ----
+          if (find.text('1/2').evaluate().isNotEmpty &&
+              find.text('Vilken årskurs kör du?').evaluate().isNotEmpty) {
+            final gradeDropdown = find.byType(DropdownButton<int?>);
+            if (gradeDropdown.evaluate().isNotEmpty) {
+              final opened = await it.tryTap(
+                tester,
+                gradeDropdown,
+                after: const Duration(milliseconds: 600),
+              );
+              if (opened) {
+                await tester.pumpAndSettle(const Duration(milliseconds: 400));
+
+                // Prefer Åk 3 for stable coverage.
+                final ak3 = find.text('Åk 3');
+                if (ak3.evaluate().isNotEmpty) {
+                  await it.tap(
+                    tester,
+                    ak3,
+                    after: const Duration(milliseconds: 700),
+                  );
+                } else {
+                  final vetInte = find.text('Vet inte');
+                  if (vetInte.evaluate().isNotEmpty) {
+                    await it.tap(
+                      tester,
+                      vetInte,
+                      after: const Duration(milliseconds: 600),
+                    );
+                  }
+                }
+              }
+            }
+
+            final nextButton = find.widgetWithText(ElevatedButton, 'Nästa');
+            if (nextButton.evaluate().isNotEmpty) {
+              await it.tap(
+                tester,
+                nextButton,
+                after: const Duration(seconds: 2),
+              );
+              await tester.pumpAndSettle(const Duration(seconds: 1));
+              return true;
+            }
+
+            // Fallback if button type changes.
+            if (find.text('Nästa').evaluate().isNotEmpty) {
+              await it.tap(
+                tester,
+                find.text('Nästa'),
+                after: const Duration(seconds: 2),
+              );
+              await tester.pumpAndSettle(const Duration(seconds: 1));
+              return true;
+            }
+          }
+
+          // Generic escape hatch.
+          final skipButton = find.widgetWithText(TextButton, 'Hoppa över');
+          if (skipButton.evaluate().isNotEmpty) {
+            await it.tap(
+              tester,
+              skipButton,
+              after: const Duration(seconds: 3),
+            );
+            await tester.pumpAndSettle(const Duration(seconds: 2));
+            return true;
+          }
+          if (find.text('Hoppa över').evaluate().isNotEmpty) {
+            await it.tap(
+              tester,
+              find.text('Hoppa över'),
+              after: const Duration(seconds: 3),
+            );
+            await tester.pumpAndSettle(const Duration(seconds: 2));
+            return true;
+          }
+
+          return false;
+        }
+
+        final deadline = DateTime.now().add(const Duration(seconds: 35));
+        while (DateTime.now().isBefore(deadline)) {
+          // Onboarding can block the UI.
+          await completeOnboardingIfVisible();
+          if (hasOperationCards() || hasCreateProfileButton()) return;
 
           // If we're in Settings, go back.
           if (find.text('Inställningar').evaluate().isNotEmpty) {
@@ -83,16 +198,21 @@ void main() {
             if (hasOperationCards()) return;
           }
 
-          await tester.pumpAndSettle(const Duration(seconds: 1));
-          if (hasOperationCards()) return;
+          await tester.pumpAndSettle(const Duration(milliseconds: 800));
+          if (hasOperationCards() || hasCreateProfileButton()) return;
         }
+
+        fail(
+          'Could not reach Home or Create Profile. Visible texts: '
+          '${it.visibleTexts(tester).take(120).toList()}',
+        );
       }
 
       await ensureHomeVisible();
 
       // Fresh install path: create a user if none exists.
       final createUserHomeButton =
-          find.widgetWithText(ElevatedButton, 'Skapa användare');
+          find.widgetWithText(ElevatedButton, 'Skapa profil');
       if (createUserHomeButton.evaluate().isNotEmpty) {
         await it.tap(tester, createUserHomeButton);
         await tester.pumpAndSettle();
@@ -114,16 +234,16 @@ void main() {
       await ensureHomeVisible();
 
       // Start a quiz by tapping the first available operation card.
-      final operationLabels = <String>[
-        'Addition',
-        'Subtraktion',
-        'Multiplikation',
-        'Division',
+      final operationCardKeys = <Key>[
+        const Key('operation_card_addition'),
+        const Key('operation_card_subtraction'),
+        const Key('operation_card_multiplication'),
+        const Key('operation_card_division'),
       ];
 
       Finder? chosenOperation;
-      for (final label in operationLabels) {
-        final candidate = find.text(label);
+      for (final key in operationCardKeys) {
+        final candidate = find.byKey(key);
         if (candidate.evaluate().isNotEmpty) {
           chosenOperation = candidate;
           break;
@@ -162,8 +282,8 @@ void main() {
 
       // Ensure we're back on home (operation cards visible).
       Finder? anyOperation;
-      for (final label in operationLabels) {
-        final candidate = find.text(label);
+      for (final key in operationCardKeys) {
+        final candidate = find.byKey(key);
         if (candidate.evaluate().isNotEmpty) {
           anyOperation = candidate;
           break;

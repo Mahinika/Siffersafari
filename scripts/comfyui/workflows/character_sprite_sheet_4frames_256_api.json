@@ -34,10 +34,23 @@
       "title": "Resize + Pad (1024x1024)"
     }
   },
+  "16": {
+    "inputs": {
+      "image": [
+        "10",
+        0
+      ],
+      "amount": 4
+    },
+    "class_type": "RepeatImageBatch",
+    "_meta": {
+      "title": "Repeat Image Batch (4)"
+    }
+  },
   "3": {
     "inputs": {
       "pixels": [
-        "10",
+        "16",
         0
       ],
       "vae": [
@@ -47,7 +60,20 @@
     },
     "class_type": "VAEEncode",
     "_meta": {
-      "title": "VAE Encode"
+      "title": "VAE Encode (Batch)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "seed_behavior": "random"
+    },
+    "class_type": "LatentBatchSeedBehavior",
+    "_meta": {
+      "title": "Latent Batch Seed Behavior (random)"
     }
   },
   "9": {
@@ -98,11 +124,11 @@
   "6": {
     "inputs": {
       "seed": 123,
-      "steps": 28,
-      "cfg": 6.5,
+      "steps": 32,
+      "cfg": 5.5,
       "sampler_name": "euler",
       "scheduler": "normal",
-      "denoise": 0.35,
+      "denoise": 0.85,
       "model": [
         "9",
         0
@@ -116,13 +142,13 @@
         0
       ],
       "latent_image": [
-        "3",
+        "18",
         0
       ]
     },
     "class_type": "KSampler",
     "_meta": {
-      "title": "KSampler (img2img)"
+      "title": "KSampler (img2img, Batch)"
     }
   },
   "7": {
@@ -138,7 +164,7 @@
     },
     "class_type": "VAEDecode",
     "_meta": {
-      "title": "VAE Decode"
+      "title": "VAE Decode (Batch)"
     }
   },
   "11": {
@@ -159,7 +185,7 @@
     },
     "class_type": "Image Rembg (Remove Background)",
     "_meta": {
-      "title": "Remove Background (rembg)"
+      "title": "Remove Background (rembg, Batch)"
     }
   },
   "12": {
@@ -171,7 +197,7 @@
     },
     "class_type": "SplitImageWithAlpha",
     "_meta": {
-      "title": "Split RGBA \u2192 RGB + Alpha"
+      "title": "Split RGBA → RGB + Alpha (Batch)"
     }
   },
   "13": {
@@ -184,7 +210,7 @@
     },
     "class_type": "ThresholdMask",
     "_meta": {
-      "title": "Alpha Threshold"
+      "title": "Alpha Threshold (Batch)"
     }
   },
   "15": {
@@ -196,7 +222,7 @@
     },
     "class_type": "Mask Fill Holes",
     "_meta": {
-      "title": "Fill Alpha Holes"
+      "title": "Fill Alpha Holes (Batch)"
     }
   },
   "14": {
@@ -212,20 +238,54 @@
     },
     "class_type": "JoinImageWithAlpha",
     "_meta": {
-      "title": "Join RGB + Alpha"
+      "title": "Join RGB + Alpha (Batch)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": [
+        "14",
+        0
+      ],
+      "target_width": 256,
+      "target_height": 256,
+      "padding_color": "black",
+      "interpolation": "nearest-exact"
+    },
+    "class_type": "ResizeAndPadImage",
+    "_meta": {
+      "title": "Resize + Pad (256x256, nearest)"
+    }
+  },
+  "17": {
+    "inputs": {
+      "images": [
+        "19",
+        0
+      ],
+      "border_width": 0,
+      "number_of_columns": 2,
+      "max_cell_size": 256,
+      "border_red": 0,
+      "border_green": 0,
+      "border_blue": 0
+    },
+    "class_type": "Create Grid Image from Batch",
+    "_meta": {
+      "title": "Create Grid (2x2)"
     }
   },
   "8": {
     "inputs": {
-      "filename_prefix": "ville_pixel_art_test",
+      "filename_prefix": "character_sprite_sheet_4frames_256",
       "images": [
-        "14",
+        "17",
         0
       ]
     },
     "class_type": "SaveImage",
     "_meta": {
-      "title": "Save Image"
+      "title": "Save Spritesheet"
     }
   }
 }

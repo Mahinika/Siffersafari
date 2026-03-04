@@ -45,6 +45,18 @@ void main(List<String> args) async {
     exit(2);
   }
 
+  // Guardrail: ComfyUI has two common JSON exports:
+  // - API format: {"1": { ... }, "2": { ... }, ...}
+  // - UI format: {"nodes": [...], "links": [...], ...}
+  // Only API format works with POST /prompt.
+  if (graphDynamic.containsKey('nodes') && graphDynamic.containsKey('links')) {
+    stderr.writeln(
+      'This looks like a ComfyUI UI-format workflow (has "nodes"/"links"). '
+      'Please export as API format ("Save (API format)") and pass that JSON to --workflow.',
+    );
+    exit(2);
+  }
+
   final graph = _deepCopyMap(graphDynamic);
 
   final seedArg = parsed['seed'];
@@ -89,6 +101,25 @@ void main(List<String> args) async {
     negativePromptText: negativePromptText,
     initImageName: initImageName,
   );
+
+  // If placeholders remain, fail fast with a clearer message than ComfyUI's
+  // "Invalid image file: __INIT_IMAGE__" validation.
+  final remaining = <String>[];
+  for (final token in const [
+    '__POSITIVE_PROMPT__',
+    '__NEGATIVE_PROMPT__',
+    '__INIT_IMAGE__',
+  ]) {
+    if (_containsString(graph, token)) remaining.add(token);
+  }
+  if (remaining.isNotEmpty) {
+    stderr.writeln(
+      'Workflow still contains placeholder(s): ${remaining.join(', ')}. '
+      'Make sure you exported API format and provided the matching CLI args '
+      '(e.g. --init when using __INIT_IMAGE__).',
+    );
+    exit(2);
+  }
 
   _applyCommonNumericOverrides(
     graph,
