@@ -130,7 +130,8 @@ void main() {
       expect(status.quest.id, 'q_minus_easy');
     });
 
-    test('Unit (QuestProgressionService): nextQuestId returnerar null på sista quest i path',
+    test(
+        'Unit (QuestProgressionService): nextQuestId returnerar null på sista quest i path',
         () {
       const user = UserProgress(
         userId: 'u1',

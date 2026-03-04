@@ -92,7 +92,9 @@ void main() {
       expect(over.level, GradeBenchmarkLevel.over);
     });
 
-    test('testmatris: expected step ger alltid I linje (Åk 1-9, alla räknesätt)', () {
+    test(
+        'testmatris: expected step ger alltid I linje (Åk 1-9, alla räknesätt)',
+        () {
       final grades = List<int>.generate(9, (i) => i + 1);
       final operations = <OperationType>[
         OperationType.addition,

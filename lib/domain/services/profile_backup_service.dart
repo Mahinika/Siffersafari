@@ -32,12 +32,10 @@ class ProfileBackupService {
   }
 
   ProfileBackup decode(
-    String json,
-    {
+    String json, {
     int minSupportedVersion = 1,
     int maxSupportedVersion = currentSchemaVersion,
-    }
-  ) {
+  }) {
     final dynamic parsed;
     try {
       parsed = jsonDecode(json);
@@ -87,7 +85,8 @@ class ProfileBackupService {
       final session = Map<String, dynamic>.from(item);
       final sessionId = session['sessionId'];
       if (sessionId is! String || sessionId.trim().isEmpty) {
-        throw const FormatException('quizHistory entry missing valid sessionId');
+        throw const FormatException(
+            'quizHistory entry missing valid sessionId');
       }
       quizHistory.add(session);
     }
