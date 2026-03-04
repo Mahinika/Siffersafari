@@ -139,16 +139,6 @@
   - [ ] Genomför ändringen
   - [ ] Verifiera och markera klar
 
-## Analytics & Insights
-- [ ] [RESEARCH] Implementera offline analytics (lokal statistik) - data collection strategy
-  - [ ] Definiera scope och kriterier
-  - [ ] Genomför ändringen
-  - [ ] Verifiera och markera klar
-- [ ] Förbättra statistikvyn för användare och föräldrar
-  - [ ] Definiera scope och kriterier
-  - [ ] Genomför ändringen
-  - [ ] Verifiera och markera klar
-
 ## Progression System Improvements
 - [ ] Utöka nivåsystemet med fler nivåer (15-20 för långsiktig motivation)
   - [ ] Definiera scope och kriterier
@@ -203,6 +193,16 @@
   - [ ] Genomför ändringen
   - [ ] Verifiera och markera klar
 - [ ] [RESEARCH] Implementera smart förslag för nästa övning (algoritm/heuristics)
+  - [ ] Definiera scope och kriterier
+  - [ ] Genomför ändringen
+  - [ ] Verifiera och markera klar
+
+## Analytics & Insights
+- [ ] [RESEARCH] Implementera offline analytics (lokal statistik) - data collection strategy
+  - [ ] Definiera scope och kriterier
+  - [ ] Genomför ändringen
+  - [ ] Verifiera och markera klar
+- [ ] Förbättra statistikvyn för användare och föräldrar
   - [ ] Definiera scope och kriterier
   - [ ] Genomför ändringen
   - [ ] Verifiera och markera klar
