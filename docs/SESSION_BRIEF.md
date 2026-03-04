@@ -14,6 +14,8 @@
 - Under/I linje/Över-indikatorn i Föräldraläge bygger (när det finns underlag) på **förslaget (steg)** utifrån barnets svar, inte bara på inställt steg.
 - QA-rutin: `flutter analyze` → minsta relevanta `flutter test`-subset (full suite vid stora ändringar).
 - Säkerhet/tests: enhetstester för PIN/lockout/recovery i `test/parent_pin_service_test.dart`; regression täcker backup-kod-unikhet + case-insensitiv inmatning.
+- Quiz/progression: edge-case tests för in-progress underlag + purge i `test/quiz_progression_edge_cases_test.dart`.
+- Integration: kritiska parent-flöden (PIN, recovery, profil) täcks i `integration_test/parent_features_test.dart`.
 - Pixel_6: deterministiska flöden via `scripts/flutter_pixel6.ps1` (sync/install/run).
 - ComfyUI: servern svarar på `http://127.0.0.1:8000/system_stats`.
 - Animation: pipeline finns för frame-för-frame PNG → GIF/strip/audit (utan emulator).

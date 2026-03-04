@@ -74,19 +74,18 @@
   - [x] Definiera scope och kriterier → Säkerhetskritisk logik: PIN-verifiering, lockout, recovery
   - [x] Genomför ändringen → Ny testfil: `test/parent_pin_service_test.dart`
   - [x] Verifiera och markera klar → `flutter test test/parent_pin_service_test.dart`
-- [ ] Lägg till regressionstester för kritiska buggar
 - [x] Lägg till regressionstester för kritiska buggar — **KLAR: backup-koder (unikhet + case-insensitiv inmatning) testat**
-  - [x] Definiera scope och kriterier → Förhindra historisk bugg: duplicerade backup-koder som kunde ge “återanvändning”
+  - [x] Definiera scope och kriterier → Förhindra historisk bugg: duplicerade backup-koder som kunde ge "återanvändning"
   - [x] Genomför ändringen → Regression assertions i `test/parent_pin_service_test.dart`
   - [x] Verifiera och markera klar → `flutter test test/parent_pin_service_test.dart`
-- [ ] Lägg till testfall för edge cases i quiz och progression
-  - [ ] Definiera scope och kriterier
-  - [ ] Genomför ändringen
-  - [ ] Verifiera och markera klar
-- [ ] Lägg till integration tests för alla kritiska användarflöden
-  - [ ] Definiera scope och kriterier
-  - [ ] Genomför ändringen
-  - [ ] Verifiera och markera klar
+- [x] Lägg till testfall för edge cases i quiz och progression — **KLAR: in-progress underlag + purge av legacy entries + startCustomSession edge case**
+  - [x] Definiera scope och kriterier → Säkerställ att "underlag" nollställs vid start och uppdateras efter svar, samt att gamla in-progress entries purgas
+  - [x] Genomför ändringen → Ny testfil: `test/quiz_progression_edge_cases_test.dart`
+  - [x] Verifiera och markera klar → `flutter test test/quiz_progression_edge_cases_test.dart`
+- [x] Lägg till integration tests för alla kritiska användarflöden — **KLAR: PIN, recovery, profil-hantering**
+  - [x] Definiera scope och kriterier → Parent-facing flöden: PIN (skapa+verifiera), PIN recovery, profil-hantering (skapa/byt)
+  - [x] Genomför ändringen → Ny testfil: `integration_test/parent_features_test.dart`
+  - [x] Verifiera och markera klar → Kompilera OK (`flutter analyze`), körning kräver enhet/emulator
 - [ ] Skapa automatiserad smoke test-suite
   - [ ] Definiera scope och kriterier
   - [ ] Genomför ändringen
