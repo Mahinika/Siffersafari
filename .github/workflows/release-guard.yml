@@ -1,0 +1,54 @@
+name: Release Guard
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'lib/**'
+      - 'test/**'
+      - 'android/**'
+      - 'pubspec.yaml'
+      - '.github/workflows/release-guard.yml'
+
+jobs:
+  release-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Fast release checks
+        run: |
+          flutter analyze lib test
+          flutter test test/spaced_repetition_service_test.dart
+          flutter test test/profile_backup_service_test.dart
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+      - name: Verify APK size budget
+        run: |
+          APK_PATH="build/app/outputs/flutter-apk/app-debug.apk"
+          test -f "$APK_PATH"
+          SIZE_BYTES=$(stat -c%s "$APK_PATH")
+          MAX_BYTES=$((80 * 1024 * 1024))
+          echo "APK size: $SIZE_BYTES bytes"
+          if [ "$SIZE_BYTES" -gt "$MAX_BYTES" ]; then
+            echo "APK exceeds budget ($MAX_BYTES bytes)"
+            exit 1
+          fi
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk

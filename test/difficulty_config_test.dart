@@ -91,6 +91,71 @@ void main() {
       );
       expect(over.level, GradeBenchmarkLevel.over);
     });
+
+    test('testmatris: expected step ger alltid I linje (Åk 1-9, alla räknesätt)', () {
+      final grades = List<int>.generate(9, (i) => i + 1);
+      final operations = <OperationType>[
+        OperationType.addition,
+        OperationType.subtraction,
+        OperationType.multiplication,
+        OperationType.division,
+      ];
+
+      for (final grade in grades) {
+        for (final operation in operations) {
+          final expected = DifficultyConfig.expectedDifficultyStepForGrade(
+            gradeLevel: grade,
+            operation: operation,
+          );
+          final benchmark = DifficultyConfig.compareDifficultyStepToGrade(
+            gradeLevel: grade,
+            operation: operation,
+            difficultyStep: expected,
+          );
+
+          expect(
+            benchmark.level,
+            GradeBenchmarkLevel.inline,
+            reason: 'Åk $grade, $operation, step $expected should be inline',
+          );
+          expect(benchmark.delta, 0);
+        }
+      }
+    });
+
+    test('testmatris: tolerance ±2 klassas som I linje', () {
+      final grades = List<int>.generate(9, (i) => i + 1);
+      final operations = <OperationType>[
+        OperationType.addition,
+        OperationType.subtraction,
+        OperationType.multiplication,
+        OperationType.division,
+      ];
+
+      for (final grade in grades) {
+        for (final operation in operations) {
+          final expected = DifficultyConfig.expectedDifficultyStepForGrade(
+            gradeLevel: grade,
+            operation: operation,
+          );
+
+          for (final offset in <int>[-2, -1, 1, 2]) {
+            final benchmark = DifficultyConfig.compareDifficultyStepToGrade(
+              gradeLevel: grade,
+              operation: operation,
+              difficultyStep: expected + offset,
+            );
+
+            expect(
+              benchmark.level,
+              GradeBenchmarkLevel.inline,
+              reason:
+                  'Åk $grade, $operation, expected $expected, offset $offset should be inline',
+            );
+          }
+        }
+      }
+    });
   });
 
   group('DifficultyConfig.parentSuggestedAdjustmentSteps', () {
@@ -139,6 +204,50 @@ void main() {
           makeHarder: false,
         ),
         1,
+      );
+    });
+
+    test('skalning mot indikatorn: avstånd 0-2 => 1, 3-4 => 2, 5+ => 3', () {
+      const over1 = GradeBenchmark(
+        expectedStep: 5,
+        actualStep: 6,
+        delta: 1,
+        level: GradeBenchmarkLevel.over,
+      );
+      expect(
+        DifficultyConfig.parentSuggestedAdjustmentSteps(
+          benchmark: over1,
+          makeHarder: false,
+        ),
+        1,
+      );
+
+      const over3 = GradeBenchmark(
+        expectedStep: 5,
+        actualStep: 8,
+        delta: 3,
+        level: GradeBenchmarkLevel.over,
+      );
+      expect(
+        DifficultyConfig.parentSuggestedAdjustmentSteps(
+          benchmark: over3,
+          makeHarder: false,
+        ),
+        2,
+      );
+
+      const under5 = GradeBenchmark(
+        expectedStep: 7,
+        actualStep: 2,
+        delta: -5,
+        level: GradeBenchmarkLevel.under,
+      );
+      expect(
+        DifficultyConfig.parentSuggestedAdjustmentSteps(
+          benchmark: under5,
+          makeHarder: true,
+        ),
+        3,
       );
     });
   });

@@ -1,0 +1,58 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:math_game_app/domain/services/profile_backup_service.dart';
+
+void main() {
+  group('ProfileBackupService', () {
+    late ProfileBackupService service;
+
+    setUp(() {
+      service = ProfileBackupService();
+    });
+
+    test('encode/decode roundtrip fungerar', () {
+      const backup = ProfileBackup(
+        schemaVersion: 1,
+        userId: 'u1',
+        userData: <String, dynamic>{'name': 'Test', 'gradeLevel': 3},
+        quizHistory: <Map<String, dynamic>>[
+          <String, dynamic>{'sessionId': 's1', 'score': 7},
+        ],
+      );
+
+      final json = service.encode(backup);
+      final decoded = service.decode(json);
+
+      expect(decoded.schemaVersion, 1);
+      expect(decoded.userId, 'u1');
+      expect(decoded.userData['name'], 'Test');
+      expect(decoded.quizHistory.length, 1);
+      expect(decoded.quizHistory.first['sessionId'], 's1');
+    });
+
+    test('decode failar pa korrupt json', () {
+      expect(
+        () => service.decode('{not-json}'),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('decode failar pa unsupported schema version', () {
+      const payload =
+          '{"schemaVersion":99,"userId":"u1","userData":{},"quizHistory":[]}';
+
+      expect(
+        () => service.decode(payload),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('decode failar vid saknade obligatoriska falt', () {
+      const payload = '{"schemaVersion":1,"userData":{},"quizHistory":[]}';
+
+      expect(
+        () => service.decode(payload),
+        throwsA(isA<FormatException>()),
+      );
+    });
+  });
+}

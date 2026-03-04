@@ -129,5 +129,22 @@ void main() {
 
       expect(status.quest.id, 'q_minus_easy');
     });
+
+    test('Unit (QuestProgressionService): nextQuestId returnerar null på sista quest i path',
+        () {
+      const user = UserProgress(
+        userId: 'u1',
+        name: 'Test',
+        ageGroup: AgeGroup.middle,
+        gradeLevel: 1,
+      );
+
+      final next = service.nextQuestId(
+        user: user,
+        currentQuestId: 'q_div_easy',
+      );
+
+      expect(next, isNull);
+    });
   });
 }

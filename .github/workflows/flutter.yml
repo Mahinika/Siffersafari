@@ -7,6 +7,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -17,6 +18,9 @@ jobs:
 
       - name: Flutter pub get
         run: flutter pub get
+
+      - name: Analyze (app + tests)
+        run: flutter analyze lib test integration_test
 
       - name: Run tests
         run: flutter test test
