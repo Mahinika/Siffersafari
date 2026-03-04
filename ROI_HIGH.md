@@ -2,13 +2,29 @@
 
 ## Foundation & Security (gör först)
 - [ ] Implementera säker storage av föräldra-PIN (hash + salt)
+	- [ ] Välj hashstrategi (Argon2id eller bcrypt) och dokumentera valet
+	- [ ] Lägg till salt + verifieringsfunktion i auth-flödet
+	- [ ] Migrera ev. befintlig PIN-lagring utan dataförlust
+	- [ ] Lägg till tester: korrekt PIN, fel PIN, edge cases
 - [ ] Utvärdera och förbättra datasäkerhet (t.ex. kryptering av känslig info)
 - [ ] Implementera datavalidering vid Hive-läsning/skrivning
+	- [ ] Definiera schema/regler per Hive-box (obligatoriska fält, typer)
+	- [ ] Lägg till guard/validator före write och efter read
+	- [ ] Hantera ogiltig data med fallback + loggning
+	- [ ] Lägg till enhetstester för korrupt/inkompatibel data
 - [ ] Validera all användarinput för att förhindra data corruption
 - [ ] Implementera säker hantering av känslig användardata
 - [ ] Säkerställ COPPA-compliance för barn under 13 år
 - [ ] Implementera dataexport för GDPR-compliance
+	- [ ] Definiera exakt vilka datafält som ingår i export
+	- [ ] Implementera export till läsbart offline-format (t.ex. JSON)
+	- [ ] Lägg till anonymisering/minimering där det behövs
+	- [ ] Verifiera export med testdata för flera profiler
 - [ ] Implementera rate limiting för föräldra-PIN-försök
+	- [ ] Definiera regler (antal försök, spärrtid, återställning)
+	- [ ] Implementera lokal spärrlogik per profil/enhet
+	- [ ] Visa tydligt felmeddelande och nedräkning vid spärr
+	- [ ] Lägg till tester för brute-force-liknande försök
 
 ## Testing & Quality (gör tidigt)
 - [ ] Förbättra testtäckningen: Lägg till fler enhets- och widgettester för edge cases och regression.

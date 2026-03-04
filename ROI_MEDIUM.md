@@ -1,5 +1,7 @@
 # ROI MEDIUM
 
+> Standard framåt: nya prioriterade todos ska få en mini-checklista direkt vid skapande.
+
 ## CI/CD & Automation (force multipliers - gör först)
 - [ ] Automatisera QA: Sätt upp CI/CD-flöde med automatiska tester och kodanalys vid varje commit.
 - [ ] Förbättra testautomatisering för integrationstester
@@ -30,7 +32,7 @@
 - [ ] Skapa fler exempelprofiler för testning
 - [ ] Skapa en "reset app"-funktion för test/demo
 - [ ] Implementera smart retry-logik för misslyckade operationer
-- [ ] Bryt ner prioriterade todos i mini-checklistor (tydlig definition av klar per punkt)
+- [x] Bryt ner prioriterade todos i mini-checklistor (tydlig definition av klar per punkt)
 
 ## Core Features & UX Improvements
 - [ ] Lägg till stöd för export/import av användardata
