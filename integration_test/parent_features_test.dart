@@ -46,16 +46,19 @@ void main() {
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
       // Look for security question dropdown or security answer field in PIN creation flow.
-      final securityQuestionDropdown = find.byType(DropdownButtonFormField<String>);
+      final securityQuestionDropdown =
+          find.byType(DropdownButtonFormField<String>);
       if (securityQuestionDropdown.evaluate().isNotEmpty) {
         // Select first security question.
-        await it.tryTap(tester, securityQuestionDropdown.first, after: const Duration(milliseconds: 300));
+        await it.tryTap(tester, securityQuestionDropdown.first,
+            after: const Duration(milliseconds: 300));
         await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
         // Tap first dropdown item (if menu opened).
         final firstMenuItem = find.text('Vad är ditt favoritämne?').last;
         if (firstMenuItem.evaluate().isNotEmpty) {
-          await it.tryTap(tester, firstMenuItem, after: const Duration(milliseconds: 300));
+          await it.tryTap(tester, firstMenuItem,
+              after: const Duration(milliseconds: 300));
           await tester.pumpAndSettle(const Duration(milliseconds: 300));
         }
 
@@ -78,7 +81,8 @@ void main() {
       if (find.text('Spara dina återställningskoder').evaluate().isNotEmpty) {
         final closeBackupDialog = find.text('Stäng');
         if (closeBackupDialog.evaluate().isNotEmpty) {
-          await it.tap(tester, closeBackupDialog, after: const Duration(milliseconds: 500));
+          await it.tap(tester, closeBackupDialog,
+              after: const Duration(milliseconds: 500));
           await tester.pumpAndSettle(const Duration(seconds: 1));
         }
       }
@@ -120,7 +124,8 @@ void main() {
 
           final confirmButton = find.text('OK');
           if (confirmButton.evaluate().isNotEmpty) {
-            await it.tap(tester, confirmButton, after: const Duration(seconds: 1));
+            await it.tap(tester, confirmButton,
+                after: const Duration(seconds: 1));
             await tester.pumpAndSettle(const Duration(seconds: 2));
           }
         }
@@ -199,13 +204,15 @@ void main() {
       final switchProfileButton = find.textContaining('profil');
       if (switchProfileButton.evaluate().isEmpty) return;
 
-      await it.tap(tester, switchProfileButton.first, after: const Duration(seconds: 1));
+      await it.tap(tester, switchProfileButton.first,
+          after: const Duration(seconds: 1));
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Should show profile selection or creation screen.
       final createProfileButton = find.text('Skapa profil');
       if (createProfileButton.evaluate().isNotEmpty) {
-        await it.tap(tester, createProfileButton, after: const Duration(seconds: 1));
+        await it.tap(tester, createProfileButton,
+            after: const Duration(seconds: 1));
         await tester.pumpAndSettle(const Duration(seconds: 1));
 
         // Enter profile name (e.g. "Test User").
@@ -216,12 +223,14 @@ void main() {
         // Select grade (Åk 3).
         final gradeDropdown = find.byType(DropdownButton<int?>);
         if (gradeDropdown.evaluate().isNotEmpty) {
-          await it.tryTap(tester, gradeDropdown, after: const Duration(milliseconds: 300));
+          await it.tryTap(tester, gradeDropdown,
+              after: const Duration(milliseconds: 300));
           await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
           final ak3 = find.text('Åk 3').last;
           if (ak3.evaluate().isNotEmpty) {
-            await it.tryTap(tester, ak3, after: const Duration(milliseconds: 300));
+            await it.tryTap(tester, ak3,
+                after: const Duration(milliseconds: 300));
             await tester.pumpAndSettle(const Duration(milliseconds: 300));
           }
         }
@@ -229,7 +238,8 @@ void main() {
         // Confirm creation.
         final confirmButton = find.text('Skapa');
         if (confirmButton.evaluate().isNotEmpty) {
-          await it.tap(tester, confirmButton, after: const Duration(seconds: 1));
+          await it.tap(tester, confirmButton,
+              after: const Duration(seconds: 1));
           await tester.pumpAndSettle(const Duration(seconds: 2));
         }
 

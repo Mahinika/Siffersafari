@@ -301,14 +301,25 @@ void main() {
 
       // Verify app is running and we can find key UI elements.
       // Either we're in onboarding or we can see operation cards.
-      final onboardingVisible =
-          find.text('Hoppa över').evaluate().isNotEmpty ||
-              find.text('Vilken årskurs kör du?').evaluate().isNotEmpty;
+      final onboardingVisible = find.text('Hoppa över').evaluate().isNotEmpty ||
+          find.text('Vilken årskurs kör du?').evaluate().isNotEmpty;
 
-      final homeVisible = find.byKey(const Key('operation_card_addition')).evaluate().isNotEmpty ||
-          find.byKey(const Key('operation_card_subtraction')).evaluate().isNotEmpty ||
-          find.byKey(const Key('operation_card_multiplication')).evaluate().isNotEmpty ||
-          find.byKey(const Key('operation_card_division')).evaluate().isNotEmpty ||
+      final homeVisible = find
+              .byKey(const Key('operation_card_addition'))
+              .evaluate()
+              .isNotEmpty ||
+          find
+              .byKey(const Key('operation_card_subtraction'))
+              .evaluate()
+              .isNotEmpty ||
+          find
+              .byKey(const Key('operation_card_multiplication'))
+              .evaluate()
+              .isNotEmpty ||
+          find
+              .byKey(const Key('operation_card_division'))
+              .evaluate()
+              .isNotEmpty ||
           find.text('Skapa profil').evaluate().isNotEmpty;
 
       expect(onboardingVisible || homeVisible, isTrue,
@@ -350,11 +361,16 @@ void main() {
           reason: 'Settings icon should be visible on home screen');
 
       await it.tap(tester, settingsIconRetry.first,
-          after: const Duration(seconds: 2,));
+          after: const Duration(
+            seconds: 2,
+          ));
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // Verify we're in settings.
-      expect(find.text('Inställningar'), findsOneWidget,);
+      expect(
+        find.text('Inställningar'),
+        findsOneWidget,
+      );
 
       // Go back.
       final backButton = find.byType(BackButton);
@@ -366,7 +382,9 @@ void main() {
       final anyOperationCard = find.byKey(const Key('operation_card_addition'));
       expect(anyOperationCard, findsOneWidget);
     },
-    timeout: const Timeout(Duration(minutes: 2,)),
+    timeout: const Timeout(Duration(
+      minutes: 2,
+    )),
   );
 
   testWidgets(
@@ -408,12 +426,16 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // Verify we're on achievements screen (look for common UI elements).
-      final achievementsTitle = find.textContaining('Achievements').evaluate().isNotEmpty ||
-          find.text('Inga upplåsta').evaluate().isNotEmpty ||
-          find.byIcon(Icons.emoji_events).evaluate().isNotEmpty;
+      final achievementsTitle =
+          find.textContaining('Achievements').evaluate().isNotEmpty ||
+              find.text('Inga upplåsta').evaluate().isNotEmpty ||
+              find.byIcon(Icons.emoji_events).evaluate().isNotEmpty;
 
-      expect(achievementsTitle, isTrue,
-          reason: 'Achievements screen should be visible',);
+      expect(
+        achievementsTitle,
+        isTrue,
+        reason: 'Achievements screen should be visible',
+      );
 
       // Go back.
       final backButton = find.byType(BackButton);
@@ -422,7 +444,9 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
       }
     },
-    timeout: const Timeout(Duration(minutes: 2,)),
+    timeout: const Timeout(Duration(
+      minutes: 2,
+    )),
   );
 
   testWidgets(
@@ -443,7 +467,8 @@ void main() {
       if (createProfileButton.evaluate().isNotEmpty) {
         await it.tap(tester, createProfileButton);
         await tester.pumpAndSettle();
-        await tester.enterText(find.byType(TextField).first, 'ProfileSwitchUser');
+        await tester.enterText(
+            find.byType(TextField).first, 'ProfileSwitchUser');
         await tester.pumpAndSettle();
         await it.tap(tester, find.text('Skapa'));
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -455,9 +480,15 @@ void main() {
       if (profileDropdown.evaluate().isEmpty) {
         // Fallback: look for name text followed by dropdown arrow.
         final arrowDown = find.byIcon(Icons.arrow_drop_down);
-        expect(arrowDown, findsWidgets,
-            reason: 'Profile dropdown should be visible on home screen',);
-        await it.tap(tester, arrowDown.first,);
+        expect(
+          arrowDown,
+          findsWidgets,
+          reason: 'Profile dropdown should be visible on home screen',
+        );
+        await it.tap(
+          tester,
+          arrowDown.first,
+        );
       } else {
         await it.tap(tester, profileDropdown.first);
       }
@@ -466,13 +497,18 @@ void main() {
 
       // Verify dropdown menu is visible (look for "Skapa ny profil" option).
       final createNewOption = find.text('Skapa ny profil');
-      expect(createNewOption, findsOneWidget,
-          reason: 'Profile switcher menu should show "Skapa ny profil" option',);
+      expect(
+        createNewOption,
+        findsOneWidget,
+        reason: 'Profile switcher menu should show "Skapa ny profil" option',
+      );
 
       // Tap outside to close dropdown (tap on scrim or press back).
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
     },
-    timeout: const Timeout(Duration(minutes: 2,)),
+    timeout: const Timeout(Duration(
+      minutes: 2,
+    )),
   );
 }
