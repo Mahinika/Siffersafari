@@ -12,3 +12,9 @@
 - Install/run ska vara deterministiskt när det behövs: använd `scripts/flutter_pixel6.ps1` (särskilt `-Action sync`).
 - UI-screenshot-regression: föredra Flutter-side screenshots via `integration_test/screenshots_test.dart` och extrahera PNG med `scripts/extract_integration_screenshots.ps1` till `artifacts/`.
 - ComfyUI baseUrl för våra scripts: `http://127.0.0.1:8000`.
+- Idle (AI-framegen): använd `-StableSeed` och vid behov `-ChainInit` för högre konsistens; för variation utan drift: håll `denoise` låg och variera frame-modifiers/prompt. Kör audit + GIF/strip för snabb validering.
+- ComfyUI workflows: undvik WAS-noden `Mask Fill Holes` i batch-flöden (kan krascha med PIL TypeError). Bypassa genom att använda `ThresholdMask` direkt som alpha.
+
+## 2026-03-04
+- Mix-coverage-testet för Åk+step+range stänger av `missing-number`, och gör range/invariant-checks bara för frågor där `operationType != mixed` (specialfrågor som tid/M4/M5 använder `operationType: mixed` och följer inte operand-regler).
+- För att ligga närmare Skolverkets centrala innehåll utan att göra appen “för svår för tidigt”: procent och negativa tal introduceras försiktigt som Mix-specialfrågor i Åk 5–6 på höga steps (9–10). Kärn-flödets +/− för Åk 1–6 förblir icke-negativt.

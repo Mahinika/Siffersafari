@@ -83,6 +83,165 @@ void main() {
       );
     });
 
+    test('Curriculum: Åk 1–9 följer riktlinjerna (ett test)', () {
+      DifficultyLevel difficultyForStep(int step) {
+        if (step <= 3) return DifficultyLevel.easy;
+        if (step <= 7) return DifficultyLevel.medium;
+        return DifficultyLevel.hard;
+      }
+
+      int maxAbsForM5a(NumberRange range, int step) {
+        final safeRangeMax = max(1, range.max);
+        if (step <= 3) return min(20, safeRangeMax);
+        if (step <= 6) return min(100, safeRangeMax);
+        return min(1000, safeRangeMax);
+      }
+
+      const stepsToCheck = <int>[2, 5, 9];
+      const ops = <OperationType>[
+        OperationType.addition,
+        OperationType.subtraction,
+        OperationType.multiplication,
+        OperationType.division,
+      ];
+
+      for (var grade = 1; grade <= 9; grade++) {
+        final ageGroup = DifficultyConfig.effectiveAgeGroup(
+          fallback: AgeGroup.young,
+          gradeLevel: grade,
+        );
+
+        for (final step in stepsToCheck) {
+          for (final op in ops) {
+            final seeded = QuestionGeneratorService(
+              random: Random(100000 + grade * 1000 + op.index * 10 + step),
+              wordProblemsEnabled: false,
+              missingNumberEnabled: false,
+            );
+
+            final range = DifficultyConfig.curriculumNumberRangeForStep(
+              gradeLevel: grade,
+              operationType: op,
+              difficultyStep: step,
+            );
+
+            final isM5a = grade >= 7;
+            final isM3 = grade >= 4 && grade <= 6;
+            const iterations = 80;
+
+            for (var i = 0; i < iterations; i++) {
+              final q = seeded.generateQuestion(
+                ageGroup: ageGroup,
+                operationType: op,
+                difficulty: difficultyForStep(step),
+                gradeLevel: grade,
+                difficultyStep: step,
+              );
+
+              expect(q.operationType, op);
+
+              switch (op) {
+                case OperationType.addition:
+                  expect(q.correctAnswer, q.operand1 + q.operand2);
+
+                  if (isM5a) {
+                    final maxAbs = maxAbsForM5a(range, step);
+                    expect(q.operand1.abs(), lessThanOrEqualTo(maxAbs));
+                    expect(q.operand2.abs(), lessThanOrEqualTo(maxAbs));
+                    expect(!(q.operand1 == 0 && q.operand2 == 0), isTrue);
+                  } else {
+                    expect(q.operand1, inInclusiveRange(range.min, range.max));
+                    expect(q.operand2, inInclusiveRange(range.min, range.max));
+                    if (grade <= 3) {
+                      expect(
+                        q.correctAnswer,
+                        inInclusiveRange(range.min, range.max),
+                      );
+                    }
+                  }
+                  break;
+
+                case OperationType.subtraction:
+                  expect(q.correctAnswer, q.operand1 - q.operand2);
+
+                  if (isM5a) {
+                    final maxAbs = maxAbsForM5a(range, step);
+                    expect(q.operand1.abs(), lessThanOrEqualTo(maxAbs));
+                    expect(q.operand2, inInclusiveRange(1, maxAbs));
+                  } else {
+                    expect(q.operand1, inInclusiveRange(range.min, range.max));
+                    expect(q.operand2, inInclusiveRange(range.min, range.max));
+                    expect(q.correctAnswer, greaterThanOrEqualTo(0));
+                    if (grade <= 3) {
+                      expect(
+                        q.correctAnswer,
+                        inInclusiveRange(range.min, range.max),
+                      );
+                    }
+                  }
+                  break;
+
+                case OperationType.multiplication:
+                  expect(q.correctAnswer, q.operand1 * q.operand2);
+
+                  if (grade <= 3) {
+                    expect(q.operand1, inInclusiveRange(2, range.max));
+                    expect(q.operand2, inInclusiveRange(2, range.max));
+                    if (grade == 3 && step <= 6) {
+                      final minFactor =
+                          q.operand1 < q.operand2 ? q.operand1 : q.operand2;
+                      expect(minFactor, lessThanOrEqualTo(10));
+                    }
+                  } else {
+                    expect(q.operand1, inInclusiveRange(1, range.max));
+                    expect(q.operand2, inInclusiveRange(1, range.max));
+                    // Åk 4+: minst en faktor är i tabell-området (<=12).
+                    expect(
+                      q.operand1 <= 12 || q.operand2 <= 12,
+                      isTrue,
+                    );
+                  }
+                  break;
+
+                case OperationType.division:
+                  expect(q.operand2, isNot(0));
+                  expect(q.operand1 % q.operand2, 0);
+                  expect(q.correctAnswer, q.operand1 ~/ q.operand2);
+
+                  if (grade <= 3) {
+                    expect(q.operand2, greaterThanOrEqualTo(2));
+
+                    if (grade == 3 && step <= 6) {
+                      expect(q.operand2, lessThanOrEqualTo(10));
+                      expect(q.correctAnswer, lessThanOrEqualTo(10));
+                    } else {
+                      expect(q.operand2, lessThanOrEqualTo(range.max));
+                      expect(q.correctAnswer, lessThanOrEqualTo(range.max));
+                    }
+                  } else {
+                    expect(q.operand2, inInclusiveRange(1, 12));
+                    expect(q.correctAnswer, inInclusiveRange(1, range.max));
+                  }
+                  break;
+
+                case OperationType.mixed:
+                  fail('Mixed ska inte ingå i detta curriculumtest');
+              }
+
+              if (isM3 && (op == OperationType.multiplication)) {
+                // Extra guard: Åk 4–6 ska alltid ha en tabell-faktor.
+                expect(q.operand1 <= 12 || q.operand2 <= 12, isTrue);
+              }
+              if (isM3 && (op == OperationType.division)) {
+                // Extra guard: Åk 4–6 ska alltid ha divisor i tabell-området.
+                expect(q.operand2, lessThanOrEqualTo(12));
+              }
+            }
+          }
+        }
+      }
+    });
+
     test('Unit (QuestionGeneratorService): multiplikation ger korrekt svar',
         () {
       final question = service.generateQuestion(
@@ -115,6 +274,465 @@ void main() {
         question.correctAnswer,
         question.operand1 ~/ question.operand2,
       );
+    });
+
+    test('Åk 1: Mix genererar inte ×/÷', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(101),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 400; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 1,
+          difficultyStep: 5,
+        );
+
+        expect(
+          q.operationType == OperationType.multiplication ||
+              q.operationType == OperationType.division,
+          isFalse,
+        );
+      }
+    });
+
+    test('Åk 1: addition step<=6 håller sig inom summa 0–10', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(102),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 250; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.addition,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 1,
+          difficultyStep: 6,
+        );
+
+        expect(q.correctAnswer, lessThanOrEqualTo(10));
+        expect(q.correctAnswer, greaterThanOrEqualTo(0));
+        expect(q.correctAnswer, q.operand1 + q.operand2);
+      }
+    });
+
+    test('Åk 1: addition step10 håller svaret inom talområdet (<=20)', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(103),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      final range = DifficultyConfig.curriculumNumberRangeForStep(
+        gradeLevel: 1,
+        operationType: OperationType.addition,
+        difficultyStep: 10,
+      );
+      expect(range.max, 20);
+
+      for (var i = 0; i < 400; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.addition,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 1,
+          difficultyStep: 10,
+        );
+
+        expect(q.correctAnswer, lessThanOrEqualTo(range.max));
+        expect(q.correctAnswer, q.operand1 + q.operand2);
+      }
+    });
+
+    test('Åk 1: subtraktion step<=6 undviker lån och håller små tal', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(104),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 250; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.subtraction,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 1,
+          difficultyStep: 6,
+        );
+
+        expect(q.correctAnswer, q.operand1 - q.operand2);
+        expect(q.correctAnswer, greaterThanOrEqualTo(0));
+        expect(q.operand1, lessThanOrEqualTo(10));
+        expect(q.operand2, lessThanOrEqualTo(q.operand1));
+        expect((q.operand1 % 10) < (q.operand2 % 10), isFalse);
+      }
+    });
+
+    test('Åk 1: Mix genererar inte tid-frågor', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(105),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 1,
+          difficultyStep: 6,
+        );
+
+        final p = q.promptText ?? '';
+        expect(p.startsWith('Klockan visar'), isFalse);
+        expect(p.startsWith('Tid = ?'), isFalse);
+      }
+    });
+
+    test(
+        'Åk 2: addition step<=2 undviker tiotalsövergång (ingen carry i ental)',
+        () {
+      final seeded = QuestionGeneratorService(
+        random: Random(110),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 400; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.addition,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 2,
+          difficultyStep: 2,
+        );
+
+        expect(q.correctAnswer, q.operand1 + q.operand2);
+        expect((q.operand1 % 10) + (q.operand2 % 10), lessThan(10));
+      }
+    });
+
+    test('Åk 2: subtraktion step<=2 undviker lån (ingen borrow i ental)', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(111),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 400; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.subtraction,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 2,
+          difficultyStep: 2,
+        );
+
+        expect(q.correctAnswer, q.operand1 - q.operand2);
+        expect(q.correctAnswer, greaterThanOrEqualTo(0));
+        expect((q.operand1 % 10) < (q.operand2 % 10), isFalse);
+      }
+    });
+
+    test('Åk 2: addition step>=8 kan ge tiotalsövergång', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(112),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var sawCarry = false;
+      for (var i = 0; i < 600; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.addition,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 2,
+          difficultyStep: 8,
+        );
+        if ((q.operand1 % 10) + (q.operand2 % 10) >= 10) {
+          sawCarry = true;
+          break;
+        }
+      }
+
+      expect(sawCarry, isTrue);
+    });
+
+    test('Åk 2: subtraktion step>=8 kan ge lån', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(113),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var sawBorrow = false;
+      for (var i = 0; i < 600; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.subtraction,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 2,
+          difficultyStep: 8,
+        );
+        if ((q.operand1 % 10) < (q.operand2 % 10)) {
+          sawBorrow = true;
+          break;
+        }
+      }
+
+      expect(sawBorrow, isTrue);
+    });
+
+    test('Åk 3: multiplikation step<=3 håller en faktor <=5', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(106),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 250; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.multiplication,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 3,
+          difficultyStep: 3,
+        );
+
+        final minFactor = q.operand1 < q.operand2 ? q.operand1 : q.operand2;
+        expect(minFactor, greaterThanOrEqualTo(2));
+        expect(minFactor, lessThanOrEqualTo(5));
+        expect(q.correctAnswer, q.operand1 * q.operand2);
+      }
+    });
+
+    test('Åk 3: division step<=6 har divisor <=10 och kvot <=10', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(107),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 250; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.division,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 3,
+          difficultyStep: 6,
+        );
+
+        expect(q.operand2, greaterThanOrEqualTo(2));
+        expect(q.operand2, lessThanOrEqualTo(10));
+        expect(q.correctAnswer, greaterThanOrEqualTo(1));
+        expect(q.correctAnswer, lessThanOrEqualTo(10));
+        expect(q.operand1 % q.operand2, 0);
+        expect(q.correctAnswer, q.operand1 ~/ q.operand2);
+      }
+    });
+
+    test('Åk 3 Mix: step<=3 ger bara +/− (ignorera special-typer)', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(114),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var checked = 0;
+      for (var i = 0; i < 800; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 3,
+          difficultyStep: 3,
+        );
+
+        // Special mix questions (e.g. time) uses OperationType.mixed.
+        if (q.operationType == OperationType.mixed) continue;
+        checked++;
+
+        expect(
+          q.operationType == OperationType.addition ||
+              q.operationType == OperationType.subtraction,
+          isTrue,
+        );
+      }
+
+      expect(checked, greaterThan(100));
+    });
+
+    test(
+        'Åk 3 Mix: step<=6 kan innehålla × men inte ÷ (ignorera special-typer)',
+        () {
+      final seeded = QuestionGeneratorService(
+        random: Random(115),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var sawMultiplication = false;
+      var checked = 0;
+
+      for (var i = 0; i < 1200; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.medium,
+          gradeLevel: 3,
+          difficultyStep: 6,
+        );
+
+        if (q.operationType == OperationType.mixed) continue;
+        checked++;
+
+        expect(q.operationType == OperationType.division, isFalse);
+        if (q.operationType == OperationType.multiplication) {
+          sawMultiplication = true;
+        }
+      }
+
+      expect(checked, greaterThan(150));
+      expect(sawMultiplication, isTrue);
+    });
+
+    test('Åk 3 Mix: step>=9 kan innehålla ÷ (ignorera special-typer)', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(116),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var sawDivision = false;
+      var checked = 0;
+
+      for (var i = 0; i < 2000; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 3,
+          difficultyStep: 9,
+        );
+
+        if (q.operationType == OperationType.mixed) continue;
+        checked++;
+        if (q.operationType == OperationType.division) {
+          sawDivision = true;
+        }
+      }
+
+      expect(checked, greaterThan(100));
+      expect(sawDivision, isTrue);
+    });
+
+    test('Åk 2 Mix: tid-frågor dyker inte upp tidigt (step<=4)', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(117),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 800; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 2,
+          difficultyStep: 4,
+        );
+
+        final p = q.promptText ?? '';
+        expect(p.startsWith('Klockan visar'), isFalse);
+        expect(p.startsWith('Tid = ?'), isFalse);
+      }
+    });
+
+    test('Åk 2 Mix: tid-frågor kan dyka upp senare (step>=8)', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(118),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var sawTime = false;
+      for (var i = 0; i < 2500; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 2,
+          difficultyStep: 8,
+        );
+
+        final p = q.promptText ?? '';
+        if (p.startsWith('Klockan visar') || p.startsWith('Tid = ?')) {
+          sawTime = true;
+          break;
+        }
+      }
+
+      expect(sawTime, isTrue);
+    });
+
+    test('Åk 3 Mix: tid-frågor dyker inte upp tidigt (step<=3)', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(119),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 1200; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.easy,
+          gradeLevel: 3,
+          difficultyStep: 3,
+        );
+
+        final p = q.promptText ?? '';
+        expect(p.startsWith('Klockan visar'), isFalse);
+        expect(p.startsWith('Klockan var'), isFalse);
+        expect(p.startsWith('Tid = ?'), isFalse);
+      }
+    });
+
+    test('Åk 3 Mix: tid-frågor kan dyka upp senare (step>=9)', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(120),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      var sawTime = false;
+      for (var i = 0; i < 4000; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.young,
+          operationType: OperationType.mixed,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 3,
+          difficultyStep: 9,
+        );
+
+        final p = q.promptText ?? '';
+        if (p.startsWith('Klockan visar') ||
+            p.startsWith('Klockan var') ||
+            p.startsWith('Tid = ?')) {
+          sawTime = true;
+          break;
+        }
+      }
+
+      expect(sawTime, isTrue);
     });
 
     test('M3 (Åk 4–6): multiplikation step<=6 har alltid en tabell-faktor', () {
@@ -253,6 +871,52 @@ void main() {
       expect(question.operand2, greaterThanOrEqualTo(1));
       expect(question.operand1 % question.operand2, 0);
       expect(question.correctAnswer, question.operand1 ~/ question.operand2);
+    });
+
+    test('Åk 7–9: multiplikation har alltid en tabell-faktor (<=12)', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(108),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 250; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.multiplication,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 8,
+          difficultyStep: 10,
+        );
+
+        final minFactor = q.operand1 < q.operand2 ? q.operand1 : q.operand2;
+        expect(minFactor, greaterThanOrEqualTo(1));
+        expect(minFactor, lessThanOrEqualTo(12));
+        expect(q.correctAnswer, q.operand1 * q.operand2);
+      }
+    });
+
+    test('Åk 7–9: division har liten divisor (<=12) och inget rest', () {
+      final seeded = QuestionGeneratorService(
+        random: Random(109),
+        wordProblemsEnabled: false,
+        missingNumberEnabled: false,
+      );
+
+      for (var i = 0; i < 250; i++) {
+        final q = seeded.generateQuestion(
+          ageGroup: AgeGroup.middle,
+          operationType: OperationType.division,
+          difficulty: DifficultyLevel.hard,
+          gradeLevel: 9,
+          difficultyStep: 10,
+        );
+
+        expect(q.operand2, greaterThanOrEqualTo(1));
+        expect(q.operand2, lessThanOrEqualTo(12));
+        expect(q.operand1 % q.operand2, 0);
+        expect(q.correctAnswer, q.operand1 ~/ q.operand2);
+      }
     });
 
     test('M4 (Åk 4–6): Mix kan generera statistikfråga (prompt med "=")', () {

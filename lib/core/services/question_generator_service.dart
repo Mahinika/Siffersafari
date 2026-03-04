@@ -188,10 +188,6 @@ class QuestionGeneratorService {
     final missingNumberChance =
         missingNumberChanceOverride ?? _missingNumberChance;
 
-    final operation = operationType == OperationType.mixed
-        ? _getRandomOperation()
-        : operationType;
-
     // Use a stable baseline step for “special” Mix question types (M4).
     // We base this on addition's step to avoid the selected random operation
     // skewing how often these appear.
@@ -200,6 +196,16 @@ class QuestionGeneratorService {
             DifficultyConfig.initialStepForDifficulty(difficulty))
         : (difficultyStep ??
             DifficultyConfig.initialStepForDifficulty(difficulty));
+
+    final clampedMixStep =
+        DifficultyConfig.clampDifficultyStep(mixBaselineStep);
+
+    final operation = operationType == OperationType.mixed
+        ? _getRandomOperation(
+            gradeLevel: gradeLevel,
+            mixBaselineStep: clampedMixStep,
+          )
+        : operationType;
 
     final shouldTryMissingNumber = missingNumberEnabled &&
         gradeLevel != null &&
@@ -222,8 +228,6 @@ class QuestionGeneratorService {
         gradeLevel >= 7 &&
         gradeLevel <= 9;
 
-    final clampedMixStep =
-        DifficultyConfig.clampDifficultyStep(mixBaselineStep);
     final statsChance = clampedMixStep <= 3
         ? 0.10
         : clampedMixStep <= 6
@@ -239,6 +243,24 @@ class QuestionGeneratorService {
     final shouldTryM4Probability = isM4Mix &&
         roll >= statsChance &&
         roll < (statsChance + probabilityChance);
+
+    // Skolverket (centralt innehåll Åk 4–6) inkluderar procent.
+    // Vi introducerar detta försiktigt (endast Åk 5–6, höga steps) som Mix-special.
+    final shouldTryM4Percent = isM4Mix &&
+        (gradeLevel == 5 || gradeLevel == 6) &&
+        clampedMixStep >= 9 &&
+        roll >= (statsChance + probabilityChance) &&
+        roll < (statsChance + probabilityChance + 0.06);
+
+    // Skolverket (Åk 4–6) nämner negativa tal. Vi introducerar detta sent i
+    // mellanstadiet (Åk 5–6, höga steps) som Mix-special för att inte påverka
+    // kärn-flödets +/−-regler.
+    final shouldTryM4NegativeNumbers = isM4Mix &&
+        (gradeLevel == 5 || gradeLevel == 6) &&
+        clampedMixStep >= 9 &&
+        roll >= (statsChance + probabilityChance + 0.06) &&
+        roll < (statsChance + probabilityChance + 0.10);
+
     final shouldTryM5aPercent = isM5aMix && roll < 0.18;
     final shouldTryM5aPower =
         isM5aMix && gradeLevel >= 8 && roll >= 0.18 && roll < 0.30;
@@ -253,8 +275,11 @@ class QuestionGeneratorService {
             operation == OperationType.subtraction);
 
     // Conservative rollout: only Åk 3 for ×/÷ text problems.
+    // In Mix mode, we delay these a bit so ×/÷ can be introduced first without
+    // adding extra reading load immediately.
     final shouldTryWordProblemMulDiv = wordProblemsEnabled &&
         gradeLevel == 3 &&
+        (operationType != OperationType.mixed || clampedMixStep >= 7) &&
         roll < wordProblemsChance &&
         (operation == OperationType.multiplication ||
             operation == OperationType.division);
@@ -288,6 +313,25 @@ class QuestionGeneratorService {
       return _generateM4ProbabilityQuestion(
         difficulty,
         difficultyStep: probStep,
+      );
+    }
+
+    if (shouldTryM4Percent) {
+      final percentStep = mixBaselineStep;
+
+      // Reuse the M5a generator (quiz-format, heltalssvar).
+      return _generateM5aPercentQuestion(
+        difficulty,
+        difficultyStep: percentStep,
+      );
+    }
+
+    if (shouldTryM4NegativeNumbers) {
+      final negStep = mixBaselineStep;
+
+      return _generateM4NegativeNumbersQuestion(
+        difficulty,
+        difficultyStep: negStep,
       );
     }
 
@@ -358,13 +402,32 @@ class QuestionGeneratorService {
       );
     }
 
-    // M4a: Tid (klockan) för Åk 1–3 i Mix-läge
-    final isM4TimeEligible = operationType == OperationType.mixed &&
-        gradeLevel != null &&
-        gradeLevel >= 1 &&
-        gradeLevel <= 3;
+    // M4a: Tid (klockan) för Åk 2–3 i Mix-läge.
+    // Keep this rare and step-gated so Mix doesn't feel "special-heavy" when
+    // ×/÷ is first introduced (Åk 3).
+    final isM4TimeEligible =
+        operationType == OperationType.mixed && gradeLevel != null;
 
-    final shouldTryM4Time = isM4TimeEligible && roll >= 0.75 && roll < 0.85;
+    final timeChance = switch (gradeLevel) {
+      2 => clampedMixStep <= 4
+          ? 0.0
+          : clampedMixStep <= 7
+              ? 0.03
+              : 0.04,
+      3 => clampedMixStep <= 3
+          ? 0.0
+          : clampedMixStep <= 8
+              ? 0.02
+              : 0.03,
+      _ => 0.0,
+    };
+
+    // Use a high-roll window to keep it mostly disjoint from other Mix
+    // features that use low roll thresholds.
+    final shouldTryM4Time = isM4TimeEligible &&
+        timeChance > 0 &&
+        roll >= (0.85 - timeChance) &&
+        roll < 0.85;
 
     if (shouldTryM4Time) {
       final timeStep = mixBaselineStep;
@@ -440,35 +503,52 @@ class QuestionGeneratorService {
           return _generateMultiplicationWordProblem(
             range,
             difficulty,
+            gradeLevel: gradeLevel,
+            difficultyStep: step,
           );
         }
-        if (gradeLevel != null && gradeLevel >= 4 && gradeLevel <= 6) {
+        if (gradeLevel != null && gradeLevel >= 4) {
           return _generateMultiplicationCurriculum(
             range,
             difficulty,
             difficultyStep: step,
           );
         }
-        return _generateMultiplication(range, difficulty);
+        return _generateMultiplication(
+          range,
+          difficulty,
+          gradeLevel: gradeLevel,
+          difficultyStep: step,
+        );
       case OperationType.division:
         if (shouldTryWordProblemMulDiv) {
           return _generateDivisionWordProblem(
             range,
             difficulty,
+            gradeLevel: gradeLevel,
+            difficultyStep: step,
           );
         }
-        if (gradeLevel != null && gradeLevel >= 4 && gradeLevel <= 6) {
+        if (gradeLevel != null && gradeLevel >= 4) {
           return _generateDivisionCurriculum(
             range,
             difficulty,
             difficultyStep: step,
           );
         }
-        return _generateDivision(range, difficulty);
+        return _generateDivision(
+          range,
+          difficulty,
+          gradeLevel: gradeLevel,
+          difficultyStep: step,
+        );
       case OperationType.mixed:
         return generateQuestion(
           ageGroup: ageGroup,
-          operationType: _getRandomOperation(),
+          operationType: _getRandomOperation(
+            gradeLevel: gradeLevel,
+            mixBaselineStep: clampedMixStep,
+          ),
           difficulty: difficulty,
           difficultyStepsByOperation: difficultyStepsByOperation,
           difficultyStep: difficultyStep,
@@ -1247,6 +1327,47 @@ class QuestionGeneratorService {
     );
   }
 
+  Question _generateM4NegativeNumbersQuestion(
+    DifficultyLevel difficulty, {
+    required int difficultyStep,
+  }) {
+    // Skolverket (Åk 4–6) inkluderar negativa tal. Vi håller detta väldigt
+    // enkelt i quiz-format och med heltalssvar.
+    final step = DifficultyConfig.clampDifficultyStep(difficultyStep);
+
+    final maxAbs = step <= 9 ? 30 : 50;
+
+    // Ensure at least one negative operand.
+    var a = -1;
+    var b = 1;
+    for (var attempt = 0; attempt < 60; attempt++) {
+      a = _random.nextInt(2 * maxAbs + 1) - maxAbs;
+      b = _random.nextInt(2 * maxAbs + 1) - maxAbs;
+      if (a == 0 && b == 0) continue;
+      if (a < 0 || b < 0) break;
+    }
+
+    final useAddition = _random.nextBool();
+    final correct = useAddition ? (a + b) : (a - b);
+    final expr = useAddition ? '$a + $b' : '$a - $b';
+
+    final prompt = 'Negativa tal = ?\nVad är $expr?';
+
+    return Question(
+      id: _uuid.v4(),
+      operationType: OperationType.mixed,
+      difficulty: difficulty,
+      operand1: 0,
+      operand2: 0,
+      correctAnswer: correct,
+      wrongAnswers: _generateWrongAnswers(correct, 3),
+      promptText: prompt,
+      explanation: useAddition
+          ? 'När du adderar kan du tänka att du går åt höger (+) och vänster (−) på tallinjen.'
+          : 'När du subtraherar kan du tänka att du tar bort ett tal (eller lägger till motsatsen).',
+    );
+  }
+
   Question _generateM5aPercentQuestion(
     DifficultyLevel difficulty, {
     required int difficultyStep,
@@ -1732,14 +1853,84 @@ Vilken typ av korrelation har variablerna?
     );
   }
 
-  OperationType _getRandomOperation() {
-    final operations = [
-      OperationType.addition,
-      OperationType.subtraction,
-      OperationType.multiplication,
-      OperationType.division,
+  OperationType _getRandomOperation({
+    required int? gradeLevel,
+    int? mixBaselineStep,
+  }) {
+    // IMPORTANT: In Mix mode, we must respect grade shaping.
+    // Otherwise Åk 1–2 can unexpectedly get ×/÷ which feels “too hard”.
+    final allowed = gradeLevel == null
+        ? const <OperationType>{
+            OperationType.addition,
+            OperationType.subtraction,
+            OperationType.multiplication,
+            OperationType.division,
+          }
+        : DifficultyConfig.visibleOperationsForGrade(gradeLevel);
+
+    final grade = gradeLevel;
+    final step = mixBaselineStep == null
+        ? null
+        : DifficultyConfig.clampDifficultyStep(mixBaselineStep);
+
+    // Åk 3: make Mix feel smoother when ×/÷ is introduced.
+    // Default Mix ordering stays stable; we only adjust weights in Åk 3 when
+    // we know the Mix baseline step.
+    if (grade == 3 && step != null) {
+      List<OperationType> weighted;
+      if (step <= 3) {
+        weighted = <OperationType>[
+          OperationType.addition,
+          OperationType.subtraction,
+        ];
+      } else if (step <= 6) {
+        weighted = <OperationType>[
+          OperationType.addition,
+          OperationType.subtraction,
+          OperationType.addition,
+          OperationType.subtraction,
+          OperationType.multiplication,
+        ];
+      } else if (step <= 8) {
+        weighted = <OperationType>[
+          OperationType.addition,
+          OperationType.subtraction,
+          OperationType.addition,
+          OperationType.subtraction,
+          OperationType.multiplication,
+          OperationType.multiplication,
+          OperationType.division,
+        ];
+      } else {
+        weighted = <OperationType>[
+          OperationType.addition,
+          OperationType.subtraction,
+          OperationType.multiplication,
+          OperationType.division,
+        ];
+      }
+
+      final filtered = weighted.where(allowed.contains).toList(growable: false);
+      if (filtered.isNotEmpty) {
+        return filtered[_random.nextInt(filtered.length)];
+      }
+    }
+
+    // Keep stable ordering (helps deterministic tests).
+    final ordered = <OperationType>[
+      if (allowed.contains(OperationType.addition)) OperationType.addition,
+      if (allowed.contains(OperationType.subtraction))
+        OperationType.subtraction,
+      if (allowed.contains(OperationType.multiplication))
+        OperationType.multiplication,
+      if (allowed.contains(OperationType.division)) OperationType.division,
     ];
-    return operations[_random.nextInt(operations.length)];
+
+    if (ordered.isEmpty) {
+      return OperationType.addition;
+    }
+
+    return ordered[_random.nextInt(ordered.length)];
   }
 
   Question _generateAddition(
@@ -1753,9 +1944,31 @@ Vilken typ av korrelation har variablerna?
     // - Åk 2: early steps avoid carry (no tiotalsövergång).
     final isGrade1 = gradeLevel == 1;
     final isGrade2 = gradeLevel == 2;
+    final step = DifficultyConfig.clampDifficultyStep(difficultyStep);
 
-    final enforceSumWithin10 = isGrade1 && difficultyStep <= 4;
-    final avoidCarry = isGrade2 && difficultyStep <= 4;
+    // Åk 1: stay within 10 a bit longer; it reduces cognitive load a lot.
+    final enforceSumWithin10 = isGrade1 && difficultyStep <= 6;
+
+    // Åk 2: tiotalsövergång i lugn progression.
+    // - step 1–2: alltid utan tiotalsövergång (ental)
+    // - step 3–4: oftast utan
+    // - step 5–6: ibland utan
+    // - step 7+: fritt
+    final carryAvoidChance = isGrade2
+        ? step <= 2
+            ? 1.0
+            : step <= 4
+                ? 0.75
+                : step <= 6
+                    ? 0.35
+                    : 0.0
+        : 0.0;
+    final avoidCarryOnes = isGrade2 && _random.nextDouble() < carryAvoidChance;
+
+    // Åk 1–3: keep results inside the current number range.
+    // Without this, Åk 1 can get e.g. 18+19 even though the intended domain is 0–20.
+    final enforceAnswerWithinRange =
+        gradeLevel != null && gradeLevel >= 1 && gradeLevel <= 3;
 
     // M3 (Åk 4–6): bigger numbers but introduce carry gradually.
     final isM3Grade = gradeLevel != null && gradeLevel >= 4 && gradeLevel <= 6;
@@ -1789,13 +2002,19 @@ Vilken typ av korrelation har variablerna?
       operand1 = _randomInRange(range);
       operand2 = _randomInRange(range);
       for (var i = 0; i < 120; i++) {
+        if (enforceAnswerWithinRange && operand1 + operand2 > range.max) {
+          operand1 = _randomInRange(range);
+          operand2 = _randomInRange(range);
+          continue;
+        }
+
         if (enforceSumWithin10 && operand1 + operand2 > 10) {
           operand1 = _randomInRange(range);
           operand2 = _randomInRange(range);
           continue;
         }
 
-        if (avoidCarry && (operand1 % 10) + (operand2 % 10) >= 10) {
+        if (avoidCarryOnes && (operand1 % 10) + (operand2 % 10) >= 10) {
           operand1 = _randomInRange(range);
           operand2 = _randomInRange(range);
           continue;
@@ -1897,11 +2116,28 @@ Vilken typ av korrelation har variablerna?
     // Ensure no negative results for younger children
     final isGrade1 = gradeLevel == 1;
     final isGrade2 = gradeLevel == 2;
+    final step = DifficultyConfig.clampDifficultyStep(difficultyStep);
 
-    // Åk 2 early: avoid borrowing.
-    final avoidBorrow = isGrade2 && difficultyStep <= 4;
-    // Åk 1 early: keep within 0–10-ish and bias towards 10-x.
-    final keepSmall = isGrade1 && difficultyStep <= 4;
+    // Åk 2: tiotalsövergång/lån i lugn progression.
+    // - step 1–2: alltid utan lån (ental)
+    // - step 3–4: oftast utan
+    // - step 5–6: ibland utan
+    // - step 7+: fritt
+    final borrowAvoidChance = isGrade2
+        ? step <= 2
+            ? 1.0
+            : step <= 4
+                ? 0.75
+                : step <= 6
+                    ? 0.35
+                    : 0.0
+        : 0.0;
+    final avoidBorrowOnes =
+        isGrade2 && _random.nextDouble() < borrowAvoidChance;
+    // Åk 1: keep within 0–10-ish a bit longer and bias towards 10-x.
+    final keepSmall = isGrade1 && difficultyStep <= 6;
+    // Åk 1 early: also avoid borrowing to keep it predictable.
+    final avoidBorrowGrade1 = isGrade1 && difficultyStep <= 6;
 
     // M3 (Åk 4–6): bigger numbers but introduce borrowing gradually.
     final isM3Grade = gradeLevel != null && gradeLevel >= 4 && gradeLevel <= 6;
@@ -1940,7 +2176,13 @@ Vilken typ av korrelation har variablerna?
         continue;
       }
 
-      if (avoidBorrow && (operand1 % 10) < (operand2 % 10)) {
+      if (avoidBorrowOnes && (operand1 % 10) < (operand2 % 10)) {
+        operand1 = _randomInRange(range);
+        operand2 = _randomInRange(range);
+        continue;
+      }
+
+      if (avoidBorrowGrade1 && (operand1 % 10) < (operand2 % 10)) {
         operand1 = _randomInRange(range);
         operand2 = _randomInRange(range);
         continue;
@@ -2114,8 +2356,55 @@ Vilken typ av korrelation har variablerna?
 
   Question _generateMultiplication(
     NumberRange range,
-    DifficultyLevel difficulty,
-  ) {
+    DifficultyLevel difficulty, {
+    required int? gradeLevel,
+    required int difficultyStep,
+  }) {
+    final grade = gradeLevel;
+    final step = DifficultyConfig.clampDifficultyStep(difficultyStep);
+
+    // Åk 1–3: tabeller först (förutsägbar progression).
+    // - Tidigt: liten “andra faktor” (t.ex. upp till 5)
+    // - Mitten: upp till 10
+    // - Sent: upp till grade-cap (Åk 3 kan nå 12)
+    if (grade != null && grade >= 1 && grade <= 3) {
+      final safeMin = max(1, range.min);
+      final safeMax = max(safeMin, range.max);
+
+      final factorMin = safeMax >= 2 ? max(2, safeMin) : safeMin;
+
+      // Åk 3: håll dig främst till tabeller 2–10 tills högre step.
+      final tableMax =
+          (grade == 3 && step <= 6) ? min(10, safeMax) : min(12, safeMax);
+
+      final otherMax = step <= 3
+          ? min(5, safeMax)
+          : step <= 6
+              ? min(10, safeMax)
+              : safeMax;
+
+      final a =
+          _randomInRange(NumberRange(factorMin, max(factorMin, tableMax)));
+      final b =
+          _randomInRange(NumberRange(factorMin, max(factorMin, otherMax)));
+
+      final swap = _random.nextBool();
+      final operand1 = swap ? b : a;
+      final operand2 = swap ? a : b;
+      final correctAnswer = operand1 * operand2;
+
+      return Question(
+        id: _uuid.v4(),
+        operationType: OperationType.multiplication,
+        difficulty: difficulty,
+        operand1: operand1,
+        operand2: operand2,
+        correctAnswer: correctAnswer,
+        wrongAnswers: _generateWrongAnswers(correctAnswer, 3),
+        explanation: '$operand1 × $operand2 = $correctAnswer',
+      );
+    }
+
     final operand1 = _randomInRange(range);
     final operand2 = _randomInRange(range);
     final correctAnswer = operand1 * operand2;
@@ -2171,8 +2460,10 @@ Vilken typ av korrelation har variablerna?
 
   Question _generateMultiplicationWordProblem(
     NumberRange range,
-    DifficultyLevel difficulty,
-  ) {
+    DifficultyLevel difficulty, {
+    required int? gradeLevel,
+    required int difficultyStep,
+  }) {
     // Avoid 0 in story problems.
     final safeMin = max(1, range.min);
     final safeMax = max(safeMin, range.max);
@@ -2180,6 +2471,8 @@ Vilken typ av korrelation har variablerna?
     final base = _generateMultiplication(
       NumberRange(safeMin, safeMax),
       difficulty,
+      gradeLevel: gradeLevel,
+      difficultyStep: difficultyStep,
     );
 
     final prompt = _pickMultiplicationPrompt(
@@ -2194,11 +2487,47 @@ Vilken typ av korrelation har variablerna?
     );
   }
 
-  Question _generateDivision(NumberRange range, DifficultyLevel difficulty) {
+  Question _generateDivision(
+    NumberRange range,
+    DifficultyLevel difficulty, {
+    required int? gradeLevel,
+    required int difficultyStep,
+  }) {
     // Generate division that results in whole numbers
     // Avoid division by zero and keep questions meaningful by avoiding quotient=0.
+    final grade = gradeLevel;
+    final step = DifficultyConfig.clampDifficultyStep(difficultyStep);
     final safeMin = max(1, range.min);
     final safeMax = max(safeMin, range.max);
+
+    // Åk 1–3: håll divisionen i tabell-området och skala gradvis.
+    if (grade != null && grade >= 1 && grade <= 3) {
+      final divisorMin = safeMax >= 2 ? max(2, safeMin) : safeMin;
+      final divisorMax =
+          (grade == 3 && step <= 6) ? min(10, safeMax) : min(12, safeMax);
+
+      final quotientMax = step <= 3
+          ? min(5, safeMax)
+          : step <= 6
+              ? min(10, safeMax)
+              : safeMax;
+
+      final divisor =
+          _randomInRange(NumberRange(divisorMin, max(divisorMin, divisorMax)));
+      final quotient = _randomInRange(NumberRange(1, max(1, quotientMax)));
+      final dividend = divisor * quotient;
+
+      return Question(
+        id: _uuid.v4(),
+        operationType: OperationType.division,
+        difficulty: difficulty,
+        operand1: dividend,
+        operand2: divisor,
+        correctAnswer: quotient,
+        wrongAnswers: _generateWrongAnswers(quotient, 3),
+        explanation: '$dividend ÷ $divisor = $quotient',
+      );
+    }
 
     final divisor = _randomInRange(NumberRange(safeMin, safeMax));
     final quotient = _randomInRange(NumberRange(safeMin, safeMax));
@@ -2248,9 +2577,16 @@ Vilken typ av korrelation har variablerna?
 
   Question _generateDivisionWordProblem(
     NumberRange range,
-    DifficultyLevel difficulty,
-  ) {
-    final base = _generateDivision(range, difficulty);
+    DifficultyLevel difficulty, {
+    required int? gradeLevel,
+    required int difficultyStep,
+  }) {
+    final base = _generateDivision(
+      range,
+      difficulty,
+      gradeLevel: gradeLevel,
+      difficultyStep: difficultyStep,
+    );
 
     final prompt = _pickDivisionPrompt(
       a: base.operand1,

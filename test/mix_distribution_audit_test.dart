@@ -26,8 +26,11 @@ String _classifyPrompt(String? promptText) {
   if (promptText.startsWith('Skillnad i chans')) return 'm4_prob_compare';
   if (promptText.startsWith('Kombinationer')) return 'm4_combinatorics';
 
+  // Late M4 additions (Åk 5–6, high steps): percent and negative numbers.
+  if (promptText.startsWith('Procent = ?')) return 'm4_percent_of';
+  if (promptText.startsWith('Negativa tal = ?')) return 'm4_negative_numbers';
+
   // M5a features
-  if (promptText.startsWith('Procent = ?')) return 'm5a_percent';
   if (promptText.startsWith('Potenser = ?')) return 'm5a_power';
   if (promptText.startsWith('Prioriteringsregler = ?')) return 'm5a_precedence';
 
@@ -56,6 +59,20 @@ double _expectedProbChanceForStep(int step) {
   return 0.12;
 }
 
+double _expectedLateM4PercentChance({
+  required int grade,
+  required int step,
+}) {
+  return grade >= 5 && step >= 9 ? 0.06 : 0.0;
+}
+
+double _expectedLateM4NegativeChance({
+  required int grade,
+  required int step,
+}) {
+  return grade >= 5 && step >= 9 ? 0.04 : 0.0;
+}
+
 void main() {
   group('Mix distribution audit (deterministic)', () {
     test('Åk 4–6: M4-andel i Mix ligger nära förväntat per step-bucket', () {
@@ -70,13 +87,23 @@ void main() {
         for (final step in stepBuckets) {
           final expectedStats = _expectedStatsChanceForStep(step);
           final expectedProb = _expectedProbChanceForStep(step);
-          final expectedSpecial = expectedStats + expectedProb;
+          final expectedLatePercent =
+              _expectedLateM4PercentChance(grade: grade, step: step);
+          final expectedLateNegative =
+              _expectedLateM4NegativeChance(grade: grade, step: step);
+
+          final expectedSpecial = expectedStats +
+              expectedProb +
+              expectedLatePercent +
+              expectedLateNegative;
 
           var total = 0;
           var stats = 0;
           var probPercent = 0;
           var probCompare = 0;
           var combinatorics = 0;
+          var percentOf = 0;
+          var negativeNumbers = 0;
           var normal = 0;
           var otherPrompt = 0;
 
@@ -111,6 +138,12 @@ void main() {
                 case 'm4_combinatorics':
                   combinatorics++;
                   break;
+                case 'm4_percent_of':
+                  percentOf++;
+                  break;
+                case 'm4_negative_numbers':
+                  negativeNumbers++;
+                  break;
                 case 'normal':
                   normal++;
                   break;
@@ -123,6 +156,7 @@ void main() {
 
           final statsPct = stats / total;
           final probPct = (probPercent + probCompare + combinatorics) / total;
+          final lateM4Pct = (percentOf + negativeNumbers) / total;
           final specialPct = statsPct + probPct;
 
           // Small report (visible in `flutter test -r expanded`).
@@ -135,7 +169,8 @@ void main() {
             'prob=${probPct.toStringAsFixed(3)} '
             '(percent=${(probPercent / total).toStringAsFixed(3)} '
             'compare=${(probCompare / total).toStringAsFixed(3)} '
-            'comb=${(combinatorics / total).toStringAsFixed(3)}) '
+            'comb=${(combinatorics / total).toStringAsFixed(3)} '
+            'late=${lateM4Pct.toStringAsFixed(3)}) '
             'normal=${(normal / total).toStringAsFixed(3)} '
             'otherPrompt=${(otherPrompt / total).toStringAsFixed(3)}',
           );
@@ -143,7 +178,7 @@ void main() {
           // Guardrails: allow some drift but catch big accidental changes.
           const tolerance = 0.03;
           expect(
-            (specialPct - expectedSpecial).abs(),
+            ((specialPct + lateM4Pct) - expectedSpecial).abs(),
             lessThanOrEqualTo(tolerance),
             reason:
                 'Special-andel ska vara nära ${expectedSpecial.toStringAsFixed(2)} '
