@@ -292,4 +292,187 @@ void main() {
       expect(anyOperation, isNotNull);
     },
   );
+
+  testWidgets(
+    'Smoke: app startar och hittar huvudskärm',
+    (tester) async {
+      await app.main();
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      // Verify app is running and we can find key UI elements.
+      // Either we're in onboarding or we can see operation cards.
+      final onboardingVisible =
+          find.text('Hoppa över').evaluate().isNotEmpty ||
+              find.text('Vilken årskurs kör du?').evaluate().isNotEmpty;
+
+      final homeVisible = find.byKey(const Key('operation_card_addition')).evaluate().isNotEmpty ||
+          find.byKey(const Key('operation_card_subtraction')).evaluate().isNotEmpty ||
+          find.byKey(const Key('operation_card_multiplication')).evaluate().isNotEmpty ||
+          find.byKey(const Key('operation_card_division')).evaluate().isNotEmpty ||
+          find.text('Skapa profil').evaluate().isNotEmpty;
+
+      expect(onboardingVisible || homeVisible, isTrue,
+          reason: 'App should show either onboarding or home screen');
+    },
+    timeout: const Timeout(Duration(minutes: 2)),
+  );
+
+  testWidgets(
+    'Smoke: öppna inställningar och gå tillbaka',
+    (tester) async {
+      await app.main();
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      // Navigate through onboarding if visible.
+      if (find.text('Hoppa över').evaluate().isNotEmpty) {
+        await it.tap(tester, find.text('Hoppa över'));
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+      }
+
+      // Find settings icon (gear icon).
+      final settingsIcon = find.byIcon(Icons.settings);
+      if (settingsIcon.evaluate().isEmpty) {
+        // If no profile exists, create one first.
+        final createProfileButton =
+            find.widgetWithText(ElevatedButton, 'Skapa profil');
+        if (createProfileButton.evaluate().isNotEmpty) {
+          await it.tap(tester, createProfileButton);
+          await tester.pumpAndSettle();
+          await tester.enterText(find.byType(TextField).first, 'SmokeUser');
+          await tester.pumpAndSettle();
+          await it.tap(tester, find.text('Skapa'));
+          await tester.pumpAndSettle(const Duration(seconds: 2));
+        }
+      }
+
+      final settingsIconRetry = find.byIcon(Icons.settings);
+      expect(settingsIconRetry, findsWidgets,
+          reason: 'Settings icon should be visible on home screen');
+
+      await it.tap(tester, settingsIconRetry.first,
+          after: const Duration(seconds: 2,));
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      // Verify we're in settings.
+      expect(find.text('Inställningar'), findsOneWidget,);
+
+      // Go back.
+      final backButton = find.byType(BackButton);
+      expect(backButton, findsOneWidget);
+      await it.tap(tester, backButton, after: const Duration(seconds: 2));
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      // Verify we're back on home (operation cards visible).
+      final anyOperationCard = find.byKey(const Key('operation_card_addition'));
+      expect(anyOperationCard, findsOneWidget);
+    },
+    timeout: const Timeout(Duration(minutes: 2,)),
+  );
+
+  testWidgets(
+    'Smoke: achievement-screen kan visas',
+    (tester) async {
+      await app.main();
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      // Skip onboarding if visible.
+      if (find.text('Hoppa över').evaluate().isNotEmpty) {
+        await it.tap(tester, find.text('Hoppa över'));
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+      }
+
+      // Create profile if none exists.
+      final createProfileButton =
+          find.widgetWithText(ElevatedButton, 'Skapa profil');
+      if (createProfileButton.evaluate().isNotEmpty) {
+        await it.tap(tester, createProfileButton);
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField).first, 'AchievementUser');
+        await tester.pumpAndSettle();
+        await it.tap(tester, find.text('Skapa'));
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+      }
+
+      // Find trophy icon (achievements).
+      final trophyIcon = find.byIcon(Icons.emoji_events);
+      if (trophyIcon.evaluate().isEmpty) {
+        // Fallback: try finding by text.
+        final achievementsText = find.text('Achievements');
+        expect(achievementsText, findsWidgets,
+            reason: 'Trophy icon or Achievements text should be visible');
+        await it.tap(tester, achievementsText.first);
+      } else {
+        await it.tap(tester, trophyIcon.first);
+      }
+
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      // Verify we're on achievements screen (look for common UI elements).
+      final achievementsTitle = find.textContaining('Achievements').evaluate().isNotEmpty ||
+          find.text('Inga upplåsta').evaluate().isNotEmpty ||
+          find.byIcon(Icons.emoji_events).evaluate().isNotEmpty;
+
+      expect(achievementsTitle, isTrue,
+          reason: 'Achievements screen should be visible',);
+
+      // Go back.
+      final backButton = find.byType(BackButton);
+      if (backButton.evaluate().isNotEmpty) {
+        await it.tap(tester, backButton.first);
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+      }
+    },
+    timeout: const Timeout(Duration(minutes: 2,)),
+  );
+
+  testWidgets(
+    'Smoke: profile switcher kan öppnas',
+    (tester) async {
+      await app.main();
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      // Skip onboarding.
+      if (find.text('Hoppa över').evaluate().isNotEmpty) {
+        await it.tap(tester, find.text('Hoppa över'));
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+      }
+
+      // Create profile if none exists.
+      final createProfileButton =
+          find.widgetWithText(ElevatedButton, 'Skapa profil');
+      if (createProfileButton.evaluate().isNotEmpty) {
+        await it.tap(tester, createProfileButton);
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField).first, 'ProfileSwitchUser');
+        await tester.pumpAndSettle();
+        await it.tap(tester, find.text('Skapa'));
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+      }
+
+      // Find profile name display (usually at top of home screen).
+      // Look for the profile dropdown or name text.
+      final profileDropdown = find.byKey(const Key('profile_selector'));
+      if (profileDropdown.evaluate().isEmpty) {
+        // Fallback: look for name text followed by dropdown arrow.
+        final arrowDown = find.byIcon(Icons.arrow_drop_down);
+        expect(arrowDown, findsWidgets,
+            reason: 'Profile dropdown should be visible on home screen',);
+        await it.tap(tester, arrowDown.first,);
+      } else {
+        await it.tap(tester, profileDropdown.first);
+      }
+
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // Verify dropdown menu is visible (look for "Skapa ny profil" option).
+      final createNewOption = find.text('Skapa ny profil');
+      expect(createNewOption, findsOneWidget,
+          reason: 'Profile switcher menu should show "Skapa ny profil" option',);
+
+      // Tap outside to close dropdown (tap on scrim or press back).
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    },
+    timeout: const Timeout(Duration(minutes: 2,)),
+  );
 }

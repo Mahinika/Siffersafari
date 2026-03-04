@@ -16,6 +16,7 @@
 - Säkerhet/tests: enhetstester för PIN/lockout/recovery i `test/parent_pin_service_test.dart`; regression täcker backup-kod-unikhet + case-insensitiv inmatning.
 - Quiz/progression: edge-case tests för in-progress underlag + purge i `test/quiz_progression_edge_cases_test.dart`.
 - Integration: kritiska parent-flöden (PIN, recovery, profil) täcks i `integration_test/parent_features_test.dart`.
+- Smoke tests: 5 automatiserade tests i `integration_test/app_smoke_test.dart` (app-start, settings, achievements, profile switcher, full quiz flow).
 - Pixel_6: deterministiska flöden via `scripts/flutter_pixel6.ps1` (sync/install/run).
 - ComfyUI: servern svarar på `http://127.0.0.1:8000/system_stats`.
 - Animation: pipeline finns för frame-för-frame PNG → GIF/strip/audit (utan emulator).

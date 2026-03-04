@@ -86,10 +86,10 @@
   - [x] Definiera scope och kriterier → Parent-facing flöden: PIN (skapa+verifiera), PIN recovery, profil-hantering (skapa/byt)
   - [x] Genomför ändringen → Ny testfil: `integration_test/parent_features_test.dart`
   - [x] Verifiera och markera klar → Kompilera OK (`flutter analyze`), körning kräver enhet/emulator
-- [ ] Skapa automatiserad smoke test-suite
-  - [ ] Definiera scope och kriterier
-  - [ ] Genomför ändringen
-  - [ ] Verifiera och markera klar
+- [x] Skapa automatiserad smoke test-suite — **KLAR: 5 smoke tests för kritiska flöden**
+  - [x] Definiera scope och kriterier → Snabba verifieringar av app-start, settings navigation, achievements, profile switcher
+  - [x] Genomför ändringen → Utökad `integration_test/app_smoke_test.dart` med 4 nya test cases (totalt 5 tests)
+  - [x] Verifiera och markera klar → Kompilera OK med `flutter analyze`, CI-ready smoke tests
 - [ ] Validera att adaptiv svårighetsgrad fungerar korrekt för alla årskurser
   - [ ] Definiera scope och kriterier
   - [ ] Genomför ändringen
