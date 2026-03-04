@@ -10,3 +10,14 @@
 - [ ] Säkerställ att onboarding fungerar utan internet
 - [ ] Verifiera att alla texter är korrekt översatta
 - [ ] Gör en sista UI/UX-genomgång och fixa smådetaljer
+- [ ] Verifiera att privacy policy och terms of service är uppdaterade
+- [ ] Kontrollera att alla assets har korrekt copyright/licens
+- [ ] Testa installation och avinstallation på flera enheter
+- [ ] Verifiera att alla APK-signaturer fungerar korrekt
+- [ ] Kontrollera att app-storlek är acceptabel
+- [ ] Testa uppgradering från tidigare version (om relevant)
+- [ ] Verifiera att crash reporting fungerar
+- [ ] Kontrollera att alla analytics events loggas korrekt
+- [ ] Testa med olika språkinställningar
+- [ ] Verifiera att permissions är minimala och väldokumenterade
+- [ ] Gör final security audit

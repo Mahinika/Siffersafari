@@ -22,3 +22,51 @@
 - [ ] Skapa en "senaste ändringar"-vy för användare
 - [ ] Lägg till stöd för biometrisk inloggning (om relevant)
 - [ ] Förbättra testautomatisering för integrationstester
+- [ ] Refaktorera QuestionGenerator för bättre testabilitet
+- [ ] Implementera lazy loading för assets
+- [ ] Optimera minnesanvändning för stora quizsessioner
+- [ ] Lägg till profiling tools för prestandamätning
+- [ ] Skapa widget tests för alla custom widgets
+- [ ] Implementera stöd för tablet-layout
+- [ ] Lägg till A/B testing-ramverk för nya features
+- [ ] Skapa designsystem med färger, typografi, spacing
+- [ ] Implementera offline analytics (lokal statistik)
+- [ ] Lägg till stöd för dynamiska teman baserat på användarålder
+- [ ] Skapa mock data generator för testning
+- [ ] Implementera undo/redo för vissa användaråtgärder
+- [ ] Lägg till tooltips och hjälptexter där det behövs
+- [ ] Skapa onboarding för föräldraläge
+- [ ] Implementera auto-save för ofullständiga quiz
+- [ ] Lägg till stöd för anpassad ljudvolym per kategori
+- [ ] Skapa progress indicators för långvariga operationer
+- [ ] Implementera smart caching för förbättrad prestanda
+- [ ] Lägg till stöd för flera användarprofiler på samma enhet
+- [ ] Skapa detaljerad användarstatistik över tid
+- [ ] Implementera adaptive UI baserat på enhetsprestanda
+- [ ] Lägg till stöd för custom quiz-schwerpunkt
+- [ ] Skapa achievement-notiser som inte stör quizflödet
+- [ ] Implementera smooth scroll och animations
+- [ ] Lägg till stöd för färgblinda (accessibility)
+- [ ] Skapa context-sensitive help
+- [ ] Implementera smart förslag för nästa övning
+- [ ] Lägg till stöd för att pausa och återuppta quiz
+- [ ] Skapa visuella progress bars för användarmål
+- [ ] Implementera gamification med badges och rewards
+- [ ] Lägg till stöd för anpassade ljudeffekter
+- [ ] Skapa feedback-formulär för användare
+- [ ] Implementera content preloading för snabbare navigation
+- [ ] Lägg till stöd för offline-uppdateringar
+- [ ] Skapa detaljerad error reporting för utvecklare
+- [ ] Implementera smart retry-logik för misslyckade operationer
+- [ ] Lägg till stöd för olika quiz-modes (tidsbaserad, antal frågor, etc.)
+- [ ] Skapa tutorial för föräldradashboard
+- [ ] Implementera data compression för backup
+- [ ] Lägg till stöd för streaming av stora assets
+- [ ] Skapa automated UI testing suite
+- [ ] Implementera feature toggles för gradvis utrullning
+- [ ] Lägg till stöd för användargenererat innehåll (custom quiz)
+- [ ] Skapa admin-panel för content management
+- [ ] Implementera versioning av användardata
+- [ ] Lägg till stöd för collaborative features (delad statistik)
+- [ ] Skapa API-dokumentation med exempel
+- [ ] Implementera webhook support för externa integrationer

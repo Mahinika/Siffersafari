@@ -17,3 +17,32 @@
 - [ ] Förbättra hantering av användarprofiler (skapa, byta, ta bort)
 - [ ] Säkerställ att alla assets är optimerade för storlek och laddningstid
 - [ ] Skapa en tydlig utvecklingsplan för kommande versioner
+- [ ] Validera all användarinput för att förhindra data corruption
+- [ ] Implementera graceful degradation vid minnesslut
+- [ ] Lägg till automatisk återställning efter app-krasch
+- [ ] Skapa detaljerad felsökningsguide för vanliga problem
+- [ ] Implementera rate limiting för föräldra-PIN-försök
+- [ ] Säkerställ COPPA-compliance för barn under 13 år
+- [ ] Lägg till enhetskompatibilitetschecklista och testning
+- [ ] Implementera datavalidering vid Hive-läsning/skrivning
+- [ ] Skapa hotfix-rutin för kritiska buggar i produktion
+- [ ] Dokumentera alla externa dependencies och licenser
+- [ ] Lägg till monitoring för kritiska fel i produktion
+- [ ] Skapa rollback-plan för misslyckade uppdateringar
+- [ ] Implementera automatisk datamigration mellan versioner
+- [ ] Skapa testplan för olika skärmstorlekar och upplösningar
+- [ ] Validera att alla ljud-/animationsfiler fungerar korrekt
+- [ ] Implementera robust nätverkshantering (om framtida server-integration)
+- [ ] Skapa användarguide för föräldrar och lärare
+- [ ] Lägg till error tracking och crash reporting
+- [ ] Implementera automatisk loggrotation för att undvika diskfullhet
+- [ ] Skapa performance benchmarks för alla kritiska operationer
+- [ ] Validera att adaptiv svårighetsgrad fungerar korrekt för alla årskurser
+- [ ] Implementera säker hantering av känslig användardata
+- [ ] Skapa disaster recovery-plan
+- [ ] Lägg till integration tests för alla kritiska användarflöden
+- [ ] Validera att spaced repetition-algoritmen fungerar korrekt
+- [ ] Implementera dataexport för GDPR-compliance
+- [ ] Skapa automatiserad smoke test-suite
+- [ ] Validera att alla achievements och progression triggers fungerar
+- [ ] Implementera säker storage av föräldra-PIN (hash + salt)
