@@ -4,7 +4,21 @@ Ett pedagogiskt mattespel för barn (6–12 år) som lär grundläggande matemat
 
 Fokus: **Android-only**, **offline-first**, flera barnprofiler.
 
-## Status (2026-03-01)
+---
+
+## 📚 Dokumentation
+
+**Ny till projektet?** Börja här: **[docs/README.md](docs/README.md)** ← Central documentation hub
+
+Dokumentationen är organiserad enligt **Diátaxis-ramverket**:
+- 📖 **Tutorials** — Kom igång snabbt
+- 🔧 **How-To Guides** — Praktiska instruktioner
+- 📋 **Reference** — Tekniska detaljer
+- 💡 **Explanation** — Förklara varför
+
+---
+
+## Status (2026-03-05)
 
 Projektet är i ett fungerande MVP+-läge med:
 - Quizflöde (hem → quiz → resultat)
@@ -57,14 +71,17 @@ lib/
 └── core/            # Delad funktionalitet, services
 ```
 
-Dokumentation (med Mermaid-diagram):
-- `docs/ARCHITECTURE.md`
-- `docs/MERMAID_GUIDE.md`
-- `docs/KUNSKAPSNIVA_PER_AK.md`
+**För arkitektur-detaljer:** se [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+**För folder-layout:** se [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)
+
+**För pedagogisk mappning:** se [docs/KUNSKAPSNIVA_PER_AK.md](docs/KUNSKAPSNIVA_PER_AK.md)
 
 ## Installation (Utveckling)
 
-Bidra gärna: se `CONTRIBUTING.md` för rekommenderad QA-rutin (före commit/push).
+**För detaljerad setup-guide:** se [docs/SETUP_ENVIRONMENT.md](docs/SETUP_ENVIRONMENT.md)
+
+Kort version:
 
 ```bash
 # Installera dependencies
@@ -77,7 +94,9 @@ flutter pub run build_runner build --delete-conflicting-outputs
 flutter run
 ```
 
-### Rekommenderat (Android): Pixel_6-script för deterministisk install
+**QA före commit:** se [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
+
+**Rekommenderat (Android):** Pixel_6-script för deterministisk install
 
 Om du märker att emulatorn ibland kör “fel APK” (gamla ändringar), använd scriptet som alltid riktar mot **Pixel_6** och kan köra ett deterministiskt build+install-flöde:
 
