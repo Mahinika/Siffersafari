@@ -61,7 +61,7 @@ void main(List<String> args) {
   stdout.writeln('dy: $dy');
 
   for (var i = 0; i < frameCount; i++) {
-    final outName = '${prefix}${i.toString().padLeft(3, '0')}.png';
+    final outName = '$prefix${i.toString().padLeft(3, '0')}.png';
     final outPath = '${outDir.path}${Platform.pathSeparator}$outName';
     final outFile = File(outPath);
 
@@ -132,18 +132,18 @@ Optional:
 
 Examples:
   # Create 8 idle frames for Ville directly into assets
-  dart run scripts/generate_bob_frames.dart \
-    --in assets/images/themes/jungle/character_v2.png \
-    --out-dir assets/images/characters/character_v2/idle \
-    --prefix idle_ \
+  dart run scripts/generate_bob_frames.dart 
+    --in assets/images/themes/jungle/character_v2.png 
+    --out-dir assets/images/characters/character_v2/idle 
+    --prefix idle_ 
     --overwrite=true
 
   # Make a faster bob (smaller movement)
-  dart run scripts/generate_bob_frames.dart \
-    --in assets/images/themes/jungle/character_v2.png \
-    --out-dir artifacts/tmp_idle \
-    --prefix idle_ \
-    --dy "0,-1,0,1,0,-1,0,1" \
+  dart run scripts/generate_bob_frames.dart 
+    --in assets/images/themes/jungle/character_v2.png 
+    --out-dir artifacts/tmp_idle 
+    --prefix idle_ 
+    --dy "0,-1,0,1,0,-1,0,1" 
     --overwrite=true
 ''');
 }

@@ -5,13 +5,15 @@ import 'package:image/image.dart' as img;
 void main(List<String> args) {
   if (args.isEmpty || args.contains('-h') || args.contains('--help')) {
     stdout.writeln(
-        'Usage: dart run scripts/analyze_image_palette.dart <path.png>');
+      'Usage: dart run scripts/analyze_image_palette.dart <path.png>',
+    );
     stdout.writeln('Options:');
     stdout
         .writeln('  --top <n>         Number of colors to print (default: 12)');
     stdout.writeln('  --step <n>        Sample every n pixels (default: 1)');
     stdout.writeln(
-        '  --bucketBits <n>  Quantization bits per channel 1..8 (default: 4)');
+      '  --bucketBits <n>  Quantization bits per channel 1..8 (default: 4)',
+    );
     exit(0);
   }
 
@@ -115,8 +117,12 @@ Map<String, String> _parseArgs(List<String> args) {
   return out;
 }
 
-int _parseInt(String? value,
-    {required int fallback, required int min, required int max}) {
+int _parseInt(
+  String? value, {
+  required int fallback,
+  required int min,
+  required int max,
+}) {
   final n = int.tryParse((value ?? '').trim()) ?? fallback;
   return n.clamp(min, max);
 }

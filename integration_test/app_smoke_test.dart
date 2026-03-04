@@ -322,8 +322,11 @@ void main() {
               .isNotEmpty ||
           find.text('Skapa profil').evaluate().isNotEmpty;
 
-      expect(onboardingVisible || homeVisible, isTrue,
-          reason: 'App should show either onboarding or home screen');
+      expect(
+        onboardingVisible || homeVisible,
+        isTrue,
+        reason: 'App should show either onboarding or home screen',
+      );
     },
     timeout: const Timeout(Duration(minutes: 2)),
   );
@@ -357,13 +360,19 @@ void main() {
       }
 
       final settingsIconRetry = find.byIcon(Icons.settings);
-      expect(settingsIconRetry, findsWidgets,
-          reason: 'Settings icon should be visible on home screen');
+      expect(
+        settingsIconRetry,
+        findsWidgets,
+        reason: 'Settings icon should be visible on home screen',
+      );
 
-      await it.tap(tester, settingsIconRetry.first,
-          after: const Duration(
-            seconds: 2,
-          ));
+      await it.tap(
+        tester,
+        settingsIconRetry.first,
+        after: const Duration(
+          seconds: 2,
+        ),
+      );
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // Verify we're in settings.
@@ -382,9 +391,11 @@ void main() {
       final anyOperationCard = find.byKey(const Key('operation_card_addition'));
       expect(anyOperationCard, findsOneWidget);
     },
-    timeout: const Timeout(Duration(
-      minutes: 2,
-    )),
+    timeout: const Timeout(
+      Duration(
+        minutes: 2,
+      ),
+    ),
   );
 
   testWidgets(
@@ -416,8 +427,11 @@ void main() {
       if (trophyIcon.evaluate().isEmpty) {
         // Fallback: try finding by text.
         final achievementsText = find.text('Achievements');
-        expect(achievementsText, findsWidgets,
-            reason: 'Trophy icon or Achievements text should be visible');
+        expect(
+          achievementsText,
+          findsWidgets,
+          reason: 'Trophy icon or Achievements text should be visible',
+        );
         await it.tap(tester, achievementsText.first);
       } else {
         await it.tap(tester, trophyIcon.first);
@@ -444,9 +458,11 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 2));
       }
     },
-    timeout: const Timeout(Duration(
-      minutes: 2,
-    )),
+    timeout: const Timeout(
+      Duration(
+        minutes: 2,
+      ),
+    ),
   );
 
   testWidgets(
@@ -468,7 +484,9 @@ void main() {
         await it.tap(tester, createProfileButton);
         await tester.pumpAndSettle();
         await tester.enterText(
-            find.byType(TextField).first, 'ProfileSwitchUser');
+          find.byType(TextField).first,
+          'ProfileSwitchUser',
+        );
         await tester.pumpAndSettle();
         await it.tap(tester, find.text('Skapa'));
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -507,8 +525,10 @@ void main() {
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
     },
-    timeout: const Timeout(Duration(
-      minutes: 2,
-    )),
+    timeout: const Timeout(
+      Duration(
+        minutes: 2,
+      ),
+    ),
   );
 }

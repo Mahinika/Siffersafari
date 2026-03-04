@@ -9,7 +9,7 @@ import 'package:math_game_app/presentation/widgets/progress_indicator_bar.dart';
 import 'package:math_game_app/presentation/widgets/question_card.dart';
 
 void main() {
-  Widget _wrapForTest(Widget child) {
+  Widget wrapForTest(Widget child) {
     return ScreenUtilInit(
       designSize: const Size(390, 844),
       minTextAdapt: true,
@@ -22,7 +22,8 @@ void main() {
   group('Accessibility quick wins', () {
     testWidgets('AnswerButton exponerar semantiklabel', (tester) async {
       final semantics = tester.ensureSemantics();
-      await tester.pumpWidget(_wrapForTest(AnswerButton(answer: 12, onPressed: () {})));
+      await tester
+          .pumpWidget(wrapForTest(AnswerButton(answer: 12, onPressed: () {})));
 
       expect(find.bySemanticsLabel('Svar 12'), findsOneWidget);
       semantics.dispose();
@@ -30,7 +31,8 @@ void main() {
 
     testWidgets('ProgressIndicatorBar exponerar label + value', (tester) async {
       final semantics = tester.ensureSemantics();
-      await tester.pumpWidget(_wrapForTest(const ProgressIndicatorBar(progress: 0.42)));
+      await tester
+          .pumpWidget(wrapForTest(const ProgressIndicatorBar(progress: 0.42)));
 
       expect(find.bySemanticsLabel('Framsteg'), findsOneWidget);
       semantics.dispose();
@@ -48,7 +50,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        _wrapForTest(
+        wrapForTest(
           const SizedBox(
             height: 500,
             child: QuestionCard(question: question),

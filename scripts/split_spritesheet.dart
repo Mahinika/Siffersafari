@@ -74,16 +74,17 @@ void main(List<String> args) {
   if (image.width < sheetNeededW || image.height < sheetNeededH) {
     stderr.writeln('Spritesheet too small for the given params.');
     stderr.writeln('Sheet: ${image.width}x${image.height}');
-    stderr.writeln('Needed: ${sheetNeededW}x${sheetNeededH}');
+    stderr.writeln('Needed: ${sheetNeededW}x$sheetNeededH');
     stderr.writeln(
-        'Tip: check --columns/--count/--frame-w/--frame-h and padding/gaps.');
+      'Tip: check --columns/--count/--frame-w/--frame-h and padding/gaps.',
+    );
     exit(2);
   }
 
   stdout.writeln('---');
   stdout.writeln('Input: $inputPath');
   stdout.writeln('Sheet: ${image.width}x${image.height}');
-  stdout.writeln('Frame: ${frameW}x${frameH}  count=$count  columns=$columns');
+  stdout.writeln('Frame: ${frameW}x$frameH  count=$count  columns=$columns');
   stdout.writeln('Pad: left=$padLeft top=$padTop  Gap: x=$gapX y=$gapY');
   stdout.writeln('Out: $outDirPath  prefix=$prefix  overwrite=$overwrite');
 
@@ -94,7 +95,7 @@ void main(List<String> args) {
     final x = padLeft + col * (frameW + gapX);
     final y = padTop + row * (frameH + gapY);
 
-    final outName = '${prefix}${i.toString().padLeft(3, '0')}.png';
+    final outName = '$prefix${i.toString().padLeft(3, '0')}.png';
     final outPath = '${outDir.path}${Platform.pathSeparator}$outName';
     final outFile = File(outPath);
 
@@ -149,21 +150,21 @@ Optional:
 
 Examples:
   # Replace Ville run animation (8 frames, one row, 512x512 each)
-  dart run scripts/split_spritesheet.dart \
-    --in artifacts/run_sheet.png \
-    --out-dir assets/images/characters/character_v2/run \
-    --prefix run_ \
-    --frame-w 512 --frame-h 512 \
-    --count 8 --columns 8 \
+  dart run scripts/split_spritesheet.dart 
+    --in artifacts/run_sheet.png 
+    --out-dir assets/images/characters/character_v2/run 
+    --prefix run_ 
+    --frame-w 512 --frame-h 512 
+    --count 8 --columns 8 
     --overwrite=true
 
   # Idle frames
-  dart run scripts/split_spritesheet.dart \
-    --in artifacts/idle_sheet.png \
-    --out-dir assets/images/characters/character_v2/idle \
-    --prefix idle_ \
-    --frame-w 512 --frame-h 512 \
-    --count 8 --columns 8 \
+  dart run scripts/split_spritesheet.dart 
+    --in artifacts/idle_sheet.png 
+    --out-dir assets/images/characters/character_v2/idle 
+    --prefix idle_ 
+    --frame-w 512 --frame-h 512 
+    --count 8 --columns 8 
     --overwrite=true
 ''');
 }

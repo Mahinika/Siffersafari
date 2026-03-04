@@ -62,7 +62,8 @@ void main(List<String> args) {
       continue;
     }
     decoded.add(
-        _NamedImage(name: f.uri.pathSegments.last, image: _ensureRgba(image)));
+      _NamedImage(name: f.uri.pathSegments.last, image: _ensureRgba(image)),
+    );
   }
 
   if (decoded.isEmpty) {
@@ -81,11 +82,14 @@ void main(List<String> args) {
 
   stdout.writeln('---');
   stdout.writeln(
-      'In:  $inDirPath  frames=${decoded.length}  prefix=${prefix ?? '(none)'}');
+    'In:  $inDirPath  frames=${decoded.length}  prefix=${prefix ?? '(none)'}',
+  );
   stdout.writeln(
-      'Out: $outDirPath  size=${size}x$size  margin=$margin  padSquare=$padToSquare  overwrite=$overwrite');
+    'Out: $outDirPath  size=${size}x$size  margin=$margin  padSquare=$padToSquare  overwrite=$overwrite',
+  );
   stdout.writeln(
-      'Union bbox: x=${union.x}..${union.x + union.w - 1}  y=${union.y}..${union.y + union.h - 1}  (w=${union.w} h=${union.h})');
+    'Union bbox: x=${union.x}..${union.x + union.w - 1}  y=${union.y}..${union.y + union.h - 1}  (w=${union.w} h=${union.h})',
+  );
 
   for (final fr in decoded) {
     final outPath = '${outDir.path}${Platform.pathSeparator}${fr.name}';
@@ -285,19 +289,19 @@ Notes:
 
 Examples:
   # Create 64x64 run frames next to originals
-  dart run scripts/downscale_frames.dart \
-    --in-dir assets/images/characters/character_v2/run \
-    --out-dir artifacts/mascot_frames/character_v2_run/run_64 \
-    --prefix run_ \
-    --size 64 \
+  dart run scripts/downscale_frames.dart
+    --in-dir assets/images/characters/character_v2/run
+    --out-dir artifacts/mascot_frames/character_v2_run/run_64
+    --prefix run_
+    --size 64
     --margin 8
 
   # Same for idle
-  dart run scripts/downscale_frames.dart \
-    --in-dir assets/images/characters/character_v2/idle \
-    --out-dir artifacts/mascot_frames/character_v2_idle/idle_64 \
-    --prefix idle_ \
-    --size 64 \
+  dart run scripts/downscale_frames.dart
+    --in-dir assets/images/characters/character_v2/idle
+    --out-dir artifacts/mascot_frames/character_v2_idle/idle_64
+    --prefix idle_
+    --size 64
     --margin 8
 ''');
 }
