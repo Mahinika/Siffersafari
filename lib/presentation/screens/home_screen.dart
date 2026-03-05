@@ -23,6 +23,8 @@ import 'parent_pin_screen.dart';
 import 'quiz_screen.dart';
 import 'settings_screen.dart';
 
+// region HomeScreen Setup
+
 /// Home screen - main entry point of the app
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -90,6 +92,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
+  // endregion
+
+  // region _startQuiz Method
+
   void _startQuiz({
     required OperationType operationType,
     required DifficultyLevel difficulty,
@@ -142,6 +148,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     context.pushSmooth(const QuizScreen());
   }
+
+  // endregion
+
+  // region Main Build Method
 
   @override
   Widget build(BuildContext context) {
@@ -702,6 +712,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // endregion
+
+  // region UI Builder Methods
+
   Widget _buildStatItem(BuildContext context, String label, String value) {
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
     final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
@@ -827,6 +841,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // endregion
+
+  // region Medal/Goal Helper Methods
+
   String _medalLabelForLevel(int level) {
     if (level >= 5) return 'Guld';
     if (level >= 3) return 'Silver';
@@ -863,4 +881,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return 'Nästa mål: nivå $nextLevel – $pointsToNextLevel poäng kvar';
   }
+
+  // endregion
 }

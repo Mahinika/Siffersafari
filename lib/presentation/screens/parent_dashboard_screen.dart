@@ -14,6 +14,8 @@ import '../widgets/themed_background_scaffold.dart';
 import 'parent_pin_screen.dart';
 import 'settings_screen.dart';
 
+// region ParentDashboardScreen
+
 class ParentDashboardScreen extends ConsumerWidget {
   const ParentDashboardScreen({super.key});
 
@@ -70,6 +72,10 @@ class ParentDashboardScreen extends ConsumerWidget {
           : _DashboardBody(userId: user.userId),
     );
   }
+
+  // endregion
+
+  // region Export Dialog Methods
 
   static void _showExportDialog(
     BuildContext context,
@@ -172,7 +178,11 @@ class ParentDashboardScreen extends ConsumerWidget {
       );
     }
   }
+
+  // endregion
 }
+
+// region _DashboardBody Main Widget
 
 class _DashboardBody extends ConsumerWidget {
   const _DashboardBody({required this.userId});
@@ -575,6 +585,10 @@ class _DashboardBody extends ConsumerWidget {
   }
 }
 
+// endregion
+
+// region Helper Classes
+
 class _WeakArea {
   const _WeakArea({
     required this.key,
@@ -714,6 +728,10 @@ class _HistoryRow extends StatelessWidget {
     }
   }
 }
+
+// endregion
+
+// region _BenchmarkSection Widget
 
 class _BenchmarkSection extends ConsumerWidget {
   const _BenchmarkSection({
@@ -996,3 +1014,5 @@ class _BenchmarkSection extends ConsumerWidget {
     );
   }
 }
+
+// endregion
