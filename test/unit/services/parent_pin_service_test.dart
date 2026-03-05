@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:bcrypt/bcrypt.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:math_game_app/data/repositories/local_storage_repository.dart';
 import 'package:math_game_app/domain/services/parent_pin_service.dart';
 
@@ -32,7 +32,8 @@ void main() {
       expect(isCorrect, isFalse);
     });
 
-    test('setPin + verifyPin accepts correct PIN and resets attempts', () async {
+    test('setPin + verifyPin accepts correct PIN and resets attempts',
+        () async {
       final storage = _InMemorySettingsRepository();
       final service = ParentPinService(storage);
 
@@ -90,7 +91,9 @@ void main() {
       // Simulate a past lockout.
       await storage.saveSetting(
         'pin_lockout_until',
-        DateTime.now().subtract(const Duration(seconds: 1)).millisecondsSinceEpoch,
+        DateTime.now()
+            .subtract(const Duration(seconds: 1))
+            .millisecondsSinceEpoch,
       );
       await storage.saveSetting('pin_failed_attempts', 5);
 
@@ -152,7 +155,8 @@ void main() {
       );
 
       // Regression: backup code redemption is case-insensitive.
-      final used = await service.verifyAndUseBackupCode(matchingCode.toLowerCase());
+      final used =
+          await service.verifyAndUseBackupCode(matchingCode.toLowerCase());
       expect(used, isTrue);
 
       final correct2 = await service.verifySecurityAnswer('MY ANSWER');
@@ -180,7 +184,8 @@ void main() {
       expect(newCodes, hasLength(6));
 
       // Old codes should no longer match.
-      final oldStillWorks = await service.verifyAndUseBackupCode(oldCodes.first);
+      final oldStillWorks =
+          await service.verifyAndUseBackupCode(oldCodes.first);
       expect(oldStillWorks, isFalse);
 
       final newWorks = await service.verifyAndUseBackupCode(newCodes.first);

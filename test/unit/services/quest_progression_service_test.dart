@@ -27,7 +27,6 @@ void main() {
     });
 
     test('Åk 1– 2 innehåller bara easy-quests', () {
-
       const user = UserProgress(
         userId: 'u1',
         name: 'Test',

@@ -38,9 +38,7 @@ void main() {
       expect(reward.unlockedIds.isNotEmpty, true);
     });
 
-    test(
-        'låser inte upp redan upplåst achievement igen',
-        () {
+    test('låser inte upp redan upplåst achievement igen', () {
       const user = UserProgress(
         userId: 'u1',
         name: 'Test',

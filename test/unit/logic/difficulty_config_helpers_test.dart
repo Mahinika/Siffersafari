@@ -137,7 +137,8 @@ void main() {
       );
     });
 
-    test('effectiveDifficulty mappar årskurser till repeterande easy/medium/hard-buckets',
+    test(
+        'effectiveDifficulty mappar årskurser till repeterande easy/medium/hard-buckets',
         () {
       final expectations = <int, DifficultyLevel>{
         1: DifficultyLevel.easy,

@@ -107,7 +107,8 @@ void main() {
       expect(hard, greaterThan(easy));
     });
 
-    test('getQuestionsPerSession returnerar förväntat antal per åldersgrupp', () {
+    test('getQuestionsPerSession returnerar förväntat antal per åldersgrupp',
+        () {
       expect(DifficultyConfig.getQuestionsPerSession(AgeGroup.young), 8);
       expect(DifficultyConfig.getQuestionsPerSession(AgeGroup.middle), 10);
       expect(DifficultyConfig.getQuestionsPerSession(AgeGroup.older), 12);
