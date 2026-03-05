@@ -14,7 +14,11 @@ class AchievementReward {
   bool get hasRewards => unlockedIds.isNotEmpty || bonusPoints > 0;
 }
 
-/// Service for checking and awarding achievements
+/// Evaluates and awards achievements based on user progress and quiz performance.
+///
+/// Checks unlocking conditions (streaks, total points, operations mastered, etc.)
+/// against defined achievement criteria. Tracks bonus points when new
+/// achievements are unlocked.
 class AchievementService {
   AchievementReward evaluate({
     required UserProgress user,

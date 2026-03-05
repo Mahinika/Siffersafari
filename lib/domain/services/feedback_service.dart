@@ -13,8 +13,23 @@ class FeedbackResult {
   final String message;
 }
 
-/// Service for generating feedback messages
+/// Generates contextual feedback messages for quiz answers.
+///
+/// Produces age-appropriate feedback including:
+/// - Correct/incorrect title and explanation
+/// - Points earned and bonus indicators
+/// - Streak notifications
+/// - Mathematical explanations (for incorrect answers)
 class FeedbackService {
+  /// Builds a feedback result for a user's answer.
+  ///
+  /// Generates age-appropriate messages based on:
+  /// - Whether the answer is correct
+  /// - Points earned and speed bonus status
+  /// - Current correct streak
+  /// - Question explanation (if available)
+  ///
+  /// Returns a [FeedbackResult] with title, message, and correctness flag.
   FeedbackResult buildFeedback({
     required Question question,
     required int userAnswer,

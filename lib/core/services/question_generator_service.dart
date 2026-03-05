@@ -9,7 +9,17 @@ import '../../domain/enums/operation_type.dart';
 import '../config/app_features.dart';
 import '../config/difficulty_config.dart';
 
-/// Service for generating math questions
+/// Generates randomized math questions for quiz sessions.
+///
+/// Supports:
+/// - Multiple operations (addition, subtraction, multiplication, division)
+/// - Difficulty-based number ranges
+/// - Word problems (customizable chance)
+/// - Missing number formats (fill-in-the-blank)
+/// - Age/grade-appropriate variations
+///
+/// Uses [Random] for reproducible testing (inject custom instance) and
+/// [Uuid] for unique question IDs.
 class QuestionGeneratorService {
   QuestionGeneratorService({
     Random? random,

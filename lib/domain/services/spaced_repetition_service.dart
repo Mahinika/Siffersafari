@@ -29,9 +29,23 @@ class ReviewSchedule {
   }
 }
 
-/// Service for spaced repetition scheduling
+/// Manages spaced repetition schedules to optimize long-term retention.
+///
+/// Uses intervals defined in [LearningConstants]:
+/// - First review: [firstReviewInterval] days
+/// - Second review: [secondReviewInterval] days
+/// - Third review: [thirdReviewInterval] days
+///
+/// Incorrect answers reset the schedule to the first interval.
+/// Consecutive correct answers progress through intervals.
 class SpacedRepetitionService {
-  /// Schedule the next review based on the result
+  /// Calculates the next review date for a question.
+  ///
+  /// If [wasCorrect] is false, resets to the first interval regardless
+  /// of prior schedule. If true, advances to the next interval based on
+  /// [consecutiveCorrect] count.
+  ///
+  /// [now] defaults to [DateTime.now] for testing purposes.
   ReviewSchedule scheduleNextReview({
     required String questionId,
     required bool wasCorrect,

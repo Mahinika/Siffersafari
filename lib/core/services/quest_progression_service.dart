@@ -7,6 +7,15 @@ import '../../domain/enums/operation_type.dart';
 
 typedef QuestPath = List<QuestDefinition>;
 
+/// Manages the quest progression system and adaptive quest selection.
+///
+/// Tracks user progress through quests based on:
+/// - Grade level and age group
+/// - Mastery levels per operation/difficulty
+/// - Completed quests and current position
+///
+/// Routes are dynamically generated based on user profile. Quests auto-advance
+/// when mastery threshold is reached.
 class QuestProgressionService {
   const QuestProgressionService();
 
