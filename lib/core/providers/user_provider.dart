@@ -60,6 +60,16 @@ class UserState {
   }
 }
 
+/// Manages user profile state: active user, user list, quest progress, and achievements.
+///
+/// Key responsibilities:
+/// - Load and cache user profiles from local storage.
+/// - Select the active user and sync audio settings.
+/// - Reconcile quest pointers when grade/age-group changes.
+/// - Apply quiz results, calculate streaks, and unlock achievements.
+/// - Clean up legacy demo users on app startup.
+///
+/// Use [loadUsers] to refresh from storage; [applyQuizResult] to record session completion.
 class UserNotifier extends StateNotifier<UserState> {
   UserNotifier(
     this._repository,

@@ -11,6 +11,11 @@ const _baseOperations = <OperationType>[
   OperationType.division,
 ];
 
+/// Manages parent-controlled settings: per-user allowed math operations.
+///
+/// Caches allowed operations for each user and persists changes to local storage.
+/// Prevents empty sets (ensures at least one operation is always allowed).
+/// Automatically loads settings on demand via [ensureLoaded].
 class ParentSettingsNotifier
     extends StateNotifier<Map<String, Set<OperationType>>> {
   ParentSettingsNotifier(this._repository) : super(const {});

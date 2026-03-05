@@ -74,6 +74,16 @@ class QuizState {
   }
 }
 
+/// Manages quiz session state: questions, answers, feedback, and streaks.
+///
+/// Key responsibilities:
+/// - Generate questions for a session based on operation type and difficulty.
+/// - Track user answers and calculate success rate.
+/// - Evaluate feedback (correct/incorrect) and bonus points.
+/// - Update streak counters and persist session progress.
+/// - Support custom question lists for focus mode.
+///
+/// Use [startSession] to begin a quiz; [submitAnswer] to record responses.
 class QuizNotifier extends StateNotifier<QuizState> {
   QuizNotifier(
     this._questionGenerator,
