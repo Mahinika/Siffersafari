@@ -325,8 +325,8 @@ class SettingsScreen extends ConsumerWidget {
                               color: subtleOnPrimary,
                             ),
                       ),
-                      leading:
-                          Icon(Icons.delete_outline, color: Colors.red.shade400),
+                      leading: Icon(Icons.delete_outline,
+                          color: Colors.red.shade400,),
                       onTap: () {
                         showDialog<void>(
                           context: context,

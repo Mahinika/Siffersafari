@@ -108,7 +108,8 @@ class QuizNotifier extends StateNotifier<QuizState> {
     );
     final answered = session.correctAnswers + session.wrongAnswers;
     if (answered <= 0) {
-      debugPrint('[QuizNotifier] _persistInProgressSession: no answers yet, skipping');
+      debugPrint(
+          '[QuizNotifier] _persistInProgressSession: no answers yet, skipping',);
       return;
     }
 
@@ -268,7 +269,8 @@ class QuizNotifier extends StateNotifier<QuizState> {
       'operation=${operationType.name}, questions=${questions.length}',
     );
     if (questions.isEmpty) {
-      debugPrint('[QuizNotifier] startCustomSession: empty questions list, skipping');
+      debugPrint(
+          '[QuizNotifier] startCustomSession: empty questions list, skipping',);
       return;
     }
 
@@ -434,7 +436,8 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
     final userId = state.userId;
     if (userId != null && userId.isNotEmpty) {
-      debugPrint('[QuizNotifier] submitAnswer: persisting session for userId=$userId');
+      debugPrint(
+          '[QuizNotifier] submitAnswer: persisting session for userId=$userId',);
       _persistInProgressSession(userId: userId, session: updatedSession);
     }
   }
