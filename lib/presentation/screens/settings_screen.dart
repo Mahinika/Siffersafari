@@ -7,6 +7,7 @@ import '../../core/providers/user_provider.dart';
 import '../../domain/enums/app_theme.dart';
 import '../dialogs/create_user_dialog.dart';
 import '../widgets/themed_background_scaffold.dart';
+import 'privacy_policy_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -296,19 +297,13 @@ class SettingsScreen extends ConsumerWidget {
                         Icons.privacy_tip_outlined,
                         color: mutedOnPrimary,
                       ),
-                      trailing: Icon(Icons.open_in_new, color: mutedOnPrimary),
-                      onTap: () async {
-                        // In future: open Privacy Policy link or web view
-                        // For now, show a dialog with basic info
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Sekretesspolicy: Vi sparar all data lokalt på din enhet. Ingen data skickas till servern.',
-                              ),
-                            ),
-                          );
-                        }
+                      trailing: Icon(Icons.chevron_right, color: mutedOnPrimary),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (context) => const PrivacyPolicyScreen(),
+                          ),
+                        );
                       },
                     ),
                     const Divider(height: 1),
