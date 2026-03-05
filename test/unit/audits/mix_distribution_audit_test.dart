@@ -74,7 +74,7 @@ double _expectedLateM4NegativeChance({
 }
 
 void main() {
-  group('Mix distribution audit (deterministic)', () {
+  group('[Unit] Mix distribution – Audit', () {
     test('Åk 4–6: M4-andel i Mix ligger nära förväntat per step-bucket', () {
       // This test is intentionally deterministic and prints a small report.
       // Goal: quickly catch accidental changes in Mix distribution.

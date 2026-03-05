@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Offline-only audit', () {
+  group('[Unit] Offline requirements – Audit', () {
     test('lib/ innehaller inga tydliga natverksanrop', () {
       final libDir = Directory('lib');
       expect(libDir.existsSync(), isTrue);

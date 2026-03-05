@@ -8,14 +8,14 @@ import 'package:math_game_app/domain/enums/difficulty_level.dart';
 import 'package:math_game_app/domain/enums/operation_type.dart';
 
 void main() {
-  group('AchievementService', () {
+  group('[Unit] AchievementService', () {
     late AchievementService service;
 
     setUp(() {
       service = AchievementService();
     });
 
-    test('Unit (AchievementService): låser upp första quiz-utmärkelsen', () {
+    test('låser upp första quiz-utmärkelsen', () {
       const user = UserProgress(
         userId: 'u1',
         name: 'Test',
@@ -39,7 +39,7 @@ void main() {
     });
 
     test(
-        'Unit (AchievementService): låser inte upp redan upplåst achievement igen',
+        'låser inte upp redan upplåst achievement igen',
         () {
       const user = UserProgress(
         userId: 'u1',
@@ -67,8 +67,7 @@ void main() {
       );
     });
 
-    test('Unit (AchievementService): streak-7 triggar men inte streak-30 vid 7',
-        () {
+    test('streak-7 triggar men inte streak-30 vid 7', () {
       const user = UserProgress(
         userId: 'u1',
         name: 'Test',

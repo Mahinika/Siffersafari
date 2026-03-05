@@ -3,7 +3,7 @@ import 'package:math_game_app/core/constants/app_constants.dart';
 import 'package:math_game_app/domain/services/spaced_repetition_service.dart';
 
 void main() {
-  group('SpacedRepetitionService', () {
+  group('[Unit] SpacedRepetitionService', () {
     late SpacedRepetitionService service;
 
     setUp(() {

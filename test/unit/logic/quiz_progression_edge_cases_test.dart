@@ -75,7 +75,7 @@ class _FakeQuestionGeneratorService extends QuestionGeneratorService {
 }
 
 void main() {
-  group('Quiz progression edge cases', () {
+  group('[Unit] Quiz progression – Edge cases', () {
     test(
         'Unit (QuizNotifier): startSession resets in-progress underlag and purges legacy entries',
         () async {

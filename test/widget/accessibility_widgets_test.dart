@@ -19,7 +19,7 @@ void main() {
     );
   }
 
-  group('Accessibility quick wins', () {
+  group('[Widget] Accessibility – Quick wins', () {
     testWidgets('AnswerButton exponerar semantiklabel', (tester) async {
       final semantics = tester.ensureSemantics();
       await tester

@@ -23,7 +23,7 @@ class _InMemorySettingsRepository extends LocalStorageRepository {
 }
 
 void main() {
-  group('ParentPinService (PIN)', () {
+  group('[Unit] ParentPinService – PIN authentication', () {
     test('verifyPin returns false when no PIN is set', () async {
       final storage = _InMemorySettingsRepository();
       final service = ParentPinService(storage);
@@ -103,7 +103,7 @@ void main() {
     });
   });
 
-  group('ParentPinService (Recovery)', () {
+  group('[Unit] ParentPinService – Recovery codes', () {
     test('setupPinRecovery stores hashed config and returns plaintext codes',
         () async {
       final storage = _InMemorySettingsRepository();

@@ -5,11 +5,10 @@ import 'package:math_game_app/domain/enums/age_group.dart';
 import 'package:math_game_app/domain/enums/operation_type.dart';
 
 void main() {
-  group('QuestProgressionService', () {
+  group('[Unit] QuestProgressionService', () {
     const service = QuestProgressionService();
 
-    test('Unit (QuestProgressionService): startar på första quest utan state',
-        () {
+    test('startar på första quest utan state', () {
       const user = UserProgress(
         userId: 'u1',
         name: 'Test',
@@ -27,8 +26,8 @@ void main() {
       expect(status.isCompleted, isFalse);
     });
 
-    test('Unit (QuestProgressionService): Åk 1–2 innehåller bara easy-quests',
-        () {
+    test('Åk 1– 2 innehåller bara easy-quests', () {
+
       const user = UserProgress(
         userId: 'u1',
         name: 'Test',
