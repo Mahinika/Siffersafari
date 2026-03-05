@@ -297,7 +297,8 @@ class SettingsScreen extends ConsumerWidget {
                         Icons.privacy_tip_outlined,
                         color: mutedOnPrimary,
                       ),
-                      trailing: Icon(Icons.chevron_right, color: mutedOnPrimary),
+                      trailing:
+                          Icon(Icons.chevron_right, color: mutedOnPrimary),
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
@@ -308,7 +309,8 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     const Divider(height: 1),
                     ListTile(
-                      title: Text(                        'Radera all data',
+                      title: Text(
+                        'Radera all data',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.red.shade400,
                             ),
@@ -319,8 +321,10 @@ class SettingsScreen extends ConsumerWidget {
                               color: subtleOnPrimary,
                             ),
                       ),
-                      leading: Icon(Icons.delete_outline,
-                          color: Colors.red.shade400,),
+                      leading: Icon(
+                        Icons.delete_outline,
+                        color: Colors.red.shade400,
+                      ),
                       onTap: () {
                         showDialog<void>(
                           context: context,

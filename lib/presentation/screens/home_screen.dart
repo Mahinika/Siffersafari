@@ -43,7 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   static final List<String> _characterV2IdleFrames = List<String>.generate(
     _idleFrameCount,
     (i) =>
-        'assets/images/characters/character_v2/idle/idle_${i.toString().padLeft(3, '0')}.png',
+        'assets/images/themes/jungle/character_walking/walking_${i.toString().padLeft(3, '0')}.png',
     growable: false,
   );
 

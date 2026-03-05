@@ -85,7 +85,8 @@ class PrivacyPolicyScreen extends ConsumerWidget {
               _buildSection(
                 context,
                 title: 'Data vi INTE samlar in',
-                content: '❌ Inga serveruppladdningar - barnets data lämnar aldrig enheten\n'
+                content:
+                    '❌ Inga serveruppladdningar - barnets data lämnar aldrig enheten\n'
                     '❌ Ingen analys - vi använder inte Google Analytics, Firebase eller liknande\n'
                     '❌ Ingen reklam - appen innehåller inga annonser\n'
                     '❌ Ingen spårning - vi spårar inte ditt barn mellan appar eller webbplatser\n'
@@ -142,8 +143,7 @@ class PrivacyPolicyScreen extends ConsumerWidget {
               _buildSection(
                 context,
                 title: 'Dina rättigheter',
-                content:
-                    'Som förälder/vårdnadshavare har du rätt att:\n\n'
+                content: 'Som förälder/vårdnadshavare har du rätt att:\n\n'
                     '✅ Veta vilken data appen sparar\n'
                     '✅ Radera ditt barns profil och all associerad data när som helst\n'
                     '✅ Begära att vi förklarar våra datametoder\n'
