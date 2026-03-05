@@ -98,6 +98,8 @@ keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -vali
 ```
 
 **VIKTIGT:** `upload-keystore.jks` är hemlig! **ALDRIG commita till Git!** Se `.gitignore`.
+## GitHub Actions – Automated Builds & Releases
+
 
 ### Step 2: Konfigurera Android keystore path
 
@@ -139,12 +141,7 @@ flutter build apk --release
 ## 5. Release to Play Store
 
 ### Upload APK
-
-1. **Google Play Console** → Din app
-2. **Release** → **Create new release**
-3. **Choose release type:** "Production" (eller "Internal testing" för beta)
 4. **Upload APK:** Välj `build/app/outputs/flutter-apk/app-release.apk`
-5. **Release notes:** 
    ```
    Version 1.0.2 - March 5, 2026
    
