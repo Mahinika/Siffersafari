@@ -5,6 +5,7 @@ import 'package:math_game_app/core/constants/app_constants.dart';
 import 'package:math_game_app/domain/entities/user_progress.dart';
 import 'package:math_game_app/domain/enums/age_group.dart';
 import 'package:math_game_app/main.dart';
+
 import '../test_utils.dart';
 
 void main() {

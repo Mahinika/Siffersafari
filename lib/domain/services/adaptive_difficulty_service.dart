@@ -55,7 +55,7 @@ class AdaptiveDifficultyService {
   ///
   /// Requires at least [questionsBeforeAdjustment] recent results before
   /// making a suggestion. Otherwise returns the current difficulty unchanged.
-DifficultyLevel suggestDifficulty({
+  DifficultyLevel suggestDifficulty({
     required DifficultyLevel currentDifficulty,
     required List<bool> recentResults,
   }) {
