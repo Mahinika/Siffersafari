@@ -329,11 +329,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
 
-        SizedBox(
-          height: isWideScreen
-            ? AppConstants.largePadding
-            : AppConstants.largePadding * 2,
-        ),
+                SizedBox(
+                  height: isWideScreen
+                      ? AppConstants.largePadding
+                      : AppConstants.largePadding * 2,
+                ),
 
                 if (user == null) ...[
                   ElevatedButton(
@@ -679,11 +679,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
 
-        SizedBox(
-          height: isWideScreen
-            ? AppConstants.largePadding
-            : AppConstants.largePadding * 2,
-        ),
+                SizedBox(
+                  height: isWideScreen
+                      ? AppConstants.largePadding
+                      : AppConstants.largePadding * 2,
+                ),
 
                 // Operation selection (responsive grid)
                 ConstrainedBox(

@@ -107,7 +107,8 @@ class AudioService {
       await player.play(AssetSource(primary), volume: volume);
     } catch (_) {
       // Fallback to WAV (larger file, should be converted to MP3 for production)
-      debugPrint('⚠️ Using WAV fallback for $primary - convert to MP3 to reduce APK size');
+      debugPrint(
+          '⚠️ Using WAV fallback for $primary - convert to MP3 to reduce APK size');
       await player.play(AssetSource(fallback), volume: volume);
     }
   }
