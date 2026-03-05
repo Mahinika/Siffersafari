@@ -48,6 +48,8 @@ class QuestionGeneratorService {
   final bool _missingNumberEnabled;
   final double _missingNumberChance;
 
+  // region Helper Methods
+
   int _randomInRange(NumberRange range) {
     return range.min + _random.nextInt(range.max - range.min + 1);
   }
@@ -147,6 +149,10 @@ class QuestionGeneratorService {
 
     return wrong.take(count).toList();
   }
+
+  // endregion
+
+  // region Main Generation Methods
 
   /// Generate a list of questions for a quiz session
   List<Question> generateQuestions({
@@ -570,6 +576,10 @@ class QuestionGeneratorService {
         );
     }
   }
+
+  // endregion
+
+  // region M4 Generators (Åk 4-6 Special Topics)
 
   Question _generateM4StatisticsQuestion(
     NumberRange range,
@@ -1378,6 +1388,10 @@ class QuestionGeneratorService {
     );
   }
 
+  // endregion
+
+  // region M5a Generators (Åk 7-9 Core Topics)
+
   Question _generateM5aPercentQuestion(
     DifficultyLevel difficulty, {
     required int difficultyStep,
@@ -1546,6 +1560,10 @@ class QuestionGeneratorService {
           'Räkna multiplikation före addition, och räkna alltid parenteser först.',
     );
   }
+
+  // endregion
+
+  // region M5b Generators (Åk 7-9 Advanced Topics)
 
   Question _generateM5bLinearFunctionQuestion(
     DifficultyLevel difficulty, {
@@ -1863,6 +1881,10 @@ Vilken typ av korrelation har variablerna?
     );
   }
 
+  // endregion
+
+  // region Operation Selection
+
   OperationType _getRandomOperation({
     required int? gradeLevel,
     int? mixBaselineStep,
@@ -1942,6 +1964,10 @@ Vilken typ av korrelation har variablerna?
 
     return ordered[_random.nextInt(ordered.length)];
   }
+
+  // endregion
+
+  // region Arithmetic Generators (Addition)
 
   Question _generateAddition(
     NumberRange range,
@@ -2117,6 +2143,10 @@ Vilken typ av korrelation har variablerna?
     );
   }
 
+  // endregion
+
+  // region Arithmetic Generators (Subtraction)
+
   Question _generateSubtraction(
     NumberRange range,
     DifficultyLevel difficulty, {
@@ -2285,6 +2315,10 @@ Vilken typ av korrelation har variablerna?
     );
   }
 
+  // endregion
+
+  // region Word Problem Templates
+
   // --- Word problem templates (Åk 1–3, 1-step) ---
   // We keep Swedish prompts short and avoid tricky pluralization.
 
@@ -2363,6 +2397,10 @@ Vilken typ av korrelation har variablerna?
     final pick = templates[_random.nextInt(templates.length)];
     return pick(a, b);
   }
+
+  // endregion
+
+  // region Arithmetic Generators (Multiplication)
 
   Question _generateMultiplication(
     NumberRange range,
@@ -2497,6 +2535,10 @@ Vilken typ av korrelation har variablerna?
     );
   }
 
+  // endregion
+
+  // region Arithmetic Generators (Division)
+
   Question _generateDivision(
     NumberRange range,
     DifficultyLevel difficulty, {
@@ -2609,6 +2651,10 @@ Vilken typ av korrelation har variablerna?
           '${base.operand1} ÷ ${base.operand2} = ${base.correctAnswer}',
     );
   }
+
+  // endregion
+
+  // region Wrong Answer Generation
 
   List<int> _generateWrongAnswers(
     int correctAnswer,
@@ -2818,4 +2864,6 @@ Vilken typ av korrelation har variablerna?
       difficultyStep: difficultyStep,
     );
   }
+
+  // endregion
 }
