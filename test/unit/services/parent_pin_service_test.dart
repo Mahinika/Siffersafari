@@ -1,7 +1,7 @@
 import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_game_app/data/repositories/local_storage_repository.dart';
-import 'package:math_game_app/domain/services/parent_pin_service.dart';
+import 'package:siffersafari/data/repositories/local_storage_repository.dart';
+import 'package:siffersafari/domain/services/parent_pin_service.dart';
 
 class _InMemorySettingsRepository extends LocalStorageRepository {
   final Map<String, dynamic> _settings = {};

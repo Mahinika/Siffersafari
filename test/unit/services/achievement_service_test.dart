@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_game_app/core/constants/app_constants.dart';
-import 'package:math_game_app/core/services/achievement_service.dart';
-import 'package:math_game_app/domain/entities/quiz_session.dart';
-import 'package:math_game_app/domain/entities/user_progress.dart';
-import 'package:math_game_app/domain/enums/age_group.dart';
-import 'package:math_game_app/domain/enums/difficulty_level.dart';
-import 'package:math_game_app/domain/enums/operation_type.dart';
+import 'package:siffersafari/core/constants/app_constants.dart';
+import 'package:siffersafari/core/services/achievement_service.dart';
+import 'package:siffersafari/domain/entities/quiz_session.dart';
+import 'package:siffersafari/domain/entities/user_progress.dart';
+import 'package:siffersafari/domain/enums/age_group.dart';
+import 'package:siffersafari/domain/enums/difficulty_level.dart';
+import 'package:siffersafari/domain/enums/operation_type.dart';
 
 void main() {
   group('[Unit] AchievementService', () {

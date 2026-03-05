@@ -1,4 +1,4 @@
-# Beslut & antaganden (Multiplikation)
+# Beslut & antaganden (Siffersafari)
 
 > Syfte: hålla stabila beslut/antaganden utanför chatten så vi kan återuppta arbetet utan att du behöver repetera.
 > Princip: kortfattat, datumstämplat, max 1–3 rader per punkt.

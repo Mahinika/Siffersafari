@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.math_game_app"
+    namespace = "com.cognifoxstudio.siffersafari"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,8 +20,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.math_game_app"
+        applicationId = "com.cognifoxstudio.siffersafari"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // Note: With Flutter 3.41.x, the effective minSdkVersion is currently 24 (Android 7.0).

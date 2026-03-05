@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_game_app/core/constants/app_constants.dart';
-import 'package:math_game_app/domain/services/spaced_repetition_service.dart';
+import 'package:siffersafari/core/constants/app_constants.dart';
+import 'package:siffersafari/domain/services/spaced_repetition_service.dart';
 
 void main() {
   group('[Unit] SpacedRepetitionService', () {

@@ -1,10 +1,10 @@
-# Privacy Policy – Multiplikation
+# Privacy Policy – Siffersafari
 
-**Last Updated:** March 4, 2026
+**Last Updated:** March 5, 2026
 
 ## Overview
 
-Multiplikation is a mathematics game app designed for children ages 6–12. This Privacy Policy explains how we handle data when you use our app.
+Siffersafari is a mathematics game app designed for children ages 6–12. This Privacy Policy explains how we handle data when you use our app.
 
 **Important:** We do NOT collect, use, or disclose personal information from children or their parents. All gameplay data is stored locally on your device.
 
@@ -42,7 +42,7 @@ The following information is stored **only on your device** using encrypted loca
 ## How You Control Your Data
 
 ### Delete a Child's Profile
-1. Open Multiplikation app
+1. Open Siffersafari app
 2. Go to **Settings** (gear icon)
 3. Select the child's profile
 4. Tap **Delete Profile**
@@ -51,7 +51,7 @@ The following information is stored **only on your device** using encrypted loca
 Profile data (quizzes, progress) is permanently deleted from the device.
 
 ### Clear All Data
-1. Open Multiplikation app
+1. Open Siffersafari app
 2. Go to **Settings** → **Advanced**
 3. Tap **Clear All Data**
 4. Confirm deletion
@@ -73,7 +73,7 @@ Your data is protected by:
 
 ## Children's Privacy (COPPA)
 
-Multiplikation is designed for children under 13. We comply with the **Children's Online Privacy Protection Act (COPPA)** by:
+Siffersafari is designed for children under 13. We comply with the **Children's Online Privacy Protection Act (COPPA)** by:
 1. **Collecting zero personal information** from children or parents
 2. **Storing data locally only** (no cloud servers)
 3. **Providing easy data deletion** (see "How You Control Your Data" above)

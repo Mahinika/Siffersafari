@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_game_app/domain/entities/question.dart';
-import 'package:math_game_app/domain/enums/difficulty_level.dart';
-import 'package:math_game_app/domain/enums/operation_type.dart';
-import 'package:math_game_app/presentation/widgets/answer_button.dart';
-import 'package:math_game_app/presentation/widgets/progress_indicator_bar.dart';
-import 'package:math_game_app/presentation/widgets/question_card.dart';
+import 'package:siffersafari/domain/entities/question.dart';
+import 'package:siffersafari/domain/enums/difficulty_level.dart';
+import 'package:siffersafari/domain/enums/operation_type.dart';
+import 'package:siffersafari/presentation/widgets/answer_button.dart';
+import 'package:siffersafari/presentation/widgets/progress_indicator_bar.dart';
+import 'package:siffersafari/presentation/widgets/question_card.dart';
 
 void main() {
   Widget wrapForTest(Widget child) {

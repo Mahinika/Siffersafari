@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_game_app/core/constants/app_constants.dart';
-import 'package:math_game_app/domain/entities/user_progress.dart';
-import 'package:math_game_app/domain/enums/age_group.dart';
-import 'package:math_game_app/main.dart';
+import 'package:siffersafari/core/constants/app_constants.dart';
+import 'package:siffersafari/domain/entities/user_progress.dart';
+import 'package:siffersafari/domain/enums/age_group.dart';
+import 'package:siffersafari/main.dart';
 
 import '../test_utils.dart';
 

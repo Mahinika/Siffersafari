@@ -1,10 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_game_app/core/services/question_generator_service.dart';
-import 'package:math_game_app/domain/enums/age_group.dart';
-import 'package:math_game_app/domain/enums/difficulty_level.dart';
-import 'package:math_game_app/domain/enums/operation_type.dart';
+import 'package:siffersafari/core/services/question_generator_service.dart';
+import 'package:siffersafari/domain/enums/age_group.dart';
+import 'package:siffersafari/domain/enums/difficulty_level.dart';
+import 'package:siffersafari/domain/enums/operation_type.dart';
 
 String _classifyPrompt(String? promptText) {
   if (promptText == null) return 'normal';

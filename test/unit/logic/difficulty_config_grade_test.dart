@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_game_app/core/config/difficulty_config.dart';
-import 'package:math_game_app/domain/enums/operation_type.dart';
+import 'package:siffersafari/core/config/difficulty_config.dart';
+import 'package:siffersafari/domain/enums/operation_type.dart';
 
 void main() {
   group('[Unit] DifficultyConfig – Grade benchmarks', () {

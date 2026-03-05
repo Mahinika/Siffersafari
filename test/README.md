@@ -1,6 +1,6 @@
 # Test Suite Documentation
 
-This document describes the organization, structure, and conventions for the Multiplikation test suite.
+This document describes the organization, structure, and conventions for the Siffersafari test suite.
 
 ## Overview
 

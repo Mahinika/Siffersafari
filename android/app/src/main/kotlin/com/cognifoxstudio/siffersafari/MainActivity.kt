@@ -1,4 +1,4 @@
-package com.example.math_game_app
+package com.cognifoxstudio.siffersafari
 
 import io.flutter.embedding.android.FlutterActivity
 

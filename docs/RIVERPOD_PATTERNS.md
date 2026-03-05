@@ -1,6 +1,6 @@
 # Riverpod Patterns & Standards
 
-This document establishes consistent patterns for defining and using Riverpod providers across Multiplikation.
+This document establishes consistent patterns for defining and using Riverpod providers across Siffersafari.
 
 ## 1. Provider Types
 

@@ -52,33 +52,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return _characterV2IdleFrames;
   }
 
-  OperationType _recommendedOperation({
-    required Set<OperationType> allowedOps,
-    required int? gradeLevel,
-  }) {
-    // If we know the child's grade, keep the recommendation conservative for
-    // younger grades.
-    final priority = (gradeLevel != null && gradeLevel <= 2)
-        ? const <OperationType>[
-            OperationType.addition,
-            OperationType.subtraction,
-            OperationType.multiplication,
-            OperationType.division,
-          ]
-        : const <OperationType>[
-            OperationType.multiplication,
-            OperationType.addition,
-            OperationType.subtraction,
-            OperationType.division,
-          ];
-
-    for (final operation in priority) {
-      if (allowedOps.contains(operation)) return operation;
-    }
-
-    return OperationType.multiplication;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -272,18 +245,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     }
 
-    final recommendedOperation = _recommendedOperation(
-      allowedOps: allowedOps,
-      gradeLevel: user?.gradeLevel,
-    );
-
     return ThemedBackgroundScaffold(
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWideScreen = constraints.maxWidth > 600;
           final gridCrossAxisCount = isWideScreen ? 4 : 2;
-          
+
+          final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+          final questHeroLogicalWidth = isWideScreen
+              ? constraints.maxWidth.clamp(0.0, 800.0).toDouble()
+              : constraints.maxWidth;
+          final questHeroCacheWidth =
+              (questHeroLogicalWidth * devicePixelRatio).round();
+          final questHeroCacheHeight = (110 * devicePixelRatio).round();
+
           return SingleChildScrollView(
             child: Column(
               children: [
@@ -293,10 +269,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Expanded(
                       child: Text(
                         AppConstants.appName,
-                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                              color: onPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                  color: onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ),
                     if (user != null)
@@ -352,7 +329,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
 
-                SizedBox(height: isWideScreen ? AppConstants.largePadding : AppConstants.largePadding * 2),
+                SizedBox(
+                    height: isWideScreen
+                        ? AppConstants.largePadding
+                        : AppConstants.largePadding * 2),
 
                 if (user == null) ...[
                   ElevatedButton(
@@ -367,10 +347,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 // Stats card
                 if (user != null)
                   Container(
-                    constraints: isWideScreen ? const BoxConstraints(maxWidth: 800) : null,
+                    constraints: isWideScreen
+                        ? const BoxConstraints(maxWidth: 800)
+                        : null,
                     padding: const EdgeInsets.all(AppConstants.defaultPadding),
                     decoration: BoxDecoration(
-                      color: onPrimary.withValues(alpha: AppOpacities.panelFill),
+                      color:
+                          onPrimary.withValues(alpha: AppOpacities.panelFill),
                       borderRadius:
                           BorderRadius.circular(AppConstants.borderRadius),
                     ),
@@ -403,18 +386,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             Text(
                               'Nivå ${user.level}',
-                              style:
-                                  Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        color: mutedOnPrimary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
+                                    color: mutedOnPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                             Text(
                               '${user.pointsIntoLevel}/${UserProgress.pointsPerLevel}',
-                              style:
-                                  Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        color: subtleOnPrimary,
-                                      ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
+                                    color: subtleOnPrimary,
+                                  ),
                             ),
                           ],
                         ),
@@ -423,10 +410,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             'Titel: ${user.levelTitle}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: subtleOnPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: subtleOnPrimary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                           ),
                         ),
                         const SizedBox(height: AppConstants.smallPadding),
@@ -439,7 +427,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             backgroundColor: onPrimary.withValues(
                               alpha: AppOpacities.progressTrackLight,
                             ),
-                            valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(accentColor),
                           ),
                         ),
                         const SizedBox(height: AppConstants.defaultPadding),
@@ -448,21 +437,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             Text(
                               'Ditt uppdrag',
-                              style:
-                                  Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        color: mutedOnPrimary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
+                                    color: mutedOnPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                             Text(
                               userState.questStatus == null
                                   ? '-'
                                   : '${(userState.questStatus!.progress * 100).round()}%',
-                              style:
-                                  Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        color: onPrimary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
+                                    color: onPrimary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                           ],
                         ),
@@ -470,10 +463,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         Text(
                           userState.questStatus?.quest.title ??
                               '${AppConstants.mascotName}: Välj ett uppdrag så kör vi!',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: mutedOnPrimary,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: mutedOnPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         const SizedBox(height: AppConstants.smallPadding),
                         ClipRRect(
@@ -486,7 +480,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             backgroundColor: onPrimary.withValues(
                               alpha: AppOpacities.progressTrackLight,
                             ),
-                            valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(accentColor),
                           ),
                         ),
                         const SizedBox(height: AppConstants.defaultPadding),
@@ -527,10 +522,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             _nextGoalMessage(user),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: subtleOnPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: subtleOnPrimary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                           ),
                         ),
                       ],
@@ -541,11 +537,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     userState.questStatus != null &&
                     allowedOps.contains(userState.questStatus!.quest.operation))
                   Container(
-                    constraints: isWideScreen ? const BoxConstraints(maxWidth: 800) : null,
-                    margin: const EdgeInsets.only(top: AppConstants.defaultPadding),
+                    constraints: isWideScreen
+                        ? const BoxConstraints(maxWidth: 800)
+                        : null,
+                    margin:
+                        const EdgeInsets.only(top: AppConstants.defaultPadding),
                     padding: const EdgeInsets.all(AppConstants.defaultPadding),
                     decoration: BoxDecoration(
-                      color: onPrimary.withValues(alpha: AppOpacities.panelFill),
+                      color:
+                          onPrimary.withValues(alpha: AppOpacities.panelFill),
                       borderRadius:
                           BorderRadius.circular(AppConstants.borderRadius),
                     ),
@@ -561,23 +561,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: Image.asset(
                               questHeroAsset,
                               fit: BoxFit.cover,
-                              cacheWidth: (MediaQuery.sizeOf(context).width *
-                                      MediaQuery.devicePixelRatioOf(context))
-                                  .round(),
-                              cacheHeight:
-                                  (110 * MediaQuery.devicePixelRatioOf(context))
-                                      .round(),
+                              cacheWidth: questHeroCacheWidth,
+                              cacheHeight: questHeroCacheHeight,
                               excludeFromSemantics: true,
                               errorBuilder: (context, error, stackTrace) {
                                 return Image.asset(
                                   backgroundAsset,
                                   fit: BoxFit.cover,
-                                  cacheWidth: (MediaQuery.sizeOf(context).width *
-                                          MediaQuery.devicePixelRatioOf(context))
-                                      .round(),
-                                  cacheHeight:
-                                      (110 * MediaQuery.devicePixelRatioOf(context))
-                                          .round(),
+                                  cacheWidth: questHeroCacheWidth,
+                                  cacheHeight: questHeroCacheHeight,
                                   excludeFromSemantics: true,
                                 );
                               },
@@ -594,39 +586,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             const SizedBox(width: AppConstants.smallPadding),
                             Text(
                               'Nästa äventyr',
-                              style:
-                                  Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        color: mutedOnPrimary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
+                                    color: mutedOnPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                           ],
                         ),
                         const SizedBox(height: AppConstants.smallPadding),
                         Text(
                           userState.questStatus!.quest.title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: onPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: onPrimary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         if (userState.questNotice != null) ...[
                           const SizedBox(height: AppConstants.smallPadding),
                           Text(
                             userState.questNotice!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: mutedOnPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: mutedOnPrimary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                           ),
                         ],
                         const SizedBox(height: AppConstants.smallPadding),
                         Text(
                           userState.questStatus!.quest.description,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: subtleOnPrimary,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: subtleOnPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         const SizedBox(height: AppConstants.defaultPadding),
                         Row(
@@ -634,19 +631,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             Text(
                               'På väg',
-                              style:
-                                  Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: subtleOnPrimary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: subtleOnPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                             Text(
                               '${(userState.questStatus!.progress * 100).round()}%',
-                              style:
-                                  Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: mutedOnPrimary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: mutedOnPrimary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                           ],
                         ),
@@ -660,13 +661,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             backgroundColor: onPrimary.withValues(
                               alpha: AppOpacities.progressTrackLight,
                             ),
-                            valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(accentColor),
                           ),
                         ),
                         const SizedBox(height: AppConstants.defaultPadding),
                         ElevatedButton(
                           onPressed: () => _startQuiz(
-                            operationType: userState.questStatus!.quest.operation,
+                            operationType:
+                                userState.questStatus!.quest.operation,
                             difficulty: userState.questStatus!.quest.difficulty,
                           ),
                           child: const Text('Starta uppdrag'),
@@ -675,31 +678,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
 
-                SizedBox(height: isWideScreen ? AppConstants.largePadding : AppConstants.largePadding * 2),
-
-                if (user != null) ...[
-                  ConstrainedBox(
-                    constraints: isWideScreen ? const BoxConstraints(maxWidth: 400) : const BoxConstraints(),
-                    child: ElevatedButton(
-                      onPressed: () => _startQuiz(
-                        operationType: recommendedOperation,
-                        difficulty: DifficultyLevel.easy,
-                      ),
-                      child: Text(
-                        'Starta ${recommendedOperation.displayName}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: onPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.largePadding),
-                ],
+                SizedBox(
+                    height: isWideScreen
+                        ? AppConstants.largePadding
+                        : AppConstants.largePadding * 2),
 
                 // Operation selection (responsive grid)
                 ConstrainedBox(
-                  constraints: isWideScreen ? const BoxConstraints(maxWidth: 800) : const BoxConstraints(),
+                  constraints: isWideScreen
+                      ? const BoxConstraints(maxWidth: 800)
+                      : const BoxConstraints(),
                   child: GridView.count(
                     crossAxisCount: gridCrossAxisCount,
                     crossAxisSpacing: AppConstants.defaultPadding,

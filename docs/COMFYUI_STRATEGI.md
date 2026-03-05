@@ -1,4 +1,4 @@
-# ComfyUI-strategi (Multiplikation)
+# ComfyUI-strategi (Siffersafari)
 
 > För praktiska kommandon (starta ComfyUI, benchmark, hur man kör scripts/workflows): se `scripts/comfyui/README.md`.
 

@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_game_app/core/services/quest_progression_service.dart';
-import 'package:math_game_app/domain/entities/user_progress.dart';
-import 'package:math_game_app/domain/enums/age_group.dart';
-import 'package:math_game_app/domain/enums/operation_type.dart';
+import 'package:siffersafari/core/services/quest_progression_service.dart';
+import 'package:siffersafari/domain/entities/user_progress.dart';
+import 'package:siffersafari/domain/enums/age_group.dart';
+import 'package:siffersafari/domain/enums/operation_type.dart';
 
 void main() {
   group('[Unit] QuestProgressionService', () {

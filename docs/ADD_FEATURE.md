@@ -118,7 +118,7 @@ Skapa `test/expert_mode_test.dart`:
 
 ```dart
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_game_app/domain/models/difficulty.dart';
+import 'package:siffersafari/domain/models/difficulty.dart';
 
 void main() {
   group('Expert Mode', () {
@@ -321,7 +321,7 @@ För data som behöver sparas offline:
 - **Orsak:** Import-sökväg fel
 - **Lösning:** Kontrollera import i test-fil
   ```dart
-  import 'package:math_game_app/domain/models/difficulty.dart';
+  import 'package:siffersafari/domain/models/difficulty.dart';
   ```
 
 ### "flutter analyze fails with lint error"

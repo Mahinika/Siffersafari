@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_game_app/core/di/injection.dart';
-import 'package:math_game_app/core/services/audio_service.dart';
-import 'package:math_game_app/core/services/question_generator_service.dart';
-import 'package:math_game_app/data/repositories/local_storage_repository.dart';
-import 'package:math_game_app/domain/entities/question.dart';
-import 'package:math_game_app/domain/entities/user_progress.dart';
-import 'package:math_game_app/domain/enums/age_group.dart';
-import 'package:math_game_app/domain/enums/difficulty_level.dart';
-import 'package:math_game_app/domain/enums/operation_type.dart';
+import 'package:siffersafari/core/di/injection.dart';
+import 'package:siffersafari/core/services/audio_service.dart';
+import 'package:siffersafari/core/services/question_generator_service.dart';
+import 'package:siffersafari/data/repositories/local_storage_repository.dart';
+import 'package:siffersafari/domain/entities/question.dart';
+import 'package:siffersafari/domain/entities/user_progress.dart';
+import 'package:siffersafari/domain/enums/age_group.dart';
+import 'package:siffersafari/domain/enums/difficulty_level.dart';
+import 'package:siffersafari/domain/enums/operation_type.dart';
 import 'package:mocktail/mocktail.dart';
 
 // ============================================================================

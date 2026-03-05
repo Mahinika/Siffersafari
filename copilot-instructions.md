@@ -1,4 +1,4 @@
-# Copilot-instruktioner (Multiplikation)
+# Copilot-instruktioner (Siffersafari)
 
 - Svara på svenska som standard (byt bara språk om jag ber om det).
 - Håll svar korta och konkreta som standard.
