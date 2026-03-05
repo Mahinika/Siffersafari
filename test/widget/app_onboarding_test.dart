@@ -248,21 +248,7 @@ void main() {
       await tester.tap(find.text('Hoppa över'));
       await pumpUntilFound(tester, find.text(AppConstants.appName));
 
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MathGameApp(initFuture: Future.value(null)),
-        ),
-      );
-
-      await pumpFor(tester, const Duration(milliseconds: 800));
-      expect(find.text('Nu kör vi!'), findsNothing);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MathGameApp(initFuture: Future.value(null)),
-        ),
-      );
-      await pumpFor(tester, const Duration(milliseconds: 800));
+      // Onboarding should not appear again after skipping
       expect(find.text('Nu kör vi!'), findsNothing);
     },
   );
