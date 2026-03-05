@@ -340,7 +340,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                           if (user == null) {
                             Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(
-                                  builder: (_) => const HomeScreen()),
+                                builder: (_) => const HomeScreen(),
+                              ),
                               (route) => false,
                             );
                             return;
@@ -360,7 +361,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                           if (!allowedOps.contains(session.operationType)) {
                             Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(
-                                  builder: (_) => const HomeScreen()),
+                                builder: (_) => const HomeScreen(),
+                              ),
                               (route) => false,
                             );
                             return;
@@ -405,7 +407,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
 
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
-                                builder: (_) => const QuizScreen()),
+                              builder: (_) => const QuizScreen(),
+                            ),
                             (route) => false,
                           );
                         },
@@ -427,7 +430,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                           if (user == null) {
                             Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(
-                                  builder: (_) => const HomeScreen()),
+                                builder: (_) => const HomeScreen(),
+                              ),
                               (route) => false,
                             );
                             return;
@@ -447,7 +451,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                           if (!allowedOps.contains(session.operationType)) {
                             Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(
-                                  builder: (_) => const HomeScreen()),
+                                builder: (_) => const HomeScreen(),
+                              ),
                               (route) => false,
                             );
                             return;
@@ -516,7 +521,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
 
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
-                                builder: (_) => const QuizScreen()),
+                              builder: (_) => const QuizScreen(),
+                            ),
                             (route) => false,
                           );
                         },
@@ -536,7 +542,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                         onPressed: () {
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
-                                builder: (_) => const HomeScreen()),
+                              builder: (_) => const HomeScreen(),
+                            ),
                             (route) => false,
                           );
                         },

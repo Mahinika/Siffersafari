@@ -35,6 +35,9 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      - name: Build generated files (Hive/Riverpod)
+        run: dart run build_runner build --delete-conflicting-outputs
+
       - name: Analyze (app + tests)
         run: flutter analyze --fatal-infos lib test integration_test
 
