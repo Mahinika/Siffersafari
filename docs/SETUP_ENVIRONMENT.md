@@ -130,7 +130,7 @@ adb devices
 ### Initial Checkout
 
 ```bash
-cd d:\Projects\Personal\Multiplikation
+cd d:\Projects\Personal\Siffersafari  # eller din lokala projektmapp
 git clone <repo-url> .  # Om nytt clone
 git pull                 # Om redan klont
 ```
@@ -156,7 +156,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 # Förväntat output:
 # [INFO] BuildContext: Building new asset graph...
-# [INFO] Building Multiplikation...
+# [INFO] Building ...
 ```
 
 Genererade filer hamnar här:

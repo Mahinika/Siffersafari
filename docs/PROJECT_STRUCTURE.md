@@ -7,7 +7,7 @@ Denna dokument mappning projektets foler-layout och namngivningskonventioner.
 ## Root Directory
 
 ```
-d:\Projects\Personal\Multiplikation/
+d:\Projects\Personal\Siffersafari/
 ├─ lib/                          ← SOURCE CODE (Dart/Flutter)
 ├─ test/                         ← UNIT TESTS
 ├─ integration_test/             ← END-TO-END TESTS
@@ -287,7 +287,7 @@ android/
 │  └─ release-guard.yml             ├─ Pre-release validation
 │
 └─ prompts/
-   └─ multiplikation-team.prompt.md ├─ Copilot instructions
+   └─ siffersafari-team.prompt.md ├─ Copilot instructions
 ```
 
 ---

@@ -48,7 +48,7 @@ För att kunna köra och utveckla detta projekt behöver du:
 ### Steg 1: Klona eller navigera till projektet
 
 ```bash
-cd d:\Projects\Personal\Multiplikation
+cd d:\Projects\Personal\Siffersafari  # eller din lokala projektmapp
 ```
 
 ### Steg 2: Installera dependencies
