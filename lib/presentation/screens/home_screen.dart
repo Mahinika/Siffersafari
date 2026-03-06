@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
@@ -36,6 +37,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _loadedAllowedOpsForUserId;
   String? _checkedOnboardingForUserId;
+  String _appVersionLabel = '...';
   bool _onboardingPushInFlight = false;
 
   static const int _idleFrameCount = 8;
@@ -55,6 +57,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _loadAppVersion();
     // Load existing users and start background music
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final notifier = ref.read(userProvider.notifier);
@@ -63,6 +66,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // Start background music when home screen loads
       ref.read(audioServiceProvider).playMusic();
     });
+  }
+
+  Future<void> _loadAppVersion() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      final versionLabel = packageInfo.buildNumber.isEmpty
+          ? packageInfo.version
+          : '${packageInfo.version}+${packageInfo.buildNumber}';
+
+      if (!mounted) return;
+      setState(() {
+        _appVersionLabel = versionLabel;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _appVersionLabel = 'okänd';
+      });
+    }
   }
 
   // endregion
@@ -730,7 +752,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                     // Version Info
                     Text(
-                      'Version ${AppConstants.appVersion}',
+                      'Version $_appVersionLabel',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: faintOnPrimary,
                           ),

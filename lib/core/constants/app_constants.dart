@@ -15,7 +15,6 @@ class AppConstants {
 
   // App Info
   static const String appName = 'Siffersafari';
-    static const String appVersion = '1.0.1';
 
   // Mascot
   static const String mascotName = 'Ville';

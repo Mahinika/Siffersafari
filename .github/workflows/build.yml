@@ -100,20 +100,15 @@ jobs:
           name: Siffersafari ${{ steps.version.outputs.VERSION }}
           generate_release_notes: true
           body: |
-            ## Release
-
             **Version:** ${{ steps.version.outputs.VERSION_FULL }}
-            
-            ### How to install:
+
+            ### Installation
             1. Download `app-release.apk` below
             2. Transfer to your Android tablet
             3. Open file manager, find the APK, and tap to install
             4. If prompted about unknown sources, allow installation
-            
-            ### What's new:
-            
-            
-            ### Feedback:
+
+            ### Feedback
             Test the app and report any issues!
           draft: false
           prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}
