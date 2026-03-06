@@ -14,6 +14,7 @@ import 'core/providers/app_theme_provider.dart';
 import 'core/theme/app_theme_config.dart';
 import 'domain/enums/app_theme.dart';
 import 'presentation/screens/app_entry_screen.dart';
+import 'presentation/screens/launch_splash_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -136,7 +137,7 @@ class MathGameApp extends ConsumerWidget {
             } else if (initError != null) {
               home = _BootstrapErrorScreen(error: initError);
             } else {
-              home = const AppEntryScreen();
+              home = const LaunchSplashGate(child: AppEntryScreen());
             }
 
             return MaterialApp(

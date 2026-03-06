@@ -64,5 +64,7 @@ flutter:
     - assets/sounds/wrong.wav
     - assets/animations/
     - assets/images/
+    - assets/images/brand/
+    - assets/images/app_icon/
     - assets/images/themes/space/
     - assets/images/themes/jungle/

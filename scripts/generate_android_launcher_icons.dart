@@ -4,9 +4,74 @@ import 'package:image/image.dart' as img;
 
 void main(List<String> args) {
   final projectRoot = Directory.current.path;
+
+  // Input image path
+  final inputPath = args.isNotEmpty
+      ? args[0]
+      : '$projectRoot/assets/images/app_icon/icon_source.png';
+
+  final inputFile = File(inputPath);
+  if (!inputFile.existsSync()) {
+    stderr.writeln('Input image not found: $inputPath');
+    stderr.writeln(
+      'Usage: dart run scripts/generate_android_launcher_icons.dart [path/to/icon.png]',
+    );
+    exitCode = 1;
+    return;
+  }
+
+  // Load source image
+  final bytes = inputFile.readAsBytesSync();
+  final sourceImage = img.decodeImage(bytes);
+  if (sourceImage == null) {
+    stderr.writeln('Failed to decode image: $inputPath');
+    exitCode = 1;
+    return;
+  }
+
+  stdout.writeln(
+    'Loaded source image: ${sourceImage.width}x${sourceImage.height}',
+  );
+
   final resRoot = '$projectRoot/android/app/src/main/res';
 
-  final targets = <String, int>{
+  final bg = _averageOpaqueColor(sourceImage);
+  final bgHex = _rgbToHex(bg);
+
+  // Write adaptive icon XML (API 26+)
+  final anydpiV26 = Directory('$resRoot/mipmap-anydpi-v26');
+  if (!anydpiV26.existsSync()) {
+    anydpiV26.createSync(recursive: true);
+  }
+
+  File('${anydpiV26.path}/ic_launcher.xml').writeAsStringSync(
+    _adaptiveIconXml(
+      background: '@color/ic_launcher_background',
+      foreground: '@mipmap/ic_launcher_foreground',
+    ),
+  );
+  File('${anydpiV26.path}/ic_launcher_round.xml').writeAsStringSync(
+    _adaptiveIconXml(
+      background: '@color/ic_launcher_background',
+      foreground: '@mipmap/ic_launcher_foreground',
+    ),
+  );
+
+  // Write adaptive icon background color
+  final valuesDir = Directory('$resRoot/values');
+  if (!valuesDir.existsSync()) {
+    stderr.writeln('Missing Android values dir: ${valuesDir.path}');
+    exitCode = 2;
+    return;
+  }
+  File('${valuesDir.path}/ic_launcher_background.xml').writeAsStringSync(
+    _launcherBackgroundColorXml(bgHex),
+  );
+
+  stdout.writeln('Adaptive icon background: $bgHex');
+
+  // Legacy icons (pre-26 + fallback)
+  final legacyTargets = <String, int>{
     'mipmap-mdpi': 48,
     'mipmap-hdpi': 72,
     'mipmap-xhdpi': 96,
@@ -14,8 +79,18 @@ void main(List<String> args) {
     'mipmap-xxxhdpi': 192,
   };
 
+  // Adaptive icon layers are 108dp. Pixel sizes below follow Android templates.
+  final adaptiveLayerTargets = <String, int>{
+    'mipmap-mdpi': 108,
+    'mipmap-hdpi': 162,
+    'mipmap-xhdpi': 216,
+    'mipmap-xxhdpi': 324,
+    'mipmap-xxxhdpi': 432,
+  };
+
   var wroteAny = false;
-  for (final entry in targets.entries) {
+
+  for (final entry in legacyTargets.entries) {
     final dirName = entry.key;
     final size = entry.value;
 
@@ -27,8 +102,33 @@ void main(List<String> args) {
       continue;
     }
 
-    final icon = _renderIcon(size);
+    final icon = _renderLegacyIcon(
+      sourceImage: sourceImage,
+      size: size,
+      background: bg,
+    );
     outFile.writeAsBytesSync(img.encodePng(icon, level: 6));
+    stdout.writeln('Wrote $outPath (${size}x$size)');
+    wroteAny = true;
+  }
+
+  for (final entry in adaptiveLayerTargets.entries) {
+    final dirName = entry.key;
+    final size = entry.value;
+
+    final outPath = '$resRoot/$dirName/ic_launcher_foreground.png';
+    final outFile = File(outPath);
+    if (!outFile.parent.existsSync()) {
+      stderr.writeln('Missing Android res dir: ${outFile.parent.path}');
+      exitCode = 2;
+      continue;
+    }
+
+    final fg = _renderAdaptiveForeground(
+      sourceImage: sourceImage,
+      size: size,
+    );
+    outFile.writeAsBytesSync(img.encodePng(fg, level: 6));
     stdout.writeln('Wrote $outPath (${size}x$size)');
     wroteAny = true;
   }
@@ -39,154 +139,107 @@ void main(List<String> args) {
   }
 }
 
-img.Image _renderIcon(int size) {
+img.Image _renderLegacyIcon({
+  required img.Image sourceImage,
+  required int size,
+  required img.ColorRgb8 background,
+}) {
   final canvas = img.Image(width: size, height: size);
+  img.fill(canvas, color: background);
 
-  // Background (warm off-white)
-  img.fill(canvas, color: img.ColorRgb8(0xF6, 0xF2, 0xE8));
-
-  // Chalkboard frame + board
-  final frameMargin = (size * 0.14).round();
-  final top = (size * 0.18).round();
-  final boardW = size - frameMargin * 2;
-  final boardH = (size * 0.56).round();
-  final left = frameMargin;
-
-  img.fillRect(
-    canvas,
-    x1: left,
-    y1: top,
-    x2: left + boardW,
-    y2: top + boardH,
-    color: img.ColorRgb8(0x2B, 0x2B, 0x2B),
+  // Give the icon some breathing room, but keep it large.
+  final padding = (size * 0.06).round().clamp(2, 24);
+  final innerSize = (size - padding * 2).clamp(1, size);
+  final resized = img.copyResize(
+    sourceImage,
+    width: innerSize,
+    height: innerSize,
+    interpolation: img.Interpolation.average,
   );
 
-  final innerPad = (size * 0.03).round();
-  img.fillRect(
-    canvas,
-    x1: left + innerPad,
-    y1: top + innerPad,
-    x2: left + boardW - innerPad,
-    y2: top + boardH - innerPad,
-    color: img.ColorRgb8(0x1F, 0x63, 0x3D),
-  );
-
-  // Chalk tray
-  final trayH = (size * 0.05).round();
-  final trayY = top + boardH - (size * 0.07).round();
-  img.fillRect(
-    canvas,
-    x1: left + (size * 0.10).round(),
-    y1: trayY,
-    x2: left + boardW - (size * 0.10).round(),
-    y2: trayY + trayH,
-    color: img.ColorRgb8(0x3A, 0x2B, 0x21),
-  );
-
-  // Big multiplication 'X'
-  final xCenter = size ~/ 2;
-  final yCenter = top + (boardH * 0.46).round();
-  final arm = (size * 0.16).round();
-  final thickness = (size * 0.06).clamp(3, 18).round();
-
-  _drawThickLine(
-    canvas,
-    xCenter - arm,
-    yCenter - arm,
-    xCenter + arm,
-    yCenter + arm,
-    thickness: thickness,
-    color: img.ColorRgb8(0xF3, 0xF6, 0xFF),
-  );
-  _drawThickLine(
-    canvas,
-    xCenter + arm,
-    yCenter - arm,
-    xCenter - arm,
-    yCenter + arm,
-    thickness: thickness,
-    color: img.ColorRgb8(0xF3, 0xF6, 0xFF),
-  );
-
-  // Small equation (kept subtle so it doesn't get mushy at small sizes)
-  if (size >= 96) {
-    img.drawString(
-      canvas,
-      '2x3=6',
-      font: img.arial24,
-      x: (size * 0.28).round(),
-      y: (top + boardH * 0.70).round(),
-      color: img.ColorRgb8(0xF3, 0xF6, 0xFF),
-    );
-  }
-
-  // Simple pencil accent (bottom-right)
-  final pencilY = (size * 0.78).round();
-  final pencilX = (size * 0.58).round();
-  final pencilW = (size * 0.34).round();
-  final pencilH = (size * 0.08).round();
-
-  img.fillRect(
-    canvas,
-    x1: pencilX,
-    y1: pencilY,
-    x2: pencilX + pencilW,
-    y2: pencilY + pencilH,
-    color: img.ColorRgb8(0xF4, 0xC5, 0x42),
-  );
-
-  // Pencil tip (kept rectangular for compatibility across image versions)
-  final tipW = (size * 0.06).round();
-  img.fillRect(
-    canvas,
-    x1: pencilX + pencilW,
-    y1: pencilY,
-    x2: pencilX + pencilW + tipW,
-    y2: pencilY + pencilH,
-    color: img.ColorRgb8(0xEA, 0xD6, 0xC3),
-  );
-  img.fillRect(
-    canvas,
-    x1: pencilX + pencilW + (tipW * 0.62).round(),
-    y1: pencilY + (pencilH * 0.25).round(),
-    x2: pencilX + pencilW + tipW,
-    y2: pencilY + (pencilH * 0.75).round(),
-    color: img.ColorRgb8(0x3B, 0x2B, 0x22),
-  );
-
+  img.compositeImage(canvas, resized, dstX: padding, dstY: padding);
   return canvas;
 }
 
-void _drawThickLine(
-  img.Image canvas,
-  int x1,
-  int y1,
-  int x2,
-  int y2, {
-  required int thickness,
-  required img.Color color,
+img.Image _renderAdaptiveForeground({
+  required img.Image sourceImage,
+  required int size,
 }) {
-  // The image package's drawLine thickness API has varied across versions.
-  // This implementation is version-agnostic: draw multiple parallel lines.
-  final dx = (x2 - x1).toDouble();
-  final dy = (y2 - y1).toDouble();
-  final len = (dx.abs() + dy.abs()).clamp(1, 1 << 30).toDouble();
+  final canvas = img.Image(width: size, height: size);
+  img.fill(canvas, color: img.ColorRgba8(0, 0, 0, 0));
 
-  // Unit normal (approx)
-  final nx = -dy / len;
-  final ny = dx / len;
+  // Slightly larger than legacy, but keep safe-ish margins for masks.
+  final padding = (size * 0.10).round().clamp(6, 64);
+  final innerSize = (size - padding * 2).clamp(1, size);
+  final resized = img.copyResize(
+    sourceImage,
+    width: innerSize,
+    height: innerSize,
+    interpolation: img.Interpolation.average,
+  );
+  img.compositeImage(canvas, resized, dstX: padding, dstY: padding);
+  return canvas;
+}
 
-  final half = (thickness / 2).floor();
-  for (var i = -half; i <= half; i++) {
-    final ox = (nx * i).round();
-    final oy = (ny * i).round();
-    img.drawLine(
-      canvas,
-      x1: x1 + ox,
-      y1: y1 + oy,
-      x2: x2 + ox,
-      y2: y2 + oy,
-      color: color,
-    );
+img.ColorRgb8 _averageOpaqueColor(img.Image sourceImage) {
+  // Downscale to make averaging fast.
+  final small = img.copyResize(
+    sourceImage,
+    width: 64,
+    height: 64,
+    interpolation: img.Interpolation.average,
+  );
+
+  var r = 0;
+  var g = 0;
+  var b = 0;
+  var count = 0;
+
+  for (var y = 0; y < small.height; y++) {
+    for (var x = 0; x < small.width; x++) {
+      final p = small.getPixel(x, y);
+      final a = p.a;
+      if (a <= 8) continue;
+      r += p.r.toInt();
+      g += p.g.toInt();
+      b += p.b.toInt();
+      count++;
+    }
   }
+
+  if (count == 0) {
+    // Fallback: a neutral mid-gray.
+    return img.ColorRgb8(0x66, 0x66, 0x66);
+  }
+
+  return img.ColorRgb8(
+    (r / count).round().clamp(0, 255),
+    (g / count).round().clamp(0, 255),
+    (b / count).round().clamp(0, 255),
+  );
+}
+
+String _rgbToHex(img.ColorRgb8 c) {
+  String two(int v) => v.toRadixString(16).padLeft(2, '0').toUpperCase();
+  return '#${two(c.r.toInt())}${two(c.g.toInt())}${two(c.b.toInt())}';
+}
+
+String _launcherBackgroundColorXml(String colorHex) {
+  return '''<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">$colorHex</color>
+</resources>
+''';
+}
+
+String _adaptiveIconXml({
+  required String background,
+  required String foreground,
+}) {
+  return '''<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="$background" />
+    <foreground android:drawable="$foreground" />
+</adaptive-icon>
+''';
 }
