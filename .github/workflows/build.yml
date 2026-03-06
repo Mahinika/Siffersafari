@@ -65,15 +65,31 @@ jobs:
         id: version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION=$(grep "version:" pubspec.yaml | head -1 | sed 's/version: //g')
+            VERSION_FULL=$(grep "version:" pubspec.yaml | head -1 | sed 's/version: //g')
+            VERSION="${VERSION_FULL%%+*}"
+            BUILD_NUMBER=""
+            if [[ "$VERSION_FULL" == *"+"* ]]; then
+              BUILD_NUMBER="${VERSION_FULL#*+}"
+            fi
             TAG_NAME="v${VERSION}"
           else
             TAG_NAME="${GITHUB_REF#refs/tags/}"
-            VERSION="${TAG_NAME#v}"
+            VERSION_FULL="${TAG_NAME#v}"
+            VERSION="${VERSION_FULL%%+*}"
+            BUILD_NUMBER=""
+            if [[ "$VERSION_FULL" == *"+"* ]]; then
+              BUILD_NUMBER="${VERSION_FULL#*+}"
+            fi
           fi
+
+          echo "VERSION_FULL=$VERSION_FULL" >> $GITHUB_OUTPUT
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
+
+          echo "VERSION_FULL=${VERSION_FULL}"
           echo "VERSION=${VERSION}"
+          echo "BUILD_NUMBER=${BUILD_NUMBER}"
           echo "TAG_NAME=${TAG_NAME}"
       
       - name: Create Release
@@ -83,9 +99,9 @@ jobs:
           tag_name: ${{ steps.version.outputs.TAG_NAME }}
           name: Siffersafari ${{ steps.version.outputs.VERSION }}
           body: |
-            ## Alpha Release
-            
-            **Version:** ${{ steps.version.outputs.VERSION }}
+            ## Release
+
+            **Version:** ${{ steps.version.outputs.VERSION_FULL }}
             
             ### How to install:
             1. Download `app-release.apk` below
@@ -99,6 +115,6 @@ jobs:
             ### Feedback:
             Test the app and report any issues!
           draft: false
-          prerelease: true
+          prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
