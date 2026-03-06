@@ -13,6 +13,7 @@ class AnswerButton extends StatefulWidget {
     this.idleBackgroundColor,
     this.idleTextColor,
     this.disabledBackgroundColor,
+    this.minHeight,
     super.key,
   });
 
@@ -24,6 +25,7 @@ class AnswerButton extends StatefulWidget {
   final Color? idleBackgroundColor;
   final Color? idleTextColor;
   final Color? disabledBackgroundColor;
+  final double? minHeight;
 
   @override
   State<AnswerButton> createState() => _AnswerButtonState();
@@ -125,8 +127,11 @@ class _AnswerButtonState extends State<AnswerButton>
               onPressed: isEnabled ? widget.onPressed : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: backgroundColor,
-                minimumSize:
-                    Size(double.infinity, AppConstants.answerButtonHeight.h),
+                minimumSize: Size(
+                  double.infinity,
+                  (widget.minHeight ?? AppConstants.answerButtonHeight).h,
+                ),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 shape: RoundedRectangleBorder(
                   borderRadius:
                       BorderRadius.circular(AppConstants.borderRadius),

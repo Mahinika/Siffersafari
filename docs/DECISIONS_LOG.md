@@ -27,3 +27,4 @@
 - Responsiv layout ska styras av tillgänglig fönsterbredd, inte enhetstyp: `compact < 600`, `medium >= 600`, `expanded >= 840`.
 - På smala skärmar ska dropdown-/inställningskontroller ligga under texten i stället för i `ListTile.trailing` för att undvika overflow i portrait/landscape och vid större textskalning.
 - På `expanded`-bredd ska informationsrika skärmar föredra riktiga tvåkolumnslayouter framför en ensam centrerad telefonkolumn.
+- Quizvyn ska också styras av tillgänglig bredd/höjd, inte bara orientation: använd split-layout först när ytan faktiskt räcker, och låt svarsalternativ växla till 2 kolumner på bred eller kort svarspanel.

@@ -64,5 +64,51 @@ void main() {
       );
       semantics.dispose();
     });
+
+    testWidgets('AnswerButton kan renderas i kompakt quiz-höjd', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapForTest(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 220,
+                child: AnswerButton(
+                  key: const Key('compact-answer'),
+                  answer: 42,
+                  onPressed: () {},
+                  minHeight: 56,
+                ),
+              ),
+              SizedBox(
+                width: 220,
+                child: AnswerButton(
+                  key: const Key('default-answer'),
+                  answer: 99,
+                  onPressed: () {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final compactSize = tester.getSize(
+        find.descendant(
+          of: find.byKey(const Key('compact-answer')),
+          matching: find.byType(ElevatedButton),
+        ),
+      );
+      final defaultSize = tester.getSize(
+        find.descendant(
+          of: find.byKey(const Key('default-answer')),
+          matching: find.byType(ElevatedButton),
+        ),
+      );
+
+      expect(compactSize.height, lessThan(defaultSize.height));
+    });
   });
 }

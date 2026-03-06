@@ -18,14 +18,16 @@
 - Föräldraläge använder nu riktig tvåkolumnslayout på breda skärmar.
 - Resultat använder nu riktig tvåkolumnslayout på breda skärmar (sammanfattning vänster, statistik/belöning/knappar höger).
 - Föräldralägets analys och historik använder nu även interna tablet-layouter: benchmark som kort/grid och senaste quiz som kortgaller på bredare paneler.
+- Quizskärmen använder nu också breddstyrd layout: split-view på bred/kort yta, statuspanel för uppdrag/streak/snabbbonus och tvåkolumns svarsknappar när svarspanelen tillåter det.
+- Quizens visuella hierarki är polerad: frågekortet visar tydligare metadata/typografi och moment-feedbacken visas som en riktig badge i statuspanelen.
 
 ### Verifiering
 - `flutter analyze`: ✅ grönt
-- full testsvit: ✅ 96/96 gröna
+- full testsvit: ✅ 97/97 gröna
 
 ### Nästa steg
 1. Valfritt: kör manuell enhetskontroll på liten telefon i landscape samt en större surfplatta.
-2. Valfritt: kör ytterligare fintrimning av enskilda tablet-paneler om ni vill utnyttja ännu större skärmar bättre.
+2. Valfritt: kör manuell audit av quiz på liten landscape-telefon och större tablet för att fintrimma proportioner i split-view.
 
 ## 2026-03-06 — Svårighetskalibrering per årskurs
 
