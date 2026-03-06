@@ -53,13 +53,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Generated files
-*.g.dart
-*.freezed.dart
+# Generated Dart source files should be versioned when relied on at runtime.
 
 # Hive
 *.hive
-*.lock
 
 # Artifacts (generated UI dumps)
 artifacts/ui*.xml
