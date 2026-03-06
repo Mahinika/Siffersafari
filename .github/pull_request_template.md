@@ -9,6 +9,7 @@ Beskriv kort vad som ändrats och varför.
 - [ ] Relevanta tester är körda
 - [ ] README/docs uppdaterade vid behov
 - [ ] Inga onödiga filer eller debug-utskrifter kvar
+- [ ] PR har relevanta labels (t.ex. `enhancement`, `bug`, `docs`, `chore`, `refactor`, `dependencies`) för bättre release notes
 
 ## Type of Change
 

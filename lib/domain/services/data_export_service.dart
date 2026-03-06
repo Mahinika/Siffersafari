@@ -58,7 +58,7 @@ class DataExportService {
             _repository.getSetting('pin_${userId}_recovery') ?? false,
       },
       'note': 'This export contains your profile and quiz history. '
-          'Sensitive information like PIN hashes and backup codes are not included '
+          'Sensitive information like PIN hashes and security answers are not included '
           'for security reasons. For PIN recovery, use the recovery flow in the app.',
     };
 

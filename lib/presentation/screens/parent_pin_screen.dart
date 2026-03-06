@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
@@ -88,8 +89,23 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
 
       if (!mounted) return;
 
-      // Show backup codes setup dialog
-      _showBackupCodesDialog(context, pinService);
+      // Avoid focus/IME transitions overlapping with dialog + navigation.
+      FocusManager.instance.primaryFocus?.unfocus();
+      await SchedulerBinding.instance.endOfFrame;
+      if (!mounted) return;
+
+      // Set up security question for PIN recovery.
+      final completed = await _showRecoverySetupDialog(context, pinService);
+      if (!mounted) return;
+      if (completed != null) {
+        FocusManager.instance.primaryFocus?.unfocus();
+        await _waitForKeyboardToClose(context);
+        await Future<void>.delayed(kThemeAnimationDuration);
+        if (!mounted) return;
+        Navigator.of(context, rootNavigator: true).pushReplacement(
+          MaterialPageRoute(builder: (_) => const ParentDashboardScreen()),
+        );
+      }
       return;
     }
 
@@ -120,207 +136,221 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
     }
   }
 
-  void _showBackupCodesDialog(
+  Future<void> _waitForKeyboardToClose(BuildContext context) async {
+    // On real devices the IME/selection overlays can update for a few frames
+    // after unfocus/pop. Navigating during that window has caused OverlayEntry
+    // GlobalKey asserts in release builds.
+    for (var i = 0; i < 20; i++) {
+      if (!context.mounted) return;
+      final viewInsets = MediaQuery.of(context).viewInsets;
+      if (viewInsets.bottom <= 0) return;
+      FocusManager.instance.primaryFocus?.unfocus();
+      await SchedulerBinding.instance.endOfFrame;
+      await Future<void>.delayed(const Duration(milliseconds: 16));
+    }
+  }
+
+  Future<bool?> _showRecoverySetupDialog(
     BuildContext context,
     ParentPinService pinService,
-  ) {
+  ) async {
     final answerController = TextEditingController();
     var selectedQuestion = defaultSecurityQuestions.first;
     String? answerErrorText;
     var isLoading = false;
+    Future<void> popSafely(BuildContext ctx, bool result) async {
+      FocusScope.of(ctx).unfocus();
+      await SchedulerBinding.instance.endOfFrame;
+      await Future<void>.delayed(const Duration(milliseconds: 16));
+      await SchedulerBinding.instance.endOfFrame;
+      if (!ctx.mounted) return;
+      Navigator.of(ctx, rootNavigator: true).pop(result);
+    }
 
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Spara backup-koder'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Vi rekommenderar att du sparar backup-koder på en säker plats (t.ex. en anteckningsbok) för att kunna återställa PIN om du glömmer det.',
-                  style: TextStyle(height: 1.5),
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  key: ValueKey(selectedQuestion),
-                  initialValue: selectedQuestion,
-                  isExpanded: true,
-                  items: defaultSecurityQuestions
-                      .map(
-                        (q) => DropdownMenuItem<String>(
-                          value: q,
-                          child: Text(
-                            q,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: isLoading
-                      ? null
-                      : (value) {
-                          if (value == null) return;
-                          setDialogState(() {
-                            selectedQuestion = value;
-                          });
-                        },
-                  decoration: const InputDecoration(
-                    labelText: 'Säkerhetsfråga',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: answerController,
-                  enabled: !isLoading,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Svar',
-                    helperText: 'Skiftläge spelar ingen roll.',
-                    errorText: answerErrorText,
-                  ),
-                  onChanged: (_) {
-                    if (answerErrorText == null) return;
-                    setDialogState(() => answerErrorText = null);
-                  },
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: isLoading
-                      ? null
-                      : () async {
-                          final messenger = ScaffoldMessenger.of(context);
+    try {
+      return await showDialog<bool>(
+        context: context,
+        useRootNavigator: true,
+        barrierDismissible: false,
+        builder: (ctx) => StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            final scheme = Theme.of(ctx).colorScheme;
+            final onPrimary = scheme.onPrimary;
+            final mutedOnPrimary =
+                onPrimary.withValues(alpha: AppOpacities.mutedText);
+            final subtleOnPrimary =
+                onPrimary.withValues(alpha: AppOpacities.subtleText);
 
-                          final validationError =
-                              InputValidators.validateSecurityAnswer(
-                            answerController.text,
-                          );
-                          if (validationError != null) {
-                            setDialogState(
-                              () => answerErrorText = validationError,
-                            );
-                            return;
-                          }
-
-                          final answer = InputValidators.sanitizeSecurityAnswer(
-                            answerController.text,
-                          );
-
-                          setDialogState(() => isLoading = true);
-                          try {
-                            final codes = await pinService.setupPinRecovery(
-                              securityQuestion: selectedQuestion,
-                              securityAnswer: answer,
-                            );
-
-                            if (!ctx.mounted) return;
-                            _showCodesForCopying(ctx, codes, pinService);
-                          } catch (e) {
-                            if (!ctx.mounted) return;
-                            setDialogState(() => isLoading = false);
-                            messenger.showSnackBar(
-                              SnackBar(content: Text('Fel: $e')),
-                            );
-                          }
-                        },
-                  child: Text(
-                    isLoading ? 'Skapar…' : 'Skapa backup-koder',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: isLoading
-                      ? null
-                      : () {
-                          Navigator.of(ctx).pop(); // Dismiss this dialog
-                          if (!mounted) return;
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => const ParentDashboardScreen(),
-                            ),
-                          );
-                        },
-                  child: const Text('Hoppa över'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ).whenComplete(answerController.dispose);
-  }
-
-  void _showCodesForCopying(
-    BuildContext context,
-    List<String> codes,
-    ParentPinService pinService,
-  ) {
-    Navigator.of(context).pop(); // Dismiss previous dialog
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Dina backup-koder'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Spara dessa koder på en säker plats:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+            return AlertDialog(
+              title: Text(
+                'Sätt säkerhetsfråga',
+                style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                      color: onPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
               ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
+              content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: codes
-                      .map(
-                        (code) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: SelectableText(
-                            code,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontFamily: 'monospace',
-                              fontWeight: FontWeight.bold,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Om du glömmer PIN kan du återställa den genom att svara på en säkerhetsfråga.',
+                      style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                            color: mutedOnPrimary,
+                            height: 1.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Säkerhetsfråga',
+                      style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
+                            color: mutedOnPrimary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    RadioGroup<String>(
+                      groupValue: selectedQuestion,
+                      onChanged: (value) {
+                        if (isLoading || value == null) return;
+                        setDialogState(() => selectedQuestion = value);
+                      },
+                      child: Column(
+                        children: [
+                          for (final q in defaultSecurityQuestions)
+                            RadioListTile<String>(
+                              value: q,
+                              activeColor: scheme.secondary,
+                              contentPadding: EdgeInsets.zero,
+                              dense: true,
+                              title: Text(
+                                q,
+                                style: Theme.of(ctx)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: onPrimary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: answerController,
+                      enabled: !isLoading,
+                      obscureText: true,
+                      enableInteractiveSelection: false,
+                      style: TextStyle(color: onPrimary),
+                      decoration: InputDecoration(
+                        labelText: 'Svar',
+                        helperText: 'Skiftläge spelar ingen roll.',
+                        labelStyle: TextStyle(color: mutedOnPrimary),
+                        helperStyle: TextStyle(color: subtleOnPrimary),
+                        filled: true,
+                        fillColor: onPrimary.withValues(
+                          alpha: AppOpacities.subtleFill,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.borderRadius),
+                          borderSide: BorderSide(
+                            color: onPrimary.withValues(
+                              alpha: AppOpacities.borderSubtle,
                             ),
                           ),
                         ),
-                      )
-                      .toList(),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppConstants.borderRadius),
+                          borderSide: BorderSide(color: scheme.secondary),
+                        ),
+                        errorText: answerErrorText,
+                      ),
+                      onChanged: (_) {
+                        if (answerErrorText == null) return;
+                        setDialogState(() => answerErrorText = null);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                              final messenger = ScaffoldMessenger.of(ctx);
+
+                              final validationError =
+                                  InputValidators.validateSecurityAnswer(
+                                answerController.text,
+                              );
+                              if (validationError != null) {
+                                setDialogState(
+                                  () => answerErrorText = validationError,
+                                );
+                                return;
+                              }
+
+                              final answer =
+                                  InputValidators.sanitizeSecurityAnswer(
+                                answerController.text,
+                              );
+
+                              setDialogState(() => isLoading = true);
+                              try {
+                                await pinService.setupPinRecovery(
+                                  securityQuestion: selectedQuestion,
+                                  securityAnswer: answer,
+                                );
+
+                                if (!ctx.mounted) return;
+                                await popSafely(ctx, true);
+                              } catch (e) {
+                                if (!ctx.mounted) return;
+                                setDialogState(() => isLoading = false);
+                                messenger.showSnackBar(
+                                  SnackBar(content: Text('Fel: $e')),
+                                );
+                              }
+                            },
+                      child: Text(
+                        isLoading ? 'Sparar…' : 'Spara säkerhetsfråga',
+                        style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                              color: onPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                              await popSafely(ctx, false);
+                            },
+                      child: Text(
+                        'Hoppa över',
+                        style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                              color: onPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            );
+          },
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              if (!mounted) return;
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (_) => const ParentDashboardScreen(),
-                ),
-              );
-            },
-            child: const Text('Klar'),
-          ),
-        ],
-      ),
-    );
+      );
+    } finally {
+      // Give the dialog transition/IME a moment to settle before disposing.
+      await Future<void>.delayed(kThemeAnimationDuration);
+      answerController.dispose();
+    }
   }
 
   @override
@@ -334,6 +364,9 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
     return ThemedBackgroundScaffold(
       appBar: AppBar(
         title: Text(_isSettingNewPin ? 'Skapa PIN' : 'Ange PIN'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -472,8 +505,8 @@ class _ParentPinScreenState extends ConsumerState<ParentPinScreen> {
                                   .textTheme
                                   .bodyMedium
                                   ?.copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
+                                    color: onPrimary,
+                                    fontWeight: FontWeight.w700,
                                   ),
                             ),
                           ),

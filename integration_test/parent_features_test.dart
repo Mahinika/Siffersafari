@@ -16,7 +16,7 @@ void main() {
     'Integration (Parent): skapa PIN och öppna föräldradashboard',
     (tester) async {
       await app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await it.settle(tester, const Duration(milliseconds: 600));
 
       // Navigate to settings (gear icon in top-right).
       final settingsIcon = find.byIcon(Icons.settings);
@@ -26,78 +26,47 @@ void main() {
       }
 
       await it.tap(tester, settingsIcon, after: const Duration(seconds: 1));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await it.settle(tester, const Duration(milliseconds: 300));
 
       // Find "Föräldraläge" button.
       final parentModeButton = find.text('Föräldraläge');
       expect(parentModeButton, findsOneWidget);
 
       await it.tap(tester, parentModeButton, after: const Duration(seconds: 1));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await it.waitForText(tester, 'Skapa PIN', timeout: const Duration(seconds: 12));
 
-      // Should show PIN creation dialog.
-      expect(find.text('Skapa PIN-kod'), findsWidgets);
+      // Should show PIN creation screen.
+      expect(find.text('Skapa PIN'), findsWidgets);
 
       // Enter a 4-digit PIN (e.g. 1234).
       final pinFields = find.byType(TextField);
-      expect(pinFields, findsWidgets);
+      expect(pinFields, findsNWidgets(2));
 
-      await tester.enterText(pinFields.first, '1234');
-      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+      await tester.enterText(pinFields.at(0), '1234');
+      await tester.pump(const Duration(milliseconds: 120));
+      await tester.enterText(pinFields.at(1), '1234');
+      await tester.pump(const Duration(milliseconds: 120));
 
-      // Look for security question dropdown or security answer field in PIN creation flow.
-      final securityQuestionDropdown =
-          find.byType(DropdownButtonFormField<String>);
-      if (securityQuestionDropdown.evaluate().isNotEmpty) {
-        // Select first security question.
-        await it.tryTap(
-          tester,
-          securityQuestionDropdown.first,
-          after: const Duration(milliseconds: 300),
-        );
-        await tester.pumpAndSettle(const Duration(milliseconds: 300));
+      final savePinButton = find.text('Spara PIN');
+      expect(savePinButton, findsOneWidget);
+      await it.tap(tester, savePinButton, after: const Duration(milliseconds: 450));
 
-        // Tap first dropdown item (if menu opened).
-        final firstMenuItem = find.text('Vad är ditt favoritämne?').last;
-        if (firstMenuItem.evaluate().isNotEmpty) {
-          await it.tryTap(
-            tester,
-            firstMenuItem,
-            after: const Duration(milliseconds: 300),
-          );
-          await tester.pumpAndSettle(const Duration(milliseconds: 300));
-        }
-
-        // Enter security answer.
-        final securityAnswerField = find.widgetWithText(TextField, 'Ditt svar');
-        if (securityAnswerField.evaluate().isNotEmpty) {
-          await tester.enterText(securityAnswerField, 'Mat');
-          await tester.pumpAndSettle(const Duration(milliseconds: 300));
-        }
-      }
-
-      // Confirm PIN creation.
-      final confirmButton = find.text('Skapa');
-      if (confirmButton.evaluate().isNotEmpty) {
-        await it.tap(tester, confirmButton, after: const Duration(seconds: 1));
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-      }
-
-      // If backup codes dialog appears, close it.
-      if (find.text('Spara dina återställningskoder').evaluate().isNotEmpty) {
-        final closeBackupDialog = find.text('Stäng');
-        if (closeBackupDialog.evaluate().isNotEmpty) {
+      // If recovery setup dialog appears, close it.
+      if (find.text('Sätt säkerhetsfråga').evaluate().isNotEmpty) {
+        final closeRecoveryDialog = find.text('Hoppa över');
+        if (closeRecoveryDialog.evaluate().isNotEmpty) {
           await it.tap(
             tester,
-            closeBackupDialog,
+            closeRecoveryDialog,
             after: const Duration(milliseconds: 500),
           );
-          await tester.pumpAndSettle(const Duration(seconds: 1));
+          await it.settle(tester, const Duration(milliseconds: 300));
         }
       }
 
       // Should now be in Parent Dashboard.
-      expect(find.text('Föräldradashboard'), findsWidgets);
+      await it.waitForText(tester, 'Översikt', timeout: const Duration(seconds: 20));
+      expect(find.text('Översikt'), findsWidgets);
     },
     timeout: const Timeout(Duration(minutes: 2)),
   );
@@ -106,21 +75,21 @@ void main() {
     'Integration (Parent): verifiera PIN efter att ha skapat en',
     (tester) async {
       await app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await it.settle(tester, const Duration(milliseconds: 600));
 
       // Go to settings.
       final settingsIcon = find.byIcon(Icons.settings);
       if (settingsIcon.evaluate().isEmpty) return;
 
       await it.tap(tester, settingsIcon, after: const Duration(seconds: 1));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await it.settle(tester, const Duration(milliseconds: 300));
 
       // Tap "Föräldraläge".
       final parentModeButton = find.text('Föräldraläge');
       if (parentModeButton.evaluate().isEmpty) return;
 
       await it.tap(tester, parentModeButton, after: const Duration(seconds: 1));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await it.settle(tester, const Duration(milliseconds: 300));
 
       // If PIN already exists, should ask for PIN verification.
       final pinVerifyText = find.textContaining('Ange PIN');
@@ -129,21 +98,21 @@ void main() {
         final pinFields = find.byType(TextField);
         if (pinFields.evaluate().isNotEmpty) {
           await tester.enterText(pinFields.first, '1234');
-          await tester.pumpAndSettle(const Duration(milliseconds: 500));
+          await tester.pump(const Duration(milliseconds: 150));
 
-          final confirmButton = find.text('OK');
+          final confirmButton = find.text('Öppna');
           if (confirmButton.evaluate().isNotEmpty) {
             await it.tap(
               tester,
               confirmButton,
-              after: const Duration(seconds: 1),
+              after: const Duration(milliseconds: 450),
             );
-            await tester.pumpAndSettle(const Duration(seconds: 2));
+            await it.waitForText(tester, 'Översikt', timeout: const Duration(seconds: 20));
           }
         }
 
         // Should now be in Parent Dashboard.
-        expect(find.text('Föräldradashboard'), findsWidgets);
+        expect(find.text('Översikt'), findsWidgets);
       }
     },
     timeout: const Timeout(Duration(minutes: 2)),
@@ -153,20 +122,20 @@ void main() {
     'Integration (Parent): PIN recovery med security question',
     (tester) async {
       await app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await it.settle(tester, const Duration(milliseconds: 600));
 
       // Navigate to Parent Mode.
       final settingsIcon = find.byIcon(Icons.settings);
       if (settingsIcon.evaluate().isEmpty) return;
 
       await it.tap(tester, settingsIcon, after: const Duration(seconds: 1));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await it.settle(tester, const Duration(milliseconds: 300));
 
       final parentModeButton = find.text('Föräldraläge');
       if (parentModeButton.evaluate().isEmpty) return;
 
       await it.tap(tester, parentModeButton, after: const Duration(seconds: 1));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await it.settle(tester, const Duration(milliseconds: 300));
 
       // Look for "Glömt PIN?" link.
       final forgotPinLink = find.text('Glömt PIN?');
@@ -176,23 +145,23 @@ void main() {
       }
 
       await it.tap(tester, forgotPinLink, after: const Duration(seconds: 1));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await it.waitForText(tester, 'Återställ PIN', timeout: const Duration(seconds: 12));
 
       // Should show security question.
-      expect(find.text('Återställ PIN-kod'), findsWidgets);
+      expect(find.text('Återställ PIN'), findsWidgets);
 
       // Enter security answer (from previous test: "Mat").
       final securityAnswerField = find.byType(TextField).first;
       await tester.enterText(securityAnswerField, 'Mat');
-      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 150));
 
-      final verifyButton = find.text('Verifiera');
+      final verifyButton = find.text('Verifiera svar');
       if (verifyButton.evaluate().isNotEmpty) {
-        await it.tap(tester, verifyButton, after: const Duration(seconds: 1));
-        await tester.pumpAndSettle(const Duration(seconds: 1));
+        await it.tap(tester, verifyButton, after: const Duration(milliseconds: 450));
+        await it.settle(tester, const Duration(milliseconds: 450));
       }
 
-      // Should proceed to backup code screen or PIN reset screen.
+      // Should proceed to PIN reset screen.
       // (This depends on implementation; just verify no crash.)
       expect(tester.takeException(), isNull);
     },
@@ -203,14 +172,14 @@ void main() {
     'Integration (Profil): skapa ny profil och byt profil',
     (tester) async {
       await app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await it.settle(tester, const Duration(milliseconds: 600));
 
       // Go to settings.
       final settingsIcon = find.byIcon(Icons.settings);
       if (settingsIcon.evaluate().isEmpty) return;
 
       await it.tap(tester, settingsIcon, after: const Duration(seconds: 1));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await it.settle(tester, const Duration(milliseconds: 300));
 
       // Look for "Byt profil" or "Skapa profil".
       final switchProfileButton = find.textContaining('profil');
@@ -219,9 +188,9 @@ void main() {
       await it.tap(
         tester,
         switchProfileButton.first,
-        after: const Duration(seconds: 1),
+        after: const Duration(milliseconds: 450),
       );
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await it.settle(tester, const Duration(milliseconds: 300));
 
       // Should show profile selection or creation screen.
       final createProfileButton = find.text('Skapa profil');
@@ -229,14 +198,14 @@ void main() {
         await it.tap(
           tester,
           createProfileButton,
-          after: const Duration(seconds: 1),
+          after: const Duration(milliseconds: 450),
         );
-        await tester.pumpAndSettle(const Duration(seconds: 1));
+        await it.settle(tester, const Duration(milliseconds: 300));
 
         // Enter profile name (e.g. "Test User").
         final nameField = find.byType(TextField).first;
         await tester.enterText(nameField, 'Integration Test User');
-        await tester.pumpAndSettle(const Duration(milliseconds: 500));
+        await tester.pump(const Duration(milliseconds: 150));
 
         // Select grade (Åk 3).
         final gradeDropdown = find.byType(DropdownButton<int?>);
@@ -246,7 +215,7 @@ void main() {
             gradeDropdown,
             after: const Duration(milliseconds: 300),
           );
-          await tester.pumpAndSettle(const Duration(milliseconds: 300));
+          await tester.pump(const Duration(milliseconds: 120));
 
           final ak3 = find.text('Åk 3').last;
           if (ak3.evaluate().isNotEmpty) {
@@ -255,7 +224,7 @@ void main() {
               ak3,
               after: const Duration(milliseconds: 300),
             );
-            await tester.pumpAndSettle(const Duration(milliseconds: 300));
+            await tester.pump(const Duration(milliseconds: 120));
           }
         }
 
@@ -265,9 +234,9 @@ void main() {
           await it.tap(
             tester,
             confirmButton,
-            after: const Duration(seconds: 1),
+            after: const Duration(milliseconds: 450),
           );
-          await tester.pumpAndSettle(const Duration(seconds: 2));
+          await it.settle(tester, const Duration(milliseconds: 600));
         }
 
         // Should be back at home with new profile active.

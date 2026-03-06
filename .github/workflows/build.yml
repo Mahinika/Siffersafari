@@ -93,11 +93,12 @@ jobs:
           echo "TAG_NAME=${TAG_NAME}"
       
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: build/app/outputs/flutter-apk/app-release.apk
           tag_name: ${{ steps.version.outputs.TAG_NAME }}
           name: Siffersafari ${{ steps.version.outputs.VERSION }}
+          generate_release_notes: true
           body: |
             ## Release
 
@@ -110,7 +111,7 @@ jobs:
             4. If prompted about unknown sources, allow installation
             
             ### What's new:
-            - See commit history for details
+            
             
             ### Feedback:
             Test the app and report any issues!

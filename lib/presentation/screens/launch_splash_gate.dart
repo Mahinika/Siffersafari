@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class LaunchSplashGate extends StatefulWidget {
   const LaunchSplashGate({super.key, required this.child});
@@ -14,6 +14,7 @@ class _LaunchSplashGateState extends State<LaunchSplashGate>
   static const _duration = Duration(seconds: 4);
   static const _switchDuration = Duration(milliseconds: 650);
   static const _handoffSplit = 0.48;
+  late final bool _isWidgetTest;
 
   late final AnimationController _controller;
   late final Animation<double> _splashOpacity;
@@ -34,7 +35,14 @@ class _LaunchSplashGateState extends State<LaunchSplashGate>
   void initState() {
     super.initState();
 
-    _controller = AnimationController(vsync: this, duration: _duration);
+    _isWidgetTest = _detectWidgetTest();
+
+    // Widget tests should not spend 4 seconds in a launch animation.
+    // Keep production behavior unchanged.
+    final duration =
+        _isWidgetTest ? const Duration(milliseconds: 1) : _duration;
+
+    _controller = AnimationController(vsync: this, duration: duration);
 
     // Professional pattern: define all tweens once (not inside build) and
     // advance the animation with a single controller.
@@ -133,7 +141,7 @@ class _LaunchSplashGateState extends State<LaunchSplashGate>
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: _switchDuration,
+      duration: _isWidgetTest ? Duration.zero : _switchDuration,
       switchInCurve: Curves.easeInOutCubic,
       switchOutCurve: Curves.easeInOutCubic,
       transitionBuilder: (child, animation) {
@@ -177,6 +185,12 @@ class _LaunchSplashGateState extends State<LaunchSplashGate>
             )
           : widget.child,
     );
+  }
+  static bool _detectWidgetTest() {
+    // Avoid depending on dart-define flags; tests run with a special binding.
+    final bindingType = WidgetsBinding.instance.runtimeType.toString();
+    return bindingType.contains('TestWidgets') ||
+        bindingType.contains('AutomatedTestWidgets');
   }
 }
 
@@ -298,3 +312,5 @@ class _AppIcon extends StatelessWidget {
     );
   }
 }
+
+

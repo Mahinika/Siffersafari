@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:siffersafari/core/constants/app_constants.dart';
+import 'package:siffersafari/core/providers/user_provider.dart';
 import 'package:siffersafari/domain/entities/user_progress.dart';
 import 'package:siffersafari/domain/enums/age_group.dart';
-import 'package:siffersafari/main.dart';
+import 'package:siffersafari/presentation/screens/home_screen.dart';
 
 import '../test_utils.dart';
 
@@ -37,20 +38,30 @@ void main() {
         gradeLevel: 3,
       );
       await repository.saveUserProgress(user);
+      await repository.setActiveUserId(userId);
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await container.read(userProvider.notifier).loadUsers();
+      expect(container.read(userProvider).activeUser?.userId, userId);
 
       await tester.pumpWidget(
-        ProviderScope(
-          child: MathGameApp(initFuture: Future.value(null)),
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(home: HomeScreen()),
         ),
       );
 
+      // Let HomeScreen's post-frame onboarding push run.
+      await tester.pump();
+
       final onboardingTitle = find.text('Nu kör vi!');
-      final steps = (const Duration(seconds: 4).inMilliseconds / 50).ceil();
+      final steps = (const Duration(seconds: 2).inMilliseconds / 50).ceil();
       for (var i = 0; i < steps; i++) {
         if (onboardingTitle.evaluate().isNotEmpty) break;
         await tester.pump(const Duration(milliseconds: 50));
       }
-      expect(find.text('Nu kör vi!'), findsOneWidget);
+      expect(onboardingTitle, findsOneWidget);
 
       await tester.tap(find.text('Hoppa över'));
       await pumpUntilFound(tester, find.text(AppConstants.appName));
@@ -79,15 +90,25 @@ void main() {
         ageGroup: AgeGroup.middle,
       );
       await repository.saveUserProgress(user);
+      await repository.setActiveUserId(userId);
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await container.read(userProvider.notifier).loadUsers();
+      expect(container.read(userProvider).activeUser?.userId, userId);
 
       await tester.pumpWidget(
-        ProviderScope(
-          child: MathGameApp(initFuture: Future.value(null)),
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(home: HomeScreen()),
         ),
       );
 
+      // Let HomeScreen's post-frame onboarding push run.
+      await tester.pump();
+
       final onboardingTitle = find.text('Nu kör vi!');
-      final steps = (const Duration(seconds: 4).inMilliseconds / 50).ceil();
+      final steps = (const Duration(seconds: 2).inMilliseconds / 50).ceil();
       for (var i = 0; i < steps; i++) {
         if (onboardingTitle.evaluate().isNotEmpty) break;
         await tester.pump(const Duration(milliseconds: 50));
@@ -131,6 +152,17 @@ void main() {
 
       expect(find.text('Vad vill du räkna?'), findsOneWidget);
 
+      // Regression check: addition should be preselected by default.
+      final additionTile = find.widgetWithText(
+        CheckboxListTile,
+        'Plusraketer',
+      );
+      expect(additionTile, findsOneWidget);
+      expect(
+        tester.widget<CheckboxListTile>(additionTile).value,
+        isTrue,
+      );
+
       await tester.tap(find.text('Klar'));
 
       final homeTitle = find.text(AppConstants.appName);
@@ -147,8 +179,9 @@ void main() {
       expect(onboardingTitle, findsNothing);
 
       await tester.pumpWidget(
-        ProviderScope(
-          child: MathGameApp(initFuture: Future.value(null)),
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(home: HomeScreen()),
         ),
       );
       await pumpFor(tester, const Duration(milliseconds: 800));

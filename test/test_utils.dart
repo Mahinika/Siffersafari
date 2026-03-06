@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:siffersafari/core/di/injection.dart';
 import 'package:siffersafari/core/services/audio_service.dart';
 import 'package:siffersafari/core/services/question_generator_service.dart';
@@ -8,7 +9,6 @@ import 'package:siffersafari/domain/entities/user_progress.dart';
 import 'package:siffersafari/domain/enums/age_group.dart';
 import 'package:siffersafari/domain/enums/difficulty_level.dart';
 import 'package:siffersafari/domain/enums/operation_type.dart';
-import 'package:mocktail/mocktail.dart';
 
 // ============================================================================
 // MOCK AUDIO SERVICE
@@ -190,11 +190,16 @@ Future<void> pumpFor(WidgetTester tester, Duration duration) async {
 ///
 /// Taps the "Hoppa över" button if found, then pumps for animations.
 Future<void> skipOnboardingIfPresent(WidgetTester tester) async {
+  // Avoid tapping unrelated "Hoppa över" buttons (e.g. dialogs).
+  final isOnboardingVisible = find.text('Nu kör vi!').evaluate().isNotEmpty;
+  if (!isOnboardingVisible) return;
+
   final skip = find.text('Hoppa över');
-  if (skip.evaluate().isNotEmpty) {
-    await tester.tap(skip);
-    await pumpFor(tester, const Duration(milliseconds: 400));
-  }
+  if (skip.evaluate().isEmpty) return;
+
+  await tester.ensureVisible(skip);
+  await tester.tap(skip, warnIfMissed: false);
+  await pumpFor(tester, const Duration(milliseconds: 400));
 }
 
 /// Pump until a finder locates a widget or timeout is exceeded.

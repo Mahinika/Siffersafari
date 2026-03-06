@@ -25,6 +25,47 @@
 1. Kör ny release-tag och verifiera på fysisk enhet att uppdateringskortet hittar releasen.
 2. Valfritt: lägg till debounce/cache (t.ex. 30-60s) för att undvika upprepade API-anrop.
 
+## 2026-03-06 — Automatiska release notes ("What's new")
+
+### Mål (denna del)
+✅ Automatisera "What's new" i GitHub Releases
+
+### Gjort
+- GitHub Releases genererar nu release notes automatiskt (PR/commits mellan tags).
+- Lagt till kategorisering via `.github/release.yml` (Features/Fixes/Maintenance/Docs/Other).
+
+### Nästa steg
+1. Säkerställ att PR:ar får labels (feature/bug/docs/chore/refactor/dependencies) för bättre kategorier.
+
+## 2026-03-06 — Integration test-optimering (smoke)
+
+### Mål (denna del)
+🔄 Göra integration-tester snabbare och mindre flakiga (minska långa `pumpAndSettle(seconds: ...)`)
+
+### Status
+- `flutter analyze`: ✅ grönt
+- Smoke integration-test: 🔄 under verifiering (senaste ändringar behöver en ny körning)
+
+### Gjort
+- Optimerat väntlogik i `integration_test/app_smoke_test.dart` (mer `waitFor(...)`/kort `settle(...)`, mindre “sov i sekunder”).
+- Förbättrat `integration_test/test_utils.dart`:
+   - `backOnce()` är nu defensiv (Back/Close/arrow/tooltips) och undviker `tester.pageBack()` som kan asserta.
+- Städ: `scripts/extract_sprites.dart` är markerad som dev-script (minskar lint-brus), och `path` ligger i `dev_dependencies` så `flutter analyze` inte klagar.
+
+### Nästa steg
+1. Kör snabb sanity på enskilt test: `flutter test integration_test/app_smoke_test.dart --plain-name "Smoke: öppna inställningar och gå tillbaka"`.
+2. Kör hela smoke-filen: `flutter test integration_test/app_smoke_test.dart`.
+3. Om den fortfarande time:ar ut vid start → öka initial `settle()` lite eller bredda start-villkoren ytterligare.
+
+## 2026-03-06 — Lärdomar (integration-tester)
+
+### Lärdomar
+- Efter `app.main()` behövs ofta en kort `settle()`/pump innan första `waitFor(...)` (annars kan UI vara “tomt” och ge `Visible texts: []`).
+- Anta inte att Home alltid har `Icons.settings`; använd operation cards (`operation_card_*`) och/eller tooltip `Föräldraläge` som Home-signal.
+- Byt ut långa `pumpAndSettle(Duration(seconds: ...))` mot bounded `settle()` + `waitFor(...)`/`waitForText(...)` (vänta på tillstånd, inte tid).
+- Undvik `tester.pageBack()` som fallback i integration-tester; bygg en `backOnce()` som letar `BackButton`/`CloseButton`/`Icons.arrow_back`/tooltips.
+- Flaggor: filtrera enskilt test med `flutter test ... --plain-name "..."` (inte `-p vm`/`--platform vm`, som hör till `dart test`).
+
 ## 2026-03-05 — After Test Refactoring + Standardization
 
 ### Mål (denna session)

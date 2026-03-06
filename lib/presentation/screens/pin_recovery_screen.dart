@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/constants/app_constants.dart';
+import '../../core/providers/parent_pin_service_provider.dart';
 import '../../core/utils/input_validators.dart';
 import '../../domain/services/parent_pin_service.dart';
-import '../../core/providers/parent_pin_service_provider.dart';
+import '../widgets/themed_background_scaffold.dart';
 
 enum _RecoveryStep {
   questionInput,
-  backupCodeSelection,
   newPinInput,
   success,
 }
@@ -26,14 +28,12 @@ class _PinRecoveryScreenState extends ConsumerState<PinRecoveryScreen> {
 
   String? _securityQuestion;
   final _answerController = TextEditingController();
-  String? _selectedBackupCode;
   final _newPin1Controller = TextEditingController();
   final _newPin2Controller = TextEditingController();
-  bool _showPin = false;
 
-  String? _errorMessage;
+  bool _showPin = false;
   bool _isLoading = false;
-  List<String> _remainingCodes = [];
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -42,7 +42,12 @@ class _PinRecoveryScreenState extends ConsumerState<PinRecoveryScreen> {
     _securityQuestion = _pinService.getSecurityQuestion();
 
     if (_securityQuestion == null) {
-      _showErrorDialog('Ingen PIN-recovery konfigurerad för denna profil.');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _showErrorDialog(
+          'Ingen säkerhetsfråga är konfigurerad för denna profil.',
+        );
+      });
     }
   }
 
@@ -57,67 +62,79 @@ class _PinRecoveryScreenState extends ConsumerState<PinRecoveryScreen> {
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Fel'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              if (message.contains('Ingen PIN-recovery')) {
-                Navigator.of(context).pop();
-              }
-            },
-            child: const Text('OK'),
+      builder: (ctx) {
+        final onPrimary = Theme.of(ctx).colorScheme.onPrimary;
+        return AlertDialog(
+          title: Text(
+            'Fel',
+            style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                  color: onPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
           ),
-        ],
-      ),
+          content: Text(
+            message,
+            style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                  color: onPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: onPrimary),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                if (message.contains('Ingen säkerhetsfråga')) {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 
   Future<void> _verifySecurityAnswer() async {
-    // Validate security answer
-    final answerError = InputValidators.validateSecurityAnswer(_answerController.text);
+    final answerError =
+        InputValidators.validateSecurityAnswer(_answerController.text);
     if (answerError != null) {
       setState(() => _errorMessage = answerError);
       return;
     }
 
-    final answer = InputValidators.sanitizeSecurityAnswer(_answerController.text);
+    final answer =
+        InputValidators.sanitizeSecurityAnswer(_answerController.text);
 
     setState(() => _isLoading = true);
     try {
-      final (isCorrect, codeCounts) =
-          await _pinService.verifySecurityAnswer(answer);
+      final isCorrect = await _pinService.verifySecurityAnswer(answer);
+      if (!mounted) return;
 
-      if (isCorrect) {
-        // Get the hashed codes to display (we'll show them as-is from storage for now)
-        // In a real app, you'd display the plaintext codes from setupPinRecovery
+      if (!isCorrect) {
         setState(() {
-          _currentStep = _RecoveryStep.backupCodeSelection;
-          _errorMessage = null;
+          _errorMessage = 'Felaktigt svar. Försök igen.';
+          _isLoading = false;
         });
-      } else {
-        setState(
-          () => _errorMessage = 'Felaktigt svar. Försök igen.',
-        );
+        return;
       }
+
+      setState(() {
+        _currentStep = _RecoveryStep.newPinInput;
+        _errorMessage = null;
+        _isLoading = false;
+      });
     } catch (e) {
-      setState(
-        () => _errorMessage = 'Ett fel inträffade: $e',
-      );
-    } finally {
-      setState(() => _isLoading = false);
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = 'Ett fel inträffade: $e';
+        _isLoading = false;
+      });
     }
   }
 
-  Future<void> _verifyBackupCodeAndResetPin() async {
-    if (_selectedBackupCode == null || _selectedBackupCode!.isEmpty) {
-      setState(() => _errorMessage = 'Välj en backup-kod');
-      return;
-    }
-
-    // Validate new PINs
+  Future<void> _resetPin() async {
     final pin1Error = InputValidators.validatePin(_newPin1Controller.text);
     if (pin1Error != null) {
       setState(() => _errorMessage = pin1Error);
@@ -134,101 +151,135 @@ class _PinRecoveryScreenState extends ConsumerState<PinRecoveryScreen> {
     final newPin2 = InputValidators.sanitizePin(_newPin2Controller.text.trim());
 
     if (newPin1 != newPin2) {
-      setState(() => _errorMessage = 'PIN:erna matchar inte');
+      setState(() => _errorMessage = 'PIN-koderna matchar inte');
       return;
     }
 
     setState(() => _isLoading = true);
     try {
-      final codeValid =
-          await _pinService.verifyAndUseBackupCode(_selectedBackupCode!);
-
-      if (!codeValid) {
-        setState(
-          () => _errorMessage =
-              'Backup-koden är ogiltig eller redan använd.',
-        );
-        return;
-      }
-
-      // Code is valid, now set the new PIN
       await _pinService.setPin(newPin1);
 
-      // Regenerate new backup codes for future recovery
-      final newCodes = await _pinService.regenerateBackupCodes();
-
-      // Show success with new backup codes
+      if (!mounted) return;
       setState(() {
         _currentStep = _RecoveryStep.success;
-        _remainingCodes = newCodes;
         _errorMessage = null;
+        _isLoading = false;
       });
     } catch (e) {
-      setState(
-        () => _errorMessage = 'Ett fel inträffade: $e',
-      );
-    } finally {
-      setState(() => _isLoading = false);
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = 'Ett fel inträffade: $e';
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final scheme = Theme.of(context).colorScheme;
+    final onPrimary = scheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
+
+    return ThemedBackgroundScaffold(
       appBar: AppBar(
-        title: const Text('Återställ PIN'),
+        title: Text(
+          'Återställ PIN',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: onPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        foregroundColor: onPrimary,
         elevation: 0,
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
       ),
       body: _securityQuestion == null
-          ? const Center(child: Text('Ingen recovery-konfiguration'))
+          ? Center(
+              child: Text(
+                'Ingen recovery-konfiguration',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: mutedOnPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            )
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: _buildCurrentStep(),
+              padding: const EdgeInsets.all(AppConstants.defaultPadding),
+              child: _buildCurrentStep(context),
             ),
     );
   }
 
-  Widget _buildCurrentStep() {
+  Widget _buildCurrentStep(BuildContext context) {
     return switch (_currentStep) {
-      _RecoveryStep.questionInput => _buildQuestionStep(),
-      _RecoveryStep.backupCodeSelection => _buildCodeSelectionStep(),
-      _RecoveryStep.newPinInput => _buildNewPinStep(),
-      _RecoveryStep.success => _buildSuccessStep(),
+      _RecoveryStep.questionInput => _buildQuestionStep(context),
+      _RecoveryStep.newPinInput => _buildNewPinStep(context),
+      _RecoveryStep.success => _buildSuccessStep(context),
     };
   }
 
-  Widget _buildQuestionStep() {
+  Widget _buildQuestionStep(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final onPrimary = scheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
+    final subtleOnPrimary =
+        onPrimary.withValues(alpha: AppOpacities.subtleText);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Säkerhetsfråga',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: onPrimary,
+                fontWeight: FontWeight.w700,
+              ),
         ),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.blue.shade50,
+            color: onPrimary.withValues(alpha: AppOpacities.subtleFill),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.blue.shade200),
+            border: Border.all(
+              color: onPrimary.withValues(alpha: AppOpacities.borderSubtle),
+            ),
           ),
           child: Text(
             _securityQuestion!,
-            style: const TextStyle(fontSize: 16),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: onPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
           ),
         ),
         const SizedBox(height: 24),
         TextField(
           controller: _answerController,
+          style: TextStyle(color: onPrimary),
           decoration: InputDecoration(
             labelText: 'Svar',
             hintText: 'Ange svar på säkerhetsfrågan',
+            labelStyle: TextStyle(color: mutedOnPrimary),
+            hintStyle: TextStyle(color: subtleOnPrimary),
+            filled: true,
+            fillColor: onPrimary.withValues(alpha: AppOpacities.subtleFill),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: onPrimary.withValues(alpha: AppOpacities.borderSubtle),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: onPrimary.withValues(alpha: AppOpacities.borderSubtle),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: scheme.secondary),
             ),
             errorText: _errorMessage,
           ),
@@ -242,106 +293,68 @@ class _PinRecoveryScreenState extends ConsumerState<PinRecoveryScreen> {
                 ? const SizedBox(
                     height: 20,
                     width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Verifiera svar'),
+                : Text(
+                    'Verifiera svar',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: onPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCodeSelectionStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Välj en backup-kod',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Ange en av dine tidigare sparade backup-koder.',
-          style: TextStyle(color: Colors.grey, fontSize: 14),
-        ),
-        const SizedBox(height: 24),
-        TextField(
-          controller: TextEditingController(text: _selectedBackupCode),
-          onChanged: (value) {
-            setState(() {
-              _selectedBackupCode = value.trim().toUpperCase();
-              _errorMessage = null;
-            });
-          },
-          decoration: InputDecoration(
-            labelText: 'Backup-kod',
-            hintText: 'T.ex. ABC12345',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            errorText: _errorMessage,
-          ),
-        ),
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () {
-                  setState(() {
-                    _currentStep = _RecoveryStep.questionInput;
-                    _errorMessage = null;
-                  });
-                },
-                child: const Text('Tillbaka'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _currentStep = _RecoveryStep.newPinInput;
-                    _errorMessage = null;
-                  });
-                },
-                child: const Text('Nästa'),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+  Widget _buildNewPinStep(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final onPrimary = scheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
 
-  Widget _buildNewPinStep() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Ny PIN',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+        Text(
+          'Välj ny PIN',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: onPrimary,
+                fontWeight: FontWeight.w700,
+              ),
         ),
         const SizedBox(height: 24),
         TextField(
           controller: _newPin1Controller,
           obscureText: !_showPin,
           keyboardType: TextInputType.number,
+          style: TextStyle(color: onPrimary),
           decoration: InputDecoration(
             labelText: 'Ny PIN',
+            labelStyle: TextStyle(color: mutedOnPrimary),
+            filled: true,
+            fillColor: onPrimary.withValues(alpha: AppOpacities.subtleFill),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: onPrimary.withValues(alpha: AppOpacities.borderSubtle),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: onPrimary.withValues(alpha: AppOpacities.borderSubtle),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: scheme.secondary),
             ),
             suffixIcon: IconButton(
-              icon: Icon(_showPin ? Icons.visibility_off : Icons.visibility),
+              icon: Icon(
+                _showPin ? Icons.visibility_off : Icons.visibility,
+                color: mutedOnPrimary,
+              ),
               onPressed: () {
                 setState(() => _showPin = !_showPin);
               },
@@ -353,13 +366,33 @@ class _PinRecoveryScreenState extends ConsumerState<PinRecoveryScreen> {
           controller: _newPin2Controller,
           obscureText: !_showPin,
           keyboardType: TextInputType.number,
+          style: TextStyle(color: onPrimary),
           decoration: InputDecoration(
             labelText: 'Bekräfta PIN',
+            labelStyle: TextStyle(color: mutedOnPrimary),
+            filled: true,
+            fillColor: onPrimary.withValues(alpha: AppOpacities.subtleFill),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: onPrimary.withValues(alpha: AppOpacities.borderSubtle),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: onPrimary.withValues(alpha: AppOpacities.borderSubtle),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: scheme.secondary),
             ),
             suffixIcon: IconButton(
-              icon: Icon(_showPin ? Icons.visibility_off : Icons.visibility),
+              icon: Icon(
+                _showPin ? Icons.visibility_off : Icons.visibility,
+                color: mutedOnPrimary,
+              ),
               onPressed: () {
                 setState(() => _showPin = !_showPin);
               },
@@ -371,13 +404,17 @@ class _PinRecoveryScreenState extends ConsumerState<PinRecoveryScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.red.shade50,
+              color:
+                  scheme.error.withValues(alpha: AppOpacities.highlightStrong),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.red.shade200),
+              border: Border.all(color: scheme.error),
             ),
             child: Text(
               _errorMessage!,
-              style: TextStyle(color: Colors.red.shade700),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: onPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ),
         ],
@@ -388,26 +425,37 @@ class _PinRecoveryScreenState extends ConsumerState<PinRecoveryScreen> {
               child: OutlinedButton(
                 onPressed: () {
                   setState(() {
-                    _currentStep = _RecoveryStep.backupCodeSelection;
+                    _currentStep = _RecoveryStep.questionInput;
                     _errorMessage = null;
                   });
                 },
-                child: const Text('Tillbaka'),
+                child: Text(
+                  'Tillbaka',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: onPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _verifyBackupCodeAndResetPin,
+                onPressed: _isLoading ? null : _resetPin,
                 child: _isLoading
                     ? const SizedBox(
                         height: 20,
                         width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Återställ PIN'),
+                    : Text(
+                        'Spara ny PIN',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: onPrimary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
               ),
             ),
           ],
@@ -416,7 +464,10 @@ class _PinRecoveryScreenState extends ConsumerState<PinRecoveryScreen> {
     );
   }
 
-  Widget _buildSuccessStep() {
+  Widget _buildSuccessStep(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -427,54 +478,21 @@ class _PinRecoveryScreenState extends ConsumerState<PinRecoveryScreen> {
           size: 64,
         ),
         const SizedBox(height: 24),
-        const Text(
+        Text(
           'PIN återställd!',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: onPrimary,
+                fontWeight: FontWeight.w700,
+              ),
         ),
         const SizedBox(height: 16),
-        const Text(
-          'Din PIN har återställts. Nya backup-koder har genererats.',
+        Text(
+          'Din PIN har uppdaterats. Du kan nu logga in i föräldraläget med den nya PIN-koden.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
-        ),
-        const SizedBox(height: 32),
-        const Text(
-          'Spara dina nya backup-koder på en säker plats:',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: _remainingCodes
-                .map(
-                  (code) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      children: [
-                        SelectableText(
-                          code,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontFamily: 'monospace',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: mutedOnPrimary,
+                fontWeight: FontWeight.w600,
+              ),
         ),
         const SizedBox(height: 32),
         SizedBox(
@@ -484,7 +502,13 @@ class _PinRecoveryScreenState extends ConsumerState<PinRecoveryScreen> {
               widget.onRecoveryComplete();
               Navigator.of(context).pop();
             },
-            child: const Text('Stäng'),
+            child: Text(
+              'Stäng',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: onPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
           ),
         ),
       ],

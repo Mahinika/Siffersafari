@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -216,25 +216,42 @@ class _DashboardBody extends ConsumerWidget {
     void showInfoDialog({required String title, required String message}) {
       showDialog(
         context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('OK'),
+        builder: (ctx) {
+          final onPrimary = Theme.of(ctx).colorScheme.onPrimary;
+          return AlertDialog(
+            title: Text(
+              title,
+              style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                    color: onPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
             ),
-          ],
-        ),
+            content: Text(
+              message,
+              style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                    color: onPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: onPrimary),
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
       );
     }
 
     Widget infoButton({required String title, required String message}) {
+      final onPrimary = Theme.of(context).colorScheme.onPrimary;
       return IconButton(
         tooltip: 'Förklaring',
         visualDensity: VisualDensity.compact,
         onPressed: () => showInfoDialog(title: title, message: message),
-        icon: const Icon(Icons.help_outline),
+        icon: Icon(Icons.help_outline, color: onPrimary),
       );
     }
 
@@ -712,9 +729,9 @@ class _UpdateSectionCard extends StatefulWidget {
 
 class _UpdateSectionCardState extends State<_UpdateSectionCard> {
   static const String _latestReleasePageUrl =
-    'https://github.com/Cognifox-Studio/Siffersafari/releases/latest';
+      'https://github.com/Cognifox-Studio/Siffersafari/releases/latest';
   static const String _releasesPageUrl =
-    'https://github.com/Cognifox-Studio/Siffersafari/releases';
+      'https://github.com/Cognifox-Studio/Siffersafari/releases';
 
   bool _isChecking = false;
   String? _installedVersion;
@@ -772,9 +789,6 @@ class _UpdateSectionCardState extends State<_UpdateSectionCard> {
   }
 
   String _friendlyUpdateError(Object error) {
-    if (error is SocketException) {
-      return 'Kunde inte kontrollera uppdatering: Ingen internetanslutning (DNS).';
-    }
 
     final message = error.toString();
     if (message.contains('Failed host lookup')) {
@@ -799,10 +813,13 @@ class _UpdateSectionCardState extends State<_UpdateSectionCard> {
     }
   }
 
-  Future<_AppUpdateInfo?> _fetchLatestReleaseFromRedirect(HttpClient client) async {
+  Future<_AppUpdateInfo?> _fetchLatestReleaseFromRedirect(
+    HttpClient client,
+  ) async {
     final request = await client.getUrl(Uri.parse(_latestReleasePageUrl));
     request.followRedirects = false;
-    request.headers.set(HttpHeaders.userAgentHeader, 'Siffersafari-Update-Check');
+    request.headers
+        .set(HttpHeaders.userAgentHeader, 'Siffersafari-Update-Check');
 
     final response = await request.close();
     await response.drain();
@@ -838,7 +855,8 @@ class _UpdateSectionCardState extends State<_UpdateSectionCard> {
     HttpClient client,
   ) async {
     final request = await client.getUrl(Uri.parse(_releasesPageUrl));
-    request.headers.set(HttpHeaders.userAgentHeader, 'Siffersafari-Update-Check');
+    request.headers
+        .set(HttpHeaders.userAgentHeader, 'Siffersafari-Update-Check');
 
     final response = await request.close();
     if (response.statusCode != 200) {
@@ -919,7 +937,8 @@ class _UpdateSectionCardState extends State<_UpdateSectionCard> {
   ({List<int> core, List<String> preRelease}) _parseSemver(String version) {
     final normalized = _normalizeVersion(version);
     final dashIndex = normalized.indexOf('-');
-    final coreStr = dashIndex == -1 ? normalized : normalized.substring(0, dashIndex);
+    final coreStr =
+        dashIndex == -1 ? normalized : normalized.substring(0, dashIndex);
     final preStr = dashIndex == -1 ? '' : normalized.substring(dashIndex + 1);
 
     final coreParts = coreStr.split('.');
@@ -1261,16 +1280,32 @@ class _BenchmarkSection extends ConsumerWidget {
     void showInfoDialog({required String title, required String message}) {
       showDialog(
         context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('OK'),
+        builder: (ctx) {
+          final onPrimary = Theme.of(ctx).colorScheme.onPrimary;
+          return AlertDialog(
+            title: Text(
+              title,
+              style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                    color: onPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
             ),
-          ],
-        ),
+            content: Text(
+              message,
+              style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                    color: onPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: onPrimary),
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
       );
     }
 
@@ -1325,7 +1360,7 @@ class _BenchmarkSection extends ConsumerWidget {
                 message:
                     'Detta är en enkel “Under / I linje / Över”-indikator baserad på appens nivå (steg 1–10) per räknesätt.\n\nFörslag bygger på de senaste ${DifficultyConfig.trainingRecommendationMinQuestions} frågorna (mål: 85% rätt).\n\nSteg ändras aldrig automatiskt — du väljer själv Lättare/Svårare.',
               ),
-              icon: const Icon(Icons.help_outline),
+              icon: Icon(Icons.help_outline, color: onPrimary),
             ),
           ],
         ),
@@ -1430,7 +1465,7 @@ class _BenchmarkSection extends ConsumerWidget {
                         title: '${op.displayName} – detaljer',
                         message: detailsMessage.toString().trim(),
                       ),
-                      icon: const Icon(Icons.help_outline),
+                      icon: Icon(Icons.help_outline, color: onPrimary),
                     ),
                   ],
                 ),
@@ -1492,3 +1527,6 @@ class _BenchmarkSection extends ConsumerWidget {
 }
 
 // endregion
+
+
+

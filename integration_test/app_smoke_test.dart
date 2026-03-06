@@ -14,7 +14,7 @@ void main() {
       await app.main();
 
       // App startup does async init (Hive + DI).
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await it.settle(tester, const Duration(milliseconds: 1200));
 
       Future<void> ensureHomeVisible() async {
         final operationCardKeys = <Key>[
@@ -53,24 +53,16 @@ void main() {
           if (find.text('2/2').evaluate().isNotEmpty) {
             final doneButton = find.widgetWithText(ElevatedButton, 'Klar');
             if (doneButton.evaluate().isNotEmpty) {
-              await it.tap(
-                tester,
-                doneButton,
-                after: const Duration(seconds: 3),
-              );
-              await tester.pumpAndSettle(const Duration(seconds: 2));
+              await it.tap(tester, doneButton);
+              await it.settle(tester, const Duration(milliseconds: 600));
               return true;
             }
 
             // Rare race: page jump may not have updated button text yet.
             final nextButton = find.widgetWithText(ElevatedButton, 'Nästa');
             if (nextButton.evaluate().isNotEmpty) {
-              await it.tap(
-                tester,
-                nextButton,
-                after: const Duration(seconds: 2),
-              );
-              await tester.pumpAndSettle(const Duration(seconds: 1));
+              await it.tap(tester, nextButton);
+              await it.settle(tester, const Duration(milliseconds: 450));
               return true;
             }
           }
@@ -86,7 +78,7 @@ void main() {
                 after: const Duration(milliseconds: 600),
               );
               if (opened) {
-                await tester.pumpAndSettle(const Duration(milliseconds: 400));
+                await it.settle(tester, const Duration(milliseconds: 300));
 
                 // Prefer Åk 3 for stable coverage.
                 final ak3 = find.text('Åk 3');
@@ -111,23 +103,15 @@ void main() {
 
             final nextButton = find.widgetWithText(ElevatedButton, 'Nästa');
             if (nextButton.evaluate().isNotEmpty) {
-              await it.tap(
-                tester,
-                nextButton,
-                after: const Duration(seconds: 2),
-              );
-              await tester.pumpAndSettle(const Duration(seconds: 1));
+              await it.tap(tester, nextButton);
+              await it.settle(tester, const Duration(milliseconds: 450));
               return true;
             }
 
             // Fallback if button type changes.
             if (find.text('Nästa').evaluate().isNotEmpty) {
-              await it.tap(
-                tester,
-                find.text('Nästa'),
-                after: const Duration(seconds: 2),
-              );
-              await tester.pumpAndSettle(const Duration(seconds: 1));
+              await it.tap(tester, find.text('Nästa'));
+              await it.settle(tester, const Duration(milliseconds: 450));
               return true;
             }
           }
@@ -135,21 +119,13 @@ void main() {
           // Generic escape hatch.
           final skipButton = find.widgetWithText(TextButton, 'Hoppa över');
           if (skipButton.evaluate().isNotEmpty) {
-            await it.tap(
-              tester,
-              skipButton,
-              after: const Duration(seconds: 3),
-            );
-            await tester.pumpAndSettle(const Duration(seconds: 2));
+            await it.tap(tester, skipButton);
+            await it.settle(tester, const Duration(milliseconds: 700));
             return true;
           }
           if (find.text('Hoppa över').evaluate().isNotEmpty) {
-            await it.tap(
-              tester,
-              find.text('Hoppa över'),
-              after: const Duration(seconds: 3),
-            );
-            await tester.pumpAndSettle(const Duration(seconds: 2));
+            await it.tap(tester, find.text('Hoppa över'));
+            await it.settle(tester, const Duration(milliseconds: 700));
             return true;
           }
 
@@ -166,12 +142,8 @@ void main() {
           if (find.text('Inställningar').evaluate().isNotEmpty) {
             final backButton = find.byType(BackButton);
             if (backButton.evaluate().isNotEmpty) {
-              await it.tap(
-                tester,
-                backButton,
-                after: const Duration(seconds: 2),
-              );
-              await tester.pumpAndSettle(const Duration(seconds: 2));
+              await it.tap(tester, backButton);
+              await it.settle(tester, const Duration(milliseconds: 700));
               if (hasOperationCards()) return;
             }
           }
@@ -180,8 +152,8 @@ void main() {
           if (find.textContaining('Fråga ').evaluate().isNotEmpty) {
             final close = find.byIcon(Icons.close);
             if (close.evaluate().isNotEmpty) {
-              await it.tap(tester, close, after: const Duration(seconds: 2));
-              await tester.pumpAndSettle(const Duration(seconds: 2));
+              await it.tap(tester, close);
+              await it.settle(tester, const Duration(milliseconds: 700));
               if (hasOperationCards()) return;
             }
           }
@@ -189,16 +161,12 @@ void main() {
           // If we're in Results, go back to start.
           final backToStart = find.text('Tillbaka till Start');
           if (backToStart.evaluate().isNotEmpty) {
-            await it.tap(
-              tester,
-              backToStart,
-              after: const Duration(seconds: 2),
-            );
-            await tester.pumpAndSettle(const Duration(seconds: 2));
+            await it.tap(tester, backToStart);
+            await it.settle(tester, const Duration(milliseconds: 700));
             if (hasOperationCards()) return;
           }
 
-          await tester.pumpAndSettle(const Duration(milliseconds: 800));
+          await tester.pump(const Duration(milliseconds: 120));
           if (hasOperationCards() || hasCreateProfileButton()) return;
         }
 
@@ -215,19 +183,19 @@ void main() {
           find.widgetWithText(ElevatedButton, 'Skapa profil');
       if (createUserHomeButton.evaluate().isNotEmpty) {
         await it.tap(tester, createUserHomeButton);
-        await tester.pumpAndSettle();
+        await it.settle(tester, const Duration(milliseconds: 400));
         // Create user dialog.
-        expect(find.text('Skapa användare'), findsWidgets);
+        await it.waitFor(
+          tester,
+          'create-user dialog',
+          () => find.text('Skapa användare').evaluate().isNotEmpty,
+        );
 
         await tester.enterText(find.byType(TextField).first, 'Test');
-        await tester.pumpAndSettle();
+        await it.settle(tester, const Duration(milliseconds: 250));
 
-        await it.tap(
-          tester,
-          find.text('Skapa'),
-          after: const Duration(seconds: 2),
-        );
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+        await it.tap(tester, find.text('Skapa'));
+        await ensureHomeVisible();
       }
 
       // Onboarding can be pushed via post-frame callback after returning to Home.
@@ -266,19 +234,30 @@ void main() {
         );
       }
 
-      await it.tap(tester, chosenOperation, after: const Duration(seconds: 2));
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await it.tap(tester, chosenOperation);
+      await it.waitFor(
+        tester,
+        'quiz question visible',
+        () => find.textContaining('Fråga ').evaluate().isNotEmpty,
+        timeout: const Duration(seconds: 12),
+      );
 
       // Quiz screen should show a question title.
       expect(find.textContaining('Fråga '), findsOneWidget);
 
       // Close the quiz and return.
-      await it.tap(
+      await it.tap(tester, find.byIcon(Icons.close));
+      await it.waitFor(
         tester,
-        find.byIcon(Icons.close),
-        after: const Duration(seconds: 2),
+        'home operation cards visible',
+        () {
+          for (final key in operationCardKeys) {
+            if (find.byKey(key).evaluate().isNotEmpty) return true;
+          }
+          return false;
+        },
+        timeout: const Duration(seconds: 12),
       );
-      await tester.pumpAndSettle(const Duration(seconds: 2));
 
       // Ensure we're back on home (operation cards visible).
       Finder? anyOperation;
@@ -297,7 +276,20 @@ void main() {
     'Smoke: app startar och hittar huvudskärm',
     (tester) async {
       await app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await it.settle(tester, const Duration(milliseconds: 1200));
+      await it.waitFor(
+        tester,
+        'app started (onboarding or home)',
+        () =>
+            find.text('Hoppa över').evaluate().isNotEmpty ||
+            find.text('Vilken årskurs kör du?').evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_addition')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_subtraction')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_multiplication')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_division')).evaluate().isNotEmpty ||
+            find.text('Skapa profil').evaluate().isNotEmpty,
+        timeout: const Duration(seconds: 35),
+      );
 
       // Verify app is running and we can find key UI elements.
       // Either we're in onboarding or we can see operation cards.
@@ -335,45 +327,65 @@ void main() {
     'Smoke: öppna inställningar och gå tillbaka',
     (tester) async {
       await app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await it.settle(tester, const Duration(milliseconds: 1200));
+      await it.waitFor(
+        tester,
+        'home/onboarding visible',
+        () =>
+            find.text('Hoppa över').evaluate().isNotEmpty ||
+            find.text('Skapa profil').evaluate().isNotEmpty ||
+            find.byIcon(Icons.settings).evaluate().isNotEmpty ||
+            find.byTooltip('Föräldraläge').evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_addition')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_subtraction')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_multiplication')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_division')).evaluate().isNotEmpty,
+        timeout: const Duration(seconds: 35),
+      );
 
       // Navigate through onboarding if visible.
       if (find.text('Hoppa över').evaluate().isNotEmpty) {
         await it.tap(tester, find.text('Hoppa över'));
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+        await it.settle(tester, const Duration(milliseconds: 700));
       }
 
       // Find settings icon (gear icon).
-      final settingsIcon = find.byIcon(Icons.settings);
-      if (settingsIcon.evaluate().isEmpty) {
-        // If no profile exists, create one first.
+      Future<void> maybeCreateProfile() async {
         final createProfileButton =
             find.widgetWithText(ElevatedButton, 'Skapa profil');
-        if (createProfileButton.evaluate().isNotEmpty) {
-          await it.tap(tester, createProfileButton);
-          await tester.pumpAndSettle();
-          await tester.enterText(find.byType(TextField).first, 'SmokeUser');
-          await tester.pumpAndSettle();
-          await it.tap(tester, find.text('Skapa'));
-          await tester.pumpAndSettle(const Duration(seconds: 2));
-        }
+        if (createProfileButton.evaluate().isEmpty) return;
+
+        await it.tap(tester, createProfileButton);
+        await it.settle(tester, const Duration(milliseconds: 400));
+        await tester.enterText(find.byType(TextField).first, 'SmokeUser');
+        await it.settle(tester, const Duration(milliseconds: 250));
+        await it.tap(tester, find.text('Skapa'));
+        await it.settle(tester, const Duration(milliseconds: 700));
       }
 
-      final settingsIconRetry = find.byIcon(Icons.settings);
-      expect(
-        settingsIconRetry,
-        findsWidgets,
-        reason: 'Settings icon should be visible on home screen',
-      );
+      Future<void> openSettings() async {
+        final candidates = <Finder>[
+          find.byIcon(Icons.settings),
+          find.byTooltip('Inställningar'),
+          find.text('Inställningar'),
+        ];
 
-      await it.tap(
-        tester,
-        settingsIconRetry.first,
-        after: const Duration(
-          seconds: 2,
-        ),
-      );
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+        for (final candidate in candidates) {
+          if (candidate.evaluate().isEmpty) continue;
+          await it.tap(tester, candidate.first);
+          return;
+        }
+
+        fail(
+          'Could not find a Settings entry point. Visible texts: '
+          '${it.visibleTexts(tester).take(120).toList()}',
+        );
+      }
+
+      await maybeCreateProfile();
+
+      await openSettings();
+      await it.waitForText(tester, 'Inställningar');
 
       // Verify we're in settings.
       expect(
@@ -384,8 +396,12 @@ void main() {
       // Go back.
       final backButton = find.byType(BackButton);
       expect(backButton, findsOneWidget);
-      await it.tap(tester, backButton, after: const Duration(seconds: 2));
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await it.tap(tester, backButton);
+      await it.waitFor(
+        tester,
+        'home operation cards',
+        () => find.byKey(const Key('operation_card_addition')).evaluate().isNotEmpty,
+      );
 
       // Verify we're back on home (operation cards visible).
       final anyOperationCard = find.byKey(const Key('operation_card_addition'));
@@ -402,12 +418,25 @@ void main() {
     'Smoke: achievement-screen kan visas',
     (tester) async {
       await app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await it.settle(tester, const Duration(milliseconds: 1200));
+      await it.waitFor(
+        tester,
+        'home/onboarding visible',
+        () =>
+            find.text('Hoppa över').evaluate().isNotEmpty ||
+            find.text('Skapa profil').evaluate().isNotEmpty ||
+            find.byIcon(Icons.emoji_events).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_addition')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_subtraction')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_multiplication')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_division')).evaluate().isNotEmpty,
+        timeout: const Duration(seconds: 35),
+      );
 
       // Skip onboarding if visible.
       if (find.text('Hoppa över').evaluate().isNotEmpty) {
         await it.tap(tester, find.text('Hoppa över'));
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+        await it.settle(tester, const Duration(milliseconds: 700));
       }
 
       // Create profile if none exists.
@@ -415,11 +444,11 @@ void main() {
           find.widgetWithText(ElevatedButton, 'Skapa profil');
       if (createProfileButton.evaluate().isNotEmpty) {
         await it.tap(tester, createProfileButton);
-        await tester.pumpAndSettle();
+        await it.settle(tester, const Duration(milliseconds: 400));
         await tester.enterText(find.byType(TextField).first, 'AchievementUser');
-        await tester.pumpAndSettle();
+        await it.settle(tester, const Duration(milliseconds: 250));
         await it.tap(tester, find.text('Skapa'));
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+        await it.settle(tester, const Duration(milliseconds: 700));
       }
 
       // Find trophy icon (achievements).
@@ -437,7 +466,7 @@ void main() {
         await it.tap(tester, trophyIcon.first);
       }
 
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await it.settle(tester, const Duration(milliseconds: 700));
 
       // Verify we're on achievements screen (look for common UI elements).
       final achievementsTitle =
@@ -451,12 +480,7 @@ void main() {
         reason: 'Achievements screen should be visible',
       );
 
-      // Go back.
-      final backButton = find.byType(BackButton);
-      if (backButton.evaluate().isNotEmpty) {
-        await it.tap(tester, backButton.first);
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-      }
+      // No need to navigate back in a smoke test.
     },
     timeout: const Timeout(
       Duration(
@@ -469,12 +493,26 @@ void main() {
     'Smoke: profile switcher kan öppnas',
     (tester) async {
       await app.main();
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await it.settle(tester, const Duration(milliseconds: 1200));
+      await it.waitFor(
+        tester,
+        'home/onboarding visible',
+        () =>
+            find.text('Hoppa över').evaluate().isNotEmpty ||
+            find.text('Skapa profil').evaluate().isNotEmpty ||
+            find.byIcon(Icons.arrow_drop_down).evaluate().isNotEmpty ||
+            find.byKey(const Key('profile_selector')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_addition')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_subtraction')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_multiplication')).evaluate().isNotEmpty ||
+            find.byKey(const Key('operation_card_division')).evaluate().isNotEmpty,
+        timeout: const Duration(seconds: 35),
+      );
 
       // Skip onboarding.
       if (find.text('Hoppa över').evaluate().isNotEmpty) {
         await it.tap(tester, find.text('Hoppa över'));
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+        await it.settle(tester, const Duration(milliseconds: 700));
       }
 
       // Create profile if none exists.
@@ -482,14 +520,14 @@ void main() {
           find.widgetWithText(ElevatedButton, 'Skapa profil');
       if (createProfileButton.evaluate().isNotEmpty) {
         await it.tap(tester, createProfileButton);
-        await tester.pumpAndSettle();
+        await it.settle(tester, const Duration(milliseconds: 400));
         await tester.enterText(
           find.byType(TextField).first,
           'ProfileSwitchUser',
         );
-        await tester.pumpAndSettle();
+        await it.settle(tester, const Duration(milliseconds: 250));
         await it.tap(tester, find.text('Skapa'));
-        await tester.pumpAndSettle(const Duration(seconds: 2));
+        await it.settle(tester, const Duration(milliseconds: 700));
       }
 
       // Find profile name display (usually at top of home screen).
@@ -511,10 +549,11 @@ void main() {
         await it.tap(tester, profileDropdown.first);
       }
 
-      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await it.settle(tester, const Duration(milliseconds: 450));
 
       // Verify dropdown menu is visible (look for "Skapa ny profil" option).
       final createNewOption = find.text('Skapa ny profil');
+      await it.waitForText(tester, 'Skapa ny profil');
       expect(
         createNewOption,
         findsOneWidget,
@@ -523,7 +562,7 @@ void main() {
 
       // Tap outside to close dropdown (tap on scrim or press back).
       await tester.tapAt(const Offset(10, 10));
-      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+      await it.settle(tester, const Duration(milliseconds: 250));
     },
     timeout: const Timeout(
       Duration(

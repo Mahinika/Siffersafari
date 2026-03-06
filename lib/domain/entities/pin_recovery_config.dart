@@ -1,10 +1,8 @@
-/// Configuration for PIN recovery via security question and backup codes.
+/// Configuration for PIN recovery via security question only.
 class PinRecoveryConfig {
   const PinRecoveryConfig({
     required this.securityQuestion,
     required this.securityAnswerHash,
-    required this.backupCodes,
-    required this.backupCodesUsed,
     this.createdAt,
   });
 
@@ -14,43 +12,17 @@ class PinRecoveryConfig {
   /// BCrypt hash of the answer (case-insensitive lowercase)
   final String securityAnswerHash;
 
-  /// List of backup codes (hashed, one-time use)
-  final List<String> backupCodes;
-
-  /// Track which backup codes have been used/redeemed
-  final List<bool> backupCodesUsed;
-
   /// When this recovery config was created (for potential rotation)
   final DateTime? createdAt;
-
-  /// Check if all backup codes have been used
-  bool get allCodesUsed => backupCodesUsed.every((used) => used);
-
-  /// Get count of remaining unused codes
-  int get remainingCodes =>
-      backupCodesUsed.where((used) => !used).length;
-
-  /// Get the first unused code index, or null if all used
-  int? getFirstUnusedCodeIndex() {
-    try {
-      return backupCodesUsed.indexWhere((used) => !used);
-    } catch (_) {
-      return null;
-    }
-  }
 
   PinRecoveryConfig copyWith({
     String? securityQuestion,
     String? securityAnswerHash,
-    List<String>? backupCodes,
-    List<bool>? backupCodesUsed,
     DateTime? createdAt,
   }) {
     return PinRecoveryConfig(
       securityQuestion: securityQuestion ?? this.securityQuestion,
       securityAnswerHash: securityAnswerHash ?? this.securityAnswerHash,
-      backupCodes: backupCodes ?? this.backupCodes,
-      backupCodesUsed: backupCodesUsed ?? this.backupCodesUsed,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -58,7 +30,6 @@ class PinRecoveryConfig {
   @override
   String toString() => '''PinRecoveryConfig(
     question: $securityQuestion,
-    remaining codes: $remainingCodes/${backupCodes.length},
     createdAt: $createdAt
   )''';
 }

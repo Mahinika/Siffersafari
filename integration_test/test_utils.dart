@@ -13,7 +13,17 @@ Future<void> settle(
   WidgetTester tester, [
   Duration duration = const Duration(milliseconds: 800),
 ]) async {
-  await tester.pumpAndSettle(duration);
+  // In integration tests the app can have continuous animations/tickers.
+  // Avoid pumpAndSettle() hanging forever by pumping in small steps up to a
+  // maximum total duration.
+  const step = Duration(milliseconds: 50);
+  final steps = (duration.inMilliseconds / step.inMilliseconds)
+      .ceil()
+      .clamp(1, 400);
+  for (var i = 0; i < steps; i++) {
+    await tester.pump(step);
+    if (!tester.binding.hasScheduledFrame) return;
+  }
 }
 
 List<String> visibleTexts(WidgetTester tester) {
@@ -37,10 +47,10 @@ List<String> visibleTexts(WidgetTester tester) {
 Future<bool> tryTap(
   WidgetTester tester,
   Finder finder, {
-  Duration after = const Duration(milliseconds: 900),
+  Duration after = const Duration(milliseconds: 450),
   List<String>? errors,
 }) async {
-  await tester.pumpAndSettle(const Duration(milliseconds: 200));
+  await settle(tester, const Duration(milliseconds: 200));
 
   final candidates = <Finder>[
     // If the finder targets a leaf (Text/Icon), climb to common tappables.
@@ -75,11 +85,11 @@ Future<bool> tryTap(
 
     final target = candidate.first;
     await tester.ensureVisible(target);
-    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    await settle(tester, const Duration(milliseconds: 200));
 
     try {
       await tester.tap(target);
-      await tester.pumpAndSettle(after);
+      await settle(tester, after);
       return true;
     } catch (e) {
       errors?.add('${_describe(candidate)}: $e');
@@ -92,7 +102,7 @@ Future<bool> tryTap(
 Future<void> tap(
   WidgetTester tester,
   Finder finder, {
-  Duration after = const Duration(milliseconds: 900),
+  Duration after = const Duration(milliseconds: 450),
 }) async {
   final errors = <String>[];
   final ok = await tryTap(
@@ -112,15 +122,79 @@ Future<void> tap(
 
 Future<void> backOnce(
   WidgetTester tester, {
-  Duration after = const Duration(seconds: 1),
+  Duration after = const Duration(milliseconds: 450),
 }) async {
   final backButton = find.byType(BackButton);
   if (backButton.evaluate().isNotEmpty) {
     await tester.tap(backButton.first);
-    await tester.pumpAndSettle(after);
+    await settle(tester, after);
     return;
   }
 
-  await tester.pageBack();
-  await tester.pumpAndSettle(after);
+  final closeButton = find.byType(CloseButton);
+  if (closeButton.evaluate().isNotEmpty) {
+    await tester.tap(closeButton.first);
+    await settle(tester, after);
+    return;
+  }
+
+  final arrowBack = find.widgetWithIcon(IconButton, Icons.arrow_back);
+  if (arrowBack.evaluate().isNotEmpty) {
+    await tester.tap(arrowBack.first);
+    await settle(tester, after);
+    return;
+  }
+
+  final tooltipBack = find.byTooltip('Back');
+  if (tooltipBack.evaluate().isNotEmpty) {
+    await tester.tap(tooltipBack.first);
+    await settle(tester, after);
+    return;
+  }
+
+  final tooltipTillbaka = find.byTooltip('Tillbaka');
+  if (tooltipTillbaka.evaluate().isNotEmpty) {
+    await tester.tap(tooltipTillbaka.first);
+    await settle(tester, after);
+    return;
+  }
+
+  fail(
+    'No back/close button found. Visible texts: '
+    '${visibleTexts(tester).take(80).toList()}',
+  );
+}
+
+Future<void> waitFor(
+  WidgetTester tester,
+  String label,
+  bool Function() condition, {
+  Duration timeout = const Duration(seconds: 15),
+  Duration step = const Duration(milliseconds: 120),
+}) async {
+  final deadline = DateTime.now().add(timeout);
+  while (DateTime.now().isBefore(deadline)) {
+    if (condition()) return;
+    await tester.pump(step);
+  }
+
+  fail(
+    'Timed out waiting for: $label. Visible texts: '
+    '${visibleTexts(tester).take(120).toList()}',
+  );
+}
+
+Future<void> waitForText(
+  WidgetTester tester,
+  String text, {
+  Duration timeout = const Duration(seconds: 15),
+  Duration step = const Duration(milliseconds: 120),
+}) async {
+  await waitFor(
+    tester,
+    'text="$text"',
+    () => find.text(text).evaluate().isNotEmpty,
+    timeout: timeout,
+    step: step,
+  );
 }

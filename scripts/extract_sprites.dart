@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
 import 'package:image/image.dart' as img;
@@ -43,7 +45,7 @@ void main() async {
   final spriteWidth = spriteSheet.width ~/ cols;
   final spriteHeight = spriteSheet.height ~/ rows;
 
-  print('Sprite dimensions: ${spriteWidth}x${spriteHeight}');
+  print('Sprite dimensions: ${spriteWidth}x$spriteHeight');
   print('Extracting ${cols * rows} sprites...\n');
 
   // Extract sprites

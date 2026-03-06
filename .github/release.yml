@@ -1,0 +1,35 @@
+# GitHub auto-generated release notes configuration.
+# Used by the "Generate release notes" feature (and by actions that enable it).
+# Docs: https://docs.github.com/repositories/releasing-projects-on-github/automatically-generated-release-notes
+
+changelog:
+  categories:
+    - title: "Features"
+      labels:
+        - "enhancement"
+        - "feature"
+        - "feat"
+
+    - title: "Fixes"
+      labels:
+        - "bug"
+        - "fix"
+        - "bugfix"
+
+    - title: "Maintenance"
+      labels:
+        - "chore"
+        - "refactor"
+        - "dependencies"
+        - "deps"
+        - "ci"
+        - "build"
+
+    - title: "Docs"
+      labels:
+        - "docs"
+        - "documentation"
+
+    - title: "Other"
+      labels:
+        - "*"

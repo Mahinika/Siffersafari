@@ -35,7 +35,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _pageIndex = 0;
 
   int? _gradeLevel;
-  Set<OperationType> _allowedOps = const {OperationType.multiplication};
+  Set<OperationType> _allowedOps = const {OperationType.addition};
 
   bool _needsReadingSetup = false;
 
@@ -59,10 +59,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
       ref.read(parentSettingsProvider.notifier).loadAllowedOperations(
         widget.userId,
-        defaultOperations: const {OperationType.multiplication},
+        defaultOperations: const {OperationType.addition},
       );
       final allowedOps = ref.read(parentSettingsProvider)[widget.userId] ??
-          const <OperationType>{OperationType.multiplication};
+          const <OperationType>{OperationType.addition};
 
       if (!mounted) return;
       setState(() {
