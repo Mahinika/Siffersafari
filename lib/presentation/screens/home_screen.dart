@@ -12,6 +12,7 @@ import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
+import '../../core/utils/adaptive_layout.dart';
 import '../../core/utils/page_transitions.dart';
 import '../../domain/entities/user_progress.dart';
 import '../../domain/enums/difficulty_level.dart';
@@ -271,10 +272,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final maxContentWidth =
-              constraints.maxWidth >= 900 ? 820.0 : double.infinity;
-          final isWideScreen = constraints.maxWidth > 600;
-          final gridCrossAxisCount = isWideScreen ? 4 : 2;
+          final layout = AdaptiveLayoutInfo.fromConstraints(constraints);
+          final maxContentWidth = layout.contentMaxWidth;
+          final isWideScreen = !layout.isCompactWidth;
+          final gridCrossAxisCount = layout.gridColumns(
+            compact: 2,
+            medium: 3,
+            expanded: 4,
+          );
+          final operationCardAspectRatio = layout.isShortHeight
+              ? 1.45
+              : layout.isExpandedWidth
+                  ? 1.15
+                  : layout.isMediumWidth
+                      ? 1.0
+                      : 0.95;
 
           final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
           final questHeroLogicalWidth = isWideScreen
@@ -388,8 +400,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            Wrap(
+                              alignment: WrapAlignment.spaceAround,
+                              runAlignment: WrapAlignment.center,
+                              spacing: AppConstants.defaultPadding,
+                              runSpacing: AppConstants.smallPadding,
                               children: [
                                 _buildStatItem(
                                   context,
@@ -740,6 +755,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           : const BoxConstraints(),
                       child: GridView.count(
                         crossAxisCount: gridCrossAxisCount,
+                        childAspectRatio: operationCardAspectRatio,
                         crossAxisSpacing: AppConstants.defaultPadding,
                         mainAxisSpacing: AppConstants.defaultPadding,
                         physics: const NeverScrollableScrollPhysics(),

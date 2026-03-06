@@ -14,6 +14,7 @@ import '../../core/providers/missing_number_settings_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
+import '../../core/utils/adaptive_layout.dart';
 import '../../domain/enums/operation_type.dart';
 import '../widgets/themed_background_scaffold.dart';
 import 'parent_pin_screen.dart';
@@ -66,8 +67,8 @@ class ParentDashboardScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final maxContentWidth =
-              constraints.maxWidth >= 900 ? 820.0 : double.infinity;
+          final layout = AdaptiveLayoutInfo.fromConstraints(constraints);
+          final maxContentWidth = layout.contentMaxWidth;
 
           return Center(
             child: ConstrainedBox(
@@ -283,377 +284,504 @@ class _DashboardBody extends ConsumerWidget {
     final missingNumberNotifier =
         ref.read(missingNumberEnabledProvider(userId).notifier);
 
-    return ListView(
-      children: [
-        _Card(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    final overviewCard = _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Översikt',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppConstants.defaultPadding),
-              _StatRow(
-                label: 'Totala poäng',
-                value: user.totalPoints.toString(),
-              ),
-              _StatRow(
-                label: 'Nivå',
-                value: '${user.level} (${user.levelTitle})',
-              ),
-              _StatRow(
-                label: 'Korrekt % (alla frågor)',
-                value: '${(user.successRate * 100).toStringAsFixed(0)}%',
-              ),
-              _StatRow(
-                label: 'Streak',
-                value: '${user.currentStreak} (max ${user.longestStreak})',
-              ),
-              _StatRow(
-                label: 'Antal quiz',
-                value: user.totalQuizzesTaken.toString(),
+              Expanded(
+                child: Text(
+                  'Översikt',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
               ),
             ],
           ),
-        ),
-        sectionSpacing,
-        const _UpdateSectionCard(),
-        sectionSpacing,
-        _Card(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          const SizedBox(height: AppConstants.defaultPadding),
+          _StatRow(
+            label: 'Totala poäng',
+            value: user.totalPoints.toString(),
+          ),
+          _StatRow(
+            label: 'Nivå',
+            value: '${user.level} (${user.levelTitle})',
+          ),
+          _StatRow(
+            label: 'Korrekt % (alla frågor)',
+            value: '${(user.successRate * 100).toStringAsFixed(0)}%',
+          ),
+          _StatRow(
+            label: 'Streak',
+            value: '${user.currentStreak} (max ${user.longestStreak})',
+          ),
+          _StatRow(
+            label: 'Antal quiz',
+            value: user.totalQuizzesTaken.toString(),
+          ),
+        ],
+      ),
+    );
+
+    final adaptationsCard = _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Anpassningar',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
+              Expanded(
+                child: Text(
+                  'Anpassningar',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              infoButton(
+                title: 'Anpassningar',
+                message:
+                    'Här kan du styra vad som kan dyka upp i quiz och vilken nivå som är lagom.\n\nTips: Om du är osäker, börja med att sätta Årskurs och låt resten vara på standard.',
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.smallPadding),
+          LayoutBuilder(
+            builder: (context, tileConstraints) {
+              final tileLayout =
+                  AdaptiveLayoutInfo.fromConstraints(tileConstraints);
+              final dropdown = DropdownButton<int?>(
+                value: user.gradeLevel,
+                isExpanded: tileLayout.isCompactWidth,
+                dropdownColor: Theme.of(context).scaffoldBackgroundColor,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: onPrimary),
+                underline: const SizedBox.shrink(),
+                items: [
+                  const DropdownMenuItem<int?>(
+                    value: null,
+                    child: Text('Ingen'),
                   ),
-                  infoButton(
-                    title: 'Anpassningar',
-                    message:
-                        'Här kan du styra vad som kan dyka upp i quiz och vilken nivå som är lagom.\n\nTips: Om du är osäker, börja med att sätta Årskurs och låt resten vara på standard.',
+                  ..._gradeItems.map(
+                    (g) => DropdownMenuItem<int?>(
+                      value: g,
+                      child: Text('Åk $g'),
+                    ),
                   ),
                 ],
-              ),
-              const SizedBox(height: AppConstants.smallPadding),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  'Årskurs',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: mutedOnPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    infoButton(
-                      title: 'Årskurs',
-                      message:
-                          'Årskurs används för att välja en lagom nivå och för att kunna visa en enkel Under/I linje/Över-indikator i analysen.\n\nDu kan alltid lämna den tom om du vill.',
-                    ),
-                    DropdownButton<int?>(
-                      value: user.gradeLevel,
-                      dropdownColor: Theme.of(context).scaffoldBackgroundColor,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: onPrimary),
-                      underline: const SizedBox.shrink(),
-                      items: [
-                        const DropdownMenuItem<int?>(
-                          value: null,
-                          child: Text('Ingen'),
-                        ),
-                        ..._gradeItems.map(
-                          (g) => DropdownMenuItem<int?>(
-                            value: g,
-                            child: Text('Åk $g'),
-                          ),
-                        ),
-                      ],
-                      onChanged: (value) async {
-                        await ref
-                            .read(userProvider.notifier)
-                            .saveUser(user.copyWith(gradeLevel: value));
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1),
-              SwitchListTile(
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Textuppgifter',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: mutedOnPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                    ),
-                    infoButton(
-                      title: 'Textuppgifter',
-                      message:
-                          'När detta är på kan vissa frågor visas som en kort text (inte bara siffror).\n\nDet används främst för Åk 1–3 och för Plus/Minus.',
-                    ),
-                  ],
-                ),
-                value: wordProblemsEnabled,
-                activeThumbColor: accentColor,
-                activeTrackColor:
-                    accentColor.withValues(alpha: AppOpacities.highlightStrong),
-                onChanged: (value) {
-                  wordProblemsNotifier.setEnabled(value);
+                onChanged: (value) async {
+                  await ref
+                      .read(userProvider.notifier)
+                      .saveUser(user.copyWith(gradeLevel: value));
                 },
-              ),
-              const Divider(height: 1),
-              SwitchListTile(
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Saknat tal',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: mutedOnPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                    ),
-                    infoButton(
-                      title: 'Saknat tal',
-                      message:
-                          'När detta är på kan vissa frågor vara av typen: 7 + ? = 10.\n\nDet används främst för Åk 2–3 och för Plus/Minus.',
-                    ),
-                  ],
-                ),
-                value: missingNumberEnabled,
-                activeThumbColor: accentColor,
-                activeTrackColor:
-                    accentColor.withValues(alpha: AppOpacities.highlightStrong),
-                onChanged: (value) {
-                  missingNumberNotifier.setEnabled(value);
-                },
-              ),
-              const Divider(height: 1),
-              Padding(
-                padding: const EdgeInsets.only(top: AppConstants.smallPadding),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Räknesätt',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: mutedOnPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                    ),
-                    infoButton(
-                      title: 'Räknesätt',
-                      message:
-                          'Välj vilka räknesätt som får användas i quiz.\n\nMinst ett räknesätt måste vara på.',
-                    ),
-                  ],
-                ),
-              ),
-              ..._baseOps().map((op) {
-                final isOn = allowedOps.contains(op);
-                final canTurnOff = allowedOps.length > 1;
-                return SwitchListTile(
+              );
+
+              if (!tileLayout.isCompactWidth) {
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
                   title: Text(
-                    op.displayName,
+                    'Årskurs',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           color: mutedOnPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                   ),
-                  value: isOn,
-                  activeThumbColor: accentColor,
-                  activeTrackColor: accentColor.withValues(
-                    alpha: AppOpacities.highlightStrong,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      infoButton(
+                        title: 'Årskurs',
+                        message:
+                            'Årskurs används för att välja en lagom nivå och för att kunna visa en enkel Under/I linje/Över-indikator i analysen.\n\nDu kan alltid lämna den tom om du vill.',
+                      ),
+                      dropdown,
+                    ],
                   ),
-                  onChanged: (!isOn || canTurnOff)
-                      ? (value) {
-                          settingsNotifier.setOperationAllowed(
-                            userId,
-                            op,
-                            value,
-                          );
-                        }
-                      : null,
                 );
-              }),
-            ],
-          ),
-        ),
-        sectionSpacing,
-        _Card(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Analys',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ),
-                  infoButton(
-                    title: 'Hur räknas statistiken?',
-                    message:
-                        'Korrekt % (alla frågor) = alla svar sedan start.\n\nFörslag (steg) räknas per räknesätt på de senaste ${DifficultyConfig.trainingRecommendationMinQuestions} frågorna (mål: 85% rätt).\n\nRekommenderad övning visar snitt per kategori (t.ex. Plus • Lätt) från quiz-resultat. Det ändrar inte steg automatiskt.',
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppConstants.smallPadding),
-              Text(
-                'Tryck på ? för förklaringar.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: subtleOnPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              const SizedBox(height: AppConstants.defaultPadding),
-              if (user.gradeLevel == null)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: AppConstants.defaultPadding,
-                  ),
-                  child: Text(
-                    'Sätt Årskurs (Åk) för att få Under/I linje/Över-indikator.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: mutedOnPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: AppConstants.defaultPadding,
-                  ),
-                  child: _BenchmarkSection(
-                    userId: user.userId,
-                    gradeLevel: user.gradeLevel!,
-                    allowedOperations: allowedOps,
-                    storedSteps: user.operationDifficultySteps,
-                    quizHistory: recentHistory,
-                  ),
+              }
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppConstants.smallPadding,
                 ),
-              if (weakestAreas.isEmpty)
-                Text(
-                  'Spela några quiz till för att få rekommendationer.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: mutedOnPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                )
-              else ...[
-                Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: Text(
-                        'Rekommenderad övning',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: mutedOnPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                    ),
-                    infoButton(
-                      title: 'Rekommenderad övning',
-                      message:
-                          'Här visas de 3 områden där barnet just nu har lägst träffsäkerhet (t.ex. Plus • Lätt).\n\nDet är en enkel “börja här”-lista: spela gärna några quiz i de områdena och se om procenten förbättras över tid.',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppConstants.smallPadding),
-                ...weakestAreas.map(
-                  (a) => Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppConstants.microSpacing6,
-                    ),
-                    child: Row(
+                    Row(
                       children: [
                         Expanded(
                           child: Text(
-                            a.label,
+                            'Årskurs',
                             style: Theme.of(context)
                                 .textTheme
-                                .bodyMedium
+                                .titleSmall
                                 ?.copyWith(
                                   color: mutedOnPrimary,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
                         ),
-                        Text(
-                          '${(a.rate * 100).toStringAsFixed(0)}%',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        infoButton(
+                          title: 'Årskurs',
+                          message:
+                              'Årskurs används för att välja en lagom nivå och för att kunna visa en enkel Under/I linje/Över-indikator i analysen.\n\nDu kan alltid lämna den tom om du vill.',
                         ),
                       ],
                     ),
+                    const SizedBox(height: AppConstants.smallPadding),
+                    DropdownButtonHideUnderline(child: dropdown),
+                  ],
+                ),
+              );
+            },
+          ),
+          const Divider(height: 1),
+          SwitchListTile(
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Textuppgifter',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: mutedOnPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
+                infoButton(
+                  title: 'Textuppgifter',
+                  message:
+                      'När detta är på kan vissa frågor visas som en kort text (inte bara siffror).\n\nDet används främst för Åk 1–3 och för Plus/Minus.',
+                ),
               ],
-            ],
+            ),
+            value: wordProblemsEnabled,
+            activeThumbColor: accentColor,
+            activeTrackColor:
+                accentColor.withValues(alpha: AppOpacities.highlightStrong),
+            onChanged: (value) {
+              wordProblemsNotifier.setEnabled(value);
+            },
           ),
-        ),
-        sectionSpacing,
-        _Card(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Senaste quiz',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: onPrimary,
-                      fontWeight: FontWeight.bold,
+          const Divider(height: 1),
+          SwitchListTile(
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Saknat tal',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: mutedOnPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ),
+                infoButton(
+                  title: 'Saknat tal',
+                  message:
+                      'När detta är på kan vissa frågor vara av typen: 7 + ? = 10.\n\nDet används främst för Åk 2–3 och för Plus/Minus.',
+                ),
+              ],
+            ),
+            value: missingNumberEnabled,
+            activeThumbColor: accentColor,
+            activeTrackColor:
+                accentColor.withValues(alpha: AppOpacities.highlightStrong),
+            onChanged: (value) {
+              missingNumberNotifier.setEnabled(value);
+            },
+          ),
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.only(top: AppConstants.smallPadding),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Räknesätt',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: mutedOnPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ),
+                infoButton(
+                  title: 'Räknesätt',
+                  message:
+                      'Välj vilka räknesätt som får användas i quiz.\n\nMinst ett räknesätt måste vara på.',
+                ),
+              ],
+            ),
+          ),
+          ..._baseOps().map((op) {
+            final isOn = allowedOps.contains(op);
+            final canTurnOff = allowedOps.length > 1;
+            return SwitchListTile(
+              title: Text(
+                op.displayName,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: mutedOnPrimary,
+                      fontWeight: FontWeight.w600,
                     ),
               ),
+              value: isOn,
+              activeThumbColor: accentColor,
+              activeTrackColor: accentColor.withValues(
+                alpha: AppOpacities.highlightStrong,
+              ),
+              onChanged: (!isOn || canTurnOff)
+                  ? (value) {
+                      settingsNotifier.setOperationAllowed(
+                        userId,
+                        op,
+                        value,
+                      );
+                    }
+                  : null,
+            );
+          }),
+        ],
+      ),
+    );
+
+    final benchmarkSectionContent = user.gradeLevel == null
+        ? Text(
+            'Sätt Årskurs (Åk) för att få Under/I linje/Över-indikator.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: mutedOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          )
+        : _BenchmarkSection(
+            userId: user.userId,
+            gradeLevel: user.gradeLevel!,
+            allowedOperations: allowedOps,
+            storedSteps: user.operationDifficultySteps,
+            quizHistory: recentHistory,
+          );
+
+    final recommendationSectionContent = weakestAreas.isEmpty
+        ? Text(
+            'Spela några quiz till för att få rekommendationer.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: mutedOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Rekommenderad övning',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: mutedOnPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                  infoButton(
+                    title: 'Rekommenderad övning',
+                    message:
+                        'Här visas de 3 områden där barnet just nu har lägst träffsäkerhet (t.ex. Plus • Lätt).\n\nDet är en enkel “börja här”-lista: spela gärna några quiz i de områdena och se om procenten förbättras över tid.',
+                  ),
+                ],
+              ),
               const SizedBox(height: AppConstants.smallPadding),
-              if (history.isEmpty)
-                Text(
-                  'Ingen historik än',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: mutedOnPrimary,
-                        fontWeight: FontWeight.w600,
+              ...weakestAreas.map(
+                (a) => Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppConstants.microSpacing6,
+                  ),
+                  child: _RecommendationRow(area: a),
+                ),
+              ),
+            ],
+          );
+
+    final analysisCard = _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Analys',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: onPrimary,
+                        fontWeight: FontWeight.bold,
                       ),
-                )
-              else
-                ...history.map((h) => _HistoryRow(history: h)),
+                ),
+              ),
+              infoButton(
+                title: 'Hur räknas statistiken?',
+                message:
+                    'Korrekt % (alla frågor) = alla svar sedan start.\n\nFörslag (steg) räknas per räknesätt på de senaste ${DifficultyConfig.trainingRecommendationMinQuestions} frågorna (mål: 85% rätt).\n\nRekommenderad övning visar snitt per kategori (t.ex. Plus • Lätt) från quiz-resultat. Det ändrar inte steg automatiskt.',
+              ),
             ],
           ),
-        ),
-      ],
+          const SizedBox(height: AppConstants.smallPadding),
+          Text(
+            'Tryck på ? för förklaringar.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: subtleOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: AppConstants.defaultPadding),
+          LayoutBuilder(
+            builder: (context, analysisConstraints) {
+              final useSplitAnalysis = analysisConstraints.maxWidth >= 520;
+
+              if (!useSplitAnalysis) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    benchmarkSectionContent,
+                    const SizedBox(height: AppConstants.defaultPadding),
+                    recommendationSectionContent,
+                  ],
+                );
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _InsetPanel(
+                      child: benchmarkSectionContent,
+                    ),
+                  ),
+                  const SizedBox(width: AppConstants.defaultPadding),
+                  Expanded(
+                    child: _InsetPanel(
+                      child: recommendationSectionContent,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    final historyCard = _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Senaste quiz',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: AppConstants.smallPadding),
+          if (history.isEmpty)
+            Text(
+              'Ingen historik än',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: mutedOnPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+            )
+          else
+            LayoutBuilder(
+              builder: (context, historyConstraints) {
+                final useHistoryGrid =
+                    historyConstraints.maxWidth >= 520 && history.length > 1;
+
+                if (!useHistoryGrid) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: history
+                        .map((h) => _HistoryRow(history: h))
+                        .toList(growable: false),
+                  );
+                }
+
+                final itemWidth =
+                    (historyConstraints.maxWidth - AppConstants.defaultPadding) /
+                        2;
+
+                return Wrap(
+                  spacing: AppConstants.defaultPadding,
+                  runSpacing: AppConstants.defaultPadding,
+                  children: history
+                      .map(
+                        (h) => SizedBox(
+                          width: itemWidth,
+                          child: _HistoryTile(history: h),
+                        ),
+                      )
+                      .toList(growable: false),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final layout = AdaptiveLayoutInfo.fromConstraints(constraints);
+
+        if (!layout.isExpandedWidth) {
+          return ListView(
+            children: [
+              overviewCard,
+              sectionSpacing,
+              const _UpdateSectionCard(),
+              sectionSpacing,
+              adaptationsCard,
+              sectionSpacing,
+              analysisCard,
+              sectionSpacing,
+              historyCard,
+            ],
+          );
+        }
+
+        return SingleChildScrollView(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    overviewCard,
+                    sectionSpacing,
+                    const _UpdateSectionCard(),
+                    sectionSpacing,
+                    historyCard,
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppConstants.defaultPadding),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    adaptationsCard,
+                    sectionSpacing,
+                    analysisCard,
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -789,7 +917,6 @@ class _UpdateSectionCardState extends State<_UpdateSectionCard> {
   }
 
   String _friendlyUpdateError(Object error) {
-
     final message = error.toString();
     if (message.contains('Failed host lookup')) {
       return 'Kunde inte kontrollera uppdatering: Ingen internetanslutning (DNS).';
@@ -1217,6 +1344,180 @@ class _HistoryRow extends StatelessWidget {
   }
 }
 
+class _HistoryTile extends StatelessWidget {
+  const _HistoryTile({required this.history});
+
+  final Map<String, dynamic> history;
+
+  @override
+  Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
+    final subtleOnPrimary =
+        onPrimary.withValues(alpha: AppOpacities.subtleText);
+    final operation = (history['operationType'] as String?) ?? '-';
+    final difficulty = (history['difficulty'] as String?) ?? '-';
+    final correct = (history['correctAnswers'] as int?) ?? 0;
+    final total = (history['totalQuestions'] as int?) ?? 0;
+    final pointsWithBonus = (history['pointsWithBonus'] as int?) ??
+        ((history['points'] as int?) ?? 0);
+
+    return _InsetPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            '${_HistoryRow(history: history)._pretty(operation)} • ${_HistoryRow(history: history)._pretty(difficulty)}',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: onPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: AppConstants.microSpacing6),
+          Text(
+            _formatHistoryTime(history),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: subtleOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: AppConstants.smallPadding),
+          Row(
+            children: [
+              Expanded(
+                child: _HistoryMetric(
+                  label: 'Resultat',
+                  value: '$correct/$total',
+                ),
+              ),
+              const SizedBox(width: AppConstants.smallPadding),
+              Expanded(
+                child: _HistoryMetric(
+                  label: 'Poäng',
+                  value: '$pointsWithBonus p',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.smallPadding),
+          Text(
+            total <= 0
+                ? 'Ingen underlag än'
+                : 'Träffsäkerhet: ${((correct / total) * 100).toStringAsFixed(0)}%',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: mutedOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatHistoryTime(Map<String, dynamic> history) {
+    final raw = history['endTime'] ?? history['startTime'];
+    if (raw is! String || raw.isEmpty) return 'Tid okänd';
+
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) return 'Tid okänd';
+
+    final local = parsed.toLocal();
+    final day = local.day.toString().padLeft(2, '0');
+    final month = local.month.toString().padLeft(2, '0');
+    final hour = local.hour.toString().padLeft(2, '0');
+    final minute = local.minute.toString().padLeft(2, '0');
+    return '$day/$month kl $hour:$minute';
+  }
+}
+
+class _HistoryMetric extends StatelessWidget {
+  const _HistoryMetric({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final subtleOnPrimary =
+        onPrimary.withValues(alpha: AppOpacities.subtleText);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: subtleOnPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const SizedBox(height: AppConstants.microSpacing4),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: onPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RecommendationRow extends StatelessWidget {
+  const _RecommendationRow({required this.area});
+
+  final _WeakArea area;
+
+  @override
+  Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            area.label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: mutedOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ),
+        Text(
+          '${(area.rate * 100).toStringAsFixed(0)}%',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: onPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InsetPanel extends StatelessWidget {
+  const _InsetPanel({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      decoration: BoxDecoration(
+        color: onPrimary.withValues(alpha: AppOpacities.panelFill),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        border: Border.all(
+          color: onPrimary.withValues(alpha: AppOpacities.borderSubtle),
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
 // endregion
 
 // region _BenchmarkSection Widget
@@ -1338,6 +1639,82 @@ class _BenchmarkSection extends ConsumerWidget {
           );
     }
 
+    final cards = ops.map((op) {
+      final stored = storedSteps[op.name];
+      final currentStep = DifficultyConfig.clampDifficultyStep(
+        stored ?? DifficultyConfig.minDifficultyStep,
+      );
+      final stats = _successRateFromLatestQuestions(op);
+      final hasEnough =
+          stats.answered >= DifficultyConfig.trainingRecommendationMinQuestions;
+
+      final recommendedStep = !hasEnough
+          ? null
+          : DifficultyConfig.recommendedDifficultyStepForTraining(
+              currentStep: currentStep,
+              averageSuccessRate: stats.rate,
+            );
+
+      final indicatorStep = recommendedStep ?? currentStep;
+
+      final benchmark = DifficultyConfig.compareDifficultyStepToGrade(
+        gradeLevel: gradeLevel,
+        operation: op,
+        difficultyStep: indicatorStep,
+      );
+
+      final valueText = DifficultyConfig.benchmarkLevelLabel(benchmark.level);
+      final recommendationText = DifficultyConfig.benchmarkRecommendationText(
+        level: benchmark.level,
+        operation: op,
+      );
+
+      final underlagText = stats.rate == null
+          ? 'Underlag: 0/${DifficultyConfig.trainingRecommendationMinQuestions} frågor'
+          : hasEnough
+              ? 'Senaste ${DifficultyConfig.trainingRecommendationMinQuestions}: ${_percentLabel(stats.rate!)} rätt'
+              : 'Underlag: ${stats.answered}/${DifficultyConfig.trainingRecommendationMinQuestions} (just nu: ${_percentLabel(stats.rate!)} rätt)';
+
+      final stepText = recommendedStep == null
+          ? 'Steg $currentStep'
+          : 'Steg $currentStep → Förslag $recommendedStep';
+
+      final detailsMessage = StringBuffer()
+        ..writeln('Indikator: $valueText')
+        ..writeln(underlagText)
+        ..writeln(stepText)
+        ..writeln()
+        ..writeln(
+          'Obs: Steg ändras aldrig automatiskt — du väljer själv Lättare/Svårare.',
+        );
+
+      if (recommendationText.isNotEmpty) {
+        detailsMessage
+          ..writeln()
+          ..writeln(recommendationText);
+      }
+
+      return _BenchmarkOperationCard(
+        operation: op,
+        valueText: valueText,
+        underlagText: underlagText,
+        stepText: stepText,
+        onPrimary: onPrimary,
+        mutedOnPrimary: mutedOnPrimary,
+        subtleOnPrimary: subtleOnPrimary,
+        onShowDetails: () => showInfoDialog(
+          title: '${op.displayName} – detaljer',
+          message: detailsMessage.toString().trim(),
+        ),
+        onDecrease: (currentStep <= DifficultyConfig.minDifficultyStep)
+            ? null
+            : () => updateStep(op, -1),
+        onIncrease: (currentStep >= DifficultyConfig.maxDifficultyStep)
+            ? null
+            : () => updateStep(op, 1),
+      );
+    }).toList(growable: false);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1373,160 +1750,132 @@ class _BenchmarkSection extends ConsumerWidget {
               ),
         ),
         const SizedBox(height: AppConstants.smallPadding),
-        ...ops.map((op) {
-          final stored = storedSteps[op.name];
-          final currentStep = DifficultyConfig.clampDifficultyStep(
-            stored ?? DifficultyConfig.minDifficultyStep,
-          );
-          final stats = _successRateFromLatestQuestions(op);
-          final hasEnough = stats.answered >=
-              DifficultyConfig.trainingRecommendationMinQuestions;
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final useGrid = constraints.maxWidth >= 520 && cards.length > 1;
 
-          final recommendedStep = !hasEnough
-              ? null
-              : DifficultyConfig.recommendedDifficultyStepForTraining(
-                  currentStep: currentStep,
-                  averageSuccessRate: stats.rate,
-                );
+            if (!useGrid) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: cards,
+              );
+            }
 
-          // Make the Under/I linje/Över indicator reflect the child's answers
-          // when we have enough underlag, without auto-changing the stored step.
-          final indicatorStep = recommendedStep ?? currentStep;
-
-          final benchmark = DifficultyConfig.compareDifficultyStepToGrade(
-            gradeLevel: gradeLevel,
-            operation: op,
-            difficultyStep: indicatorStep,
-          );
-
-          final valueText =
-              DifficultyConfig.benchmarkLevelLabel(benchmark.level);
-          final recommendationText =
-              DifficultyConfig.benchmarkRecommendationText(
-            level: benchmark.level,
-            operation: op,
-          );
-
-          final underlagText = stats.rate == null
-              ? 'Underlag: 0/${DifficultyConfig.trainingRecommendationMinQuestions} frågor'
-              : hasEnough
-                  ? 'Senaste ${DifficultyConfig.trainingRecommendationMinQuestions}: ${_percentLabel(stats.rate!)} rätt'
-                  : 'Underlag: ${stats.answered}/${DifficultyConfig.trainingRecommendationMinQuestions} (just nu: ${_percentLabel(stats.rate!)} rätt)';
-
-          final stepText = recommendedStep == null
-              ? 'Steg $currentStep'
-              : 'Steg $currentStep → Förslag $recommendedStep';
-
-          final detailsMessage = StringBuffer()
-            ..writeln('Indikator: $valueText')
-            ..writeln(underlagText)
-            ..writeln(stepText)
-            ..writeln()
-            ..writeln(
-              'Obs: Steg ändras aldrig automatiskt — du väljer själv Lättare/Svårare.',
+            final itemWidth = (constraints.maxWidth - AppConstants.smallPadding) / 2;
+            return Wrap(
+              spacing: AppConstants.smallPadding,
+              runSpacing: AppConstants.smallPadding,
+              children: cards
+                  .map(
+                    (card) => SizedBox(
+                      width: itemWidth,
+                      child: card,
+                    ),
+                  )
+                  .toList(growable: false),
             );
-
-          if (recommendationText.isNotEmpty) {
-            detailsMessage
-              ..writeln()
-              ..writeln(recommendationText);
-          }
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppConstants.microSpacing6,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        op.displayName,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: mutedOnPrimary,
-                            ),
-                      ),
-                    ),
-                    const SizedBox(width: AppConstants.smallPadding),
-                    Text(
-                      valueText,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    IconButton(
-                      tooltip: 'Förklaring',
-                      visualDensity: VisualDensity.compact,
-                      onPressed: () => showInfoDialog(
-                        title: '${op.displayName} – detaljer',
-                        message: detailsMessage.toString().trim(),
-                      ),
-                      icon: Icon(Icons.help_outline, color: onPrimary),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(top: AppConstants.microSpacing4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        underlagText,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: subtleOnPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      const SizedBox(height: AppConstants.microSpacing2),
-                      Text(
-                        stepText,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: subtleOnPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      const SizedBox(height: AppConstants.microSpacing6),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: (currentStep <=
-                                      DifficultyConfig.minDifficultyStep)
-                                  ? null
-                                  : () => updateStep(op, -1),
-                              child: const Text('Lättare'),
-                            ),
-                          ),
-                          const SizedBox(width: AppConstants.smallPadding),
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: (currentStep >=
-                                      DifficultyConfig.maxDifficultyStep)
-                                  ? null
-                                  : () => updateStep(op, 1),
-                              child: const Text('Svårare'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
+          },
+        ),
       ],
     );
   }
 }
 
+class _BenchmarkOperationCard extends StatelessWidget {
+  const _BenchmarkOperationCard({
+    required this.operation,
+    required this.valueText,
+    required this.underlagText,
+    required this.stepText,
+    required this.onPrimary,
+    required this.mutedOnPrimary,
+    required this.subtleOnPrimary,
+    required this.onShowDetails,
+    required this.onDecrease,
+    required this.onIncrease,
+  });
+
+  final OperationType operation;
+  final String valueText;
+  final String underlagText;
+  final String stepText;
+  final Color onPrimary;
+  final Color mutedOnPrimary;
+  final Color subtleOnPrimary;
+  final VoidCallback onShowDetails;
+  final VoidCallback? onDecrease;
+  final VoidCallback? onIncrease;
+
+  @override
+  Widget build(BuildContext context) {
+    return _InsetPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  operation.displayName,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: mutedOnPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+              const SizedBox(width: AppConstants.smallPadding),
+              Text(
+                valueText,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              IconButton(
+                tooltip: 'Förklaring',
+                visualDensity: VisualDensity.compact,
+                onPressed: onShowDetails,
+                icon: Icon(Icons.help_outline, color: onPrimary),
+              ),
+            ],
+          ),
+          Text(
+            underlagText,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: subtleOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: AppConstants.microSpacing2),
+          Text(
+            stepText,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: subtleOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: AppConstants.smallPadding),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onDecrease,
+                  child: const Text('Lättare'),
+                ),
+              ),
+              const SizedBox(width: AppConstants.smallPadding),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onIncrease,
+                  child: const Text('Svårare'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // endregion
-
-
-

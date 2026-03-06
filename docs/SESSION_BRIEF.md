@@ -4,6 +4,29 @@
 > 
 > Uppdateras efter större milestones/förluster av kontext.
 
+## 2026-03-06 — Responsiv UI-kalibrering
+
+### Mål (denna del)
+✅ Göra huvud-UI mer robust för portrait, landscape och större skärmytor
+
+### Gjort
+- Infört gemensamma width breakpoints via `AdaptiveLayoutInfo` (`compact < 600`, `medium >= 600`, `expanded >= 840`).
+- Home använder nu samma breakpoints för maxbredd, grid-kolumner och card-aspect ratio.
+- Inställningar använder adaptiva dropdown-rader så kontroller inte ligger i `trailing` på smala skärmar.
+- Föräldraläge använder samma pattern för Årskurs-raden.
+- Resultat och onboarding använder nu samma centrala maxbreddslogik som övriga huvudskärmar.
+- Föräldraläge använder nu riktig tvåkolumnslayout på breda skärmar.
+- Resultat använder nu riktig tvåkolumnslayout på breda skärmar (sammanfattning vänster, statistik/belöning/knappar höger).
+- Föräldralägets analys och historik använder nu även interna tablet-layouter: benchmark som kort/grid och senaste quiz som kortgaller på bredare paneler.
+
+### Verifiering
+- `flutter analyze`: ✅ grönt
+- full testsvit: ✅ 96/96 gröna
+
+### Nästa steg
+1. Valfritt: kör manuell enhetskontroll på liten telefon i landscape samt en större surfplatta.
+2. Valfritt: kör ytterligare fintrimning av enskilda tablet-paneler om ni vill utnyttja ännu större skärmar bättre.
+
 ## 2026-03-06 — Svårighetskalibrering per årskurs
 
 ### Mål (denna del)

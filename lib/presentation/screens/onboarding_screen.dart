@@ -6,6 +6,7 @@ import '../../core/providers/local_storage_repository_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
+import '../../core/utils/adaptive_layout.dart';
 import '../../domain/enums/operation_type.dart';
 import '../widgets/themed_background_scaffold.dart';
 
@@ -150,9 +151,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         body: LayoutBuilder(
           builder: (context, constraints) {
+            final layout = AdaptiveLayoutInfo.fromConstraints(constraints);
             final compactLayout = constraints.maxHeight < 620;
-            final maxContentWidth =
-                constraints.maxWidth >= 900 ? 860.0 : double.infinity;
+            final maxContentWidth = layout.contentMaxWidth;
 
             return Center(
               child: ConstrainedBox(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/user_provider.dart';
+import '../../core/utils/adaptive_layout.dart';
 import '../../domain/enums/app_theme.dart';
 import '../dialogs/create_user_dialog.dart';
 import '../widgets/themed_background_scaffold.dart';
@@ -32,8 +33,8 @@ class SettingsScreen extends ConsumerWidget {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final maxContentWidth =
-              constraints.maxWidth >= 900 ? 820.0 : double.infinity;
+          final layout = AdaptiveLayoutInfo.fromConstraints(constraints);
+          final maxContentWidth = layout.contentMaxWidth;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -53,53 +54,30 @@ class SettingsScreen extends ConsumerWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          ListTile(
-                            title: Text(
-                              'Användare',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    color: mutedOnPrimary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            subtitle: Text(
-                              'Välj eller skapa en profil',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: subtleOnPrimary,
-                                  ),
-                            ),
-                            trailing: allUsers.isEmpty
+                          _AdaptiveDropdownTile<String>(
+                            title: 'Användare',
+                            subtitle: 'Välj eller skapa en profil',
+                            value: user?.userId,
+                            isCompact: layout.isCompactWidth,
+                            textColor: onPrimary,
+                            subtitleColor: subtleOnPrimary,
+                            dropdownColor: themeCfg.baseBackgroundColor,
+                            items: [
+                              ...allUsers.map(
+                                (u) => DropdownMenuItem<String>(
+                                  value: u.userId,
+                                  child: Text(u.name),
+                                ),
+                              ),
+                            ],
+                            onChanged: allUsers.isEmpty
                                 ? null
-                                : DropdownButton<String>(
-                                    value: user?.userId,
-                                    dropdownColor: themeCfg.baseBackgroundColor,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(color: onPrimary),
-                                    underline: const SizedBox.shrink(),
-                                    items: [
-                                      ...allUsers.map(
-                                        (u) => DropdownMenuItem<String>(
-                                          value: u.userId,
-                                          child: Text(u.name),
-                                        ),
-                                      ),
-                                    ],
-                                    onChanged: (value) async {
-                                      if (value == null) return;
-                                      await ref
-                                          .read(userProvider.notifier)
-                                          .selectUser(
-                                            value,
-                                          );
-                                    },
-                                  ),
+                                : (value) async {
+                                    if (value == null) return;
+                                    await ref
+                                        .read(userProvider.notifier)
+                                        .selectUser(value);
+                                  },
                           ),
                           const Divider(height: 1),
                           ListTile(
@@ -160,102 +138,55 @@ class SettingsScreen extends ConsumerWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            ListTile(
-                              title: Text(
-                                'Årskurs',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.copyWith(
-                                      color: mutedOnPrimary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                              subtitle: Text(
-                                'Styr svårighetsnivå (Åk 1–9).',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: subtleOnPrimary,
-                                    ),
-                              ),
-                              trailing: DropdownButton<int?>(
-                                value: user.gradeLevel,
-                                dropdownColor: themeCfg.baseBackgroundColor,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(color: onPrimary),
-                                underline: const SizedBox.shrink(),
-                                items: [
-                                  const DropdownMenuItem<int?>(
-                                    value: null,
-                                    child: Text('Ingen'),
+                            _AdaptiveDropdownTile<int?>(
+                              title: 'Årskurs',
+                              subtitle: 'Styr svårighetsnivå (Åk 1–9).',
+                              value: user.gradeLevel,
+                              isCompact: layout.isCompactWidth,
+                              textColor: onPrimary,
+                              subtitleColor: subtleOnPrimary,
+                              dropdownColor: themeCfg.baseBackgroundColor,
+                              items: [
+                                const DropdownMenuItem<int?>(
+                                  value: null,
+                                  child: Text('Ingen'),
+                                ),
+                                ..._gradeItems.map(
+                                  (g) => DropdownMenuItem<int?>(
+                                    value: g,
+                                    child: Text('Åk $g'),
                                   ),
-                                  ..._gradeItems.map(
-                                    (g) => DropdownMenuItem<int?>(
-                                      value: g,
-                                      child: Text('Åk $g'),
-                                    ),
-                                  ),
-                                ],
-                                onChanged: (value) async {
-                                  await ref
-                                      .read(userProvider.notifier)
-                                      .saveUser(
-                                        user.copyWith(gradeLevel: value),
-                                      );
-                                },
-                              ),
+                                ),
+                              ],
+                              onChanged: (value) async {
+                                await ref.read(userProvider.notifier).saveUser(
+                                      user.copyWith(gradeLevel: value),
+                                    );
+                              },
                             ),
                             const Divider(height: 1),
-                            ListTile(
-                              title: Text(
-                                'Tema',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.copyWith(
-                                      color: mutedOnPrimary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                              subtitle: Text(
-                                'Byt bakgrund och stil.',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: subtleOnPrimary,
-                                    ),
-                              ),
-                              trailing: DropdownButton<AppTheme>(
-                                value: user.selectedTheme,
-                                dropdownColor: themeCfg.baseBackgroundColor,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(color: onPrimary),
-                                underline: const SizedBox.shrink(),
-                                items: [
-                                  ...AppTheme.values.map(
-                                    (t) => DropdownMenuItem<AppTheme>(
-                                      value: t,
-                                      child:
-                                          Text('${t.emoji} ${t.displayName}'),
-                                    ),
+                            _AdaptiveDropdownTile<AppTheme>(
+                              title: 'Tema',
+                              subtitle: 'Byt bakgrund och stil.',
+                              value: user.selectedTheme,
+                              isCompact: layout.isCompactWidth,
+                              textColor: onPrimary,
+                              subtitleColor: subtleOnPrimary,
+                              dropdownColor: themeCfg.baseBackgroundColor,
+                              items: [
+                                ...AppTheme.values.map(
+                                  (t) => DropdownMenuItem<AppTheme>(
+                                    value: t,
+                                    child: Text('${t.emoji} ${t.displayName}'),
                                   ),
-                                ],
-                                onChanged: (value) async {
-                                  if (value == null) return;
-                                  await ref
-                                      .read(userProvider.notifier)
-                                      .saveUser(
-                                        user.copyWith(selectedTheme: value),
-                                      );
-                                },
-                              ),
+                                ),
+                              ],
+                              onChanged: (value) async {
+                                if (value == null) return;
+                                await ref.read(userProvider.notifier).saveUser(
+                                      user.copyWith(selectedTheme: value),
+                                    );
+                              },
                             ),
                             const Divider(height: 1),
                             SwitchListTile(
@@ -452,6 +383,79 @@ class SettingsScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _AdaptiveDropdownTile<T> extends StatelessWidget {
+  const _AdaptiveDropdownTile({
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    required this.isCompact,
+    required this.textColor,
+    required this.subtitleColor,
+    required this.dropdownColor,
+  });
+
+  final String title;
+  final String subtitle;
+  final T? value;
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?>? onChanged;
+  final bool isCompact;
+  final Color textColor;
+  final Color subtitleColor;
+  final Color dropdownColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final titleStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+        );
+    final subtitleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: subtitleColor,
+        );
+    final dropdown = DropdownButton<T>(
+      value: value,
+      isExpanded: isCompact,
+      dropdownColor: dropdownColor,
+      style: Theme.of(context)
+          .textTheme
+          .bodyMedium
+          ?.copyWith(color: textColor),
+      underline: const SizedBox.shrink(),
+      items: items,
+      onChanged: onChanged,
+    );
+
+    if (!isCompact) {
+      return ListTile(
+        title: Text(title, style: titleStyle),
+        subtitle: Text(subtitle, style: subtitleStyle),
+        trailing: onChanged == null ? null : dropdown,
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(title, style: titleStyle),
+          const SizedBox(height: AppConstants.microSpacing6),
+          Text(subtitle, style: subtitleStyle),
+          if (onChanged != null) ...[
+            const SizedBox(height: AppConstants.smallPadding),
+            DropdownButtonHideUnderline(
+              child: dropdown,
+            ),
+          ],
+        ],
       ),
     );
   }

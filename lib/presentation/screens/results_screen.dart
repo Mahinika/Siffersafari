@@ -12,6 +12,7 @@ import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
+import '../../core/utils/adaptive_layout.dart';
 import '../../domain/entities/question.dart';
 import '../../domain/entities/quiz_session.dart';
 import '../../domain/enums/operation_type.dart';
@@ -209,12 +210,323 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
       didUnlockSomething: didUnlockSomething,
     );
 
+    final summaryHero = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          _getTitle(stars),
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                color: onPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppConstants.largePadding),
+        if (shouldCelebrate) ...[
+          TweenAnimationBuilder<double>(
+            duration: AppConstants.celebrationPopDuration,
+            tween: Tween(begin: 0.0, end: 1.0),
+            curve: Curves.easeOutBack,
+            builder: (context, t, child) {
+              final scale = 0.85 + (0.15 * t);
+              return Opacity(
+                opacity: t.clamp(0.0, 1.0),
+                child: Transform.scale(
+                  scale: scale,
+                  child: child,
+                ),
+              );
+            },
+            child: SizedBox(
+              height: 150.h,
+              child: Lottie.asset(
+                'assets/animations/celebration.json',
+                fit: BoxFit.contain,
+                repeat: false,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppConstants.largePadding),
+        ],
+        StarRating(stars: stars),
+      ],
+    );
+
+    final statsCard = Container(
+      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        border: Border.all(
+          color: onPrimary.withValues(
+            alpha: AppOpacities.borderSubtle,
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          _buildStatRow(
+            context,
+            'Rätt!',
+            '${session.correctAnswers} / ${session.totalQuestions}',
+          ),
+          SizedBox(height: AppConstants.defaultPadding.h),
+          _buildStatRow(
+            context,
+            'Din tid',
+            timeText,
+          ),
+          SizedBox(height: AppConstants.defaultPadding.h),
+          _buildStatRow(
+            context,
+            'Dina poäng',
+            totalPoints.toString(),
+          ),
+          if (bonusPoints > 0) ...[
+            SizedBox(height: AppConstants.smallPadding.h),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                'Bonus +$bonusPoints!',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: scheme.secondary,
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    final actionColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        statsCard,
+        const SizedBox(height: AppConstants.largePadding),
+        _buildBadgePanel(
+          context,
+          panelColor: panelColor,
+          onPrimary: onPrimary,
+          mutedOnPrimary: mutedOnPrimary,
+          badgeTeaser: badgeTeaser,
+        ),
+        const SizedBox(height: AppConstants.largePadding),
+        ElevatedButton(
+          onPressed: () {
+            final user = ref.read(userProvider).activeUser;
+            if (user == null) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => const HomeScreen(),
+                ),
+                (route) => false,
+              );
+              return;
+            }
+
+            final allowedOps = ref.read(parentSettingsProvider)[user.userId] ??
+                {
+                  OperationType.addition,
+                  OperationType.subtraction,
+                  OperationType.multiplication,
+                  OperationType.division,
+                };
+
+            if (!allowedOps.contains(session.operationType)) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => const HomeScreen(),
+                ),
+                (route) => false,
+              );
+              return;
+            }
+
+            final effectiveAgeGroup = DifficultyConfig.effectiveAgeGroup(
+              fallback: user.ageGroup,
+              gradeLevel: user.gradeLevel,
+            );
+
+            final effectiveDifficulty = DifficultyConfig.effectiveDifficulty(
+              fallback: session.difficulty,
+              gradeLevel: user.gradeLevel,
+            );
+
+            final steps = DifficultyConfig.buildDifficultySteps(
+              storedSteps: user.operationDifficultySteps,
+              defaultDifficulty: effectiveDifficulty,
+              gradeLevel: user.gradeLevel,
+            );
+
+            final wordProblemsEnabled = ref.read(
+              wordProblemsEnabledProvider(user.userId),
+            );
+
+            final missingNumberEnabled = ref.read(
+              missingNumberEnabledProvider(user.userId),
+            );
+
+            ref.read(quizProvider.notifier).startSession(
+                  userId: user.userId,
+                  ageGroup: effectiveAgeGroup,
+                  gradeLevel: user.gradeLevel,
+                  operationType: session.operationType,
+                  difficulty: effectiveDifficulty,
+                  initialDifficultyStepsByOperation: steps,
+                  wordProblemsEnabled: wordProblemsEnabled,
+                  missingNumberEnabled: missingNumberEnabled,
+                );
+
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => const QuizScreen(),
+              ),
+              (route) => false,
+            );
+          },
+          child: Text(
+            'Spela igen!',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ),
+        SizedBox(height: AppConstants.defaultPadding.h),
+        OutlinedButton(
+          onPressed: () {
+            final user = ref.read(userProvider).activeUser;
+            if (user == null) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => const HomeScreen(),
+                ),
+                (route) => false,
+              );
+              return;
+            }
+
+            final allowedOps = ref.read(parentSettingsProvider)[user.userId] ??
+                {
+                  OperationType.addition,
+                  OperationType.subtraction,
+                  OperationType.multiplication,
+                  OperationType.division,
+                };
+
+            if (!allowedOps.contains(session.operationType)) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => const HomeScreen(),
+                ),
+                (route) => false,
+              );
+              return;
+            }
+
+            final effectiveAgeGroup = DifficultyConfig.effectiveAgeGroup(
+              fallback: user.ageGroup,
+              gradeLevel: user.gradeLevel,
+            );
+
+            final effectiveDifficulty = DifficultyConfig.effectiveDifficulty(
+              fallback: session.difficulty,
+              gradeLevel: user.gradeLevel,
+            );
+
+            final steps = DifficultyConfig.buildDifficultySteps(
+              storedSteps: user.operationDifficultySteps,
+              defaultDifficulty: effectiveDifficulty,
+              gradeLevel: user.gradeLevel,
+            );
+
+            final wordProblemsEnabled = ref.read(
+              wordProblemsEnabledProvider(user.userId),
+            );
+
+            final missingNumberEnabled = ref.read(
+              missingNumberEnabledProvider(user.userId),
+            );
+
+            final count = DifficultyConfig.getQuestionsPerSession(
+              effectiveAgeGroup,
+            );
+
+            final miniQuestions = _buildFocusedMiniPassQuestions(
+              session,
+              hardest,
+              count,
+            );
+
+            if (miniQuestions.isEmpty) {
+              ref.read(quizProvider.notifier).startSession(
+                    userId: user.userId,
+                    ageGroup: effectiveAgeGroup,
+                    gradeLevel: user.gradeLevel,
+                    operationType: session.operationType,
+                    difficulty: effectiveDifficulty,
+                    initialDifficultyStepsByOperation: steps,
+                    wordProblemsEnabled: wordProblemsEnabled,
+                    missingNumberEnabled: missingNumberEnabled,
+                  );
+            } else {
+              ref.read(quizProvider.notifier).startCustomSession(
+                    userId: user.userId,
+                    operationType: session.operationType,
+                    difficulty: effectiveDifficulty,
+                    questions: miniQuestions,
+                    ageGroup: effectiveAgeGroup,
+                    gradeLevel: user.gradeLevel,
+                    initialDifficultyStepsByOperation: steps,
+                    wordProblemsEnabled: wordProblemsEnabled,
+                    missingNumberEnabled: missingNumberEnabled,
+                  );
+            }
+
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => const QuizScreen(),
+              ),
+              (route) => false,
+            );
+          },
+          child: Text(
+            'Snabbträna (2 min)',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ),
+        SizedBox(height: AppConstants.smallPadding.h),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => const HomeScreen(),
+              ),
+              (route) => false,
+            );
+          },
+          child: Text(
+            'Hem',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: mutedOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ),
+      ],
+    );
+
     return ThemedBackgroundScaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final maxContentWidth =
-              constraints.maxWidth >= 900 ? 820.0 : double.infinity;
-          final isWideScreen = constraints.maxWidth > 600;
+          final layout = AdaptiveLayoutInfo.fromConstraints(constraints);
+          final maxContentWidth = layout.contentMaxWidth;
+          final isWideScreen = !layout.isCompactWidth;
+          final useTwoColumnResults = layout.isExpandedWidth;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -225,342 +537,31 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                   constraints: isWideScreen
                       ? BoxConstraints(maxWidth: maxContentWidth)
                       : const BoxConstraints(),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Title
-                      Text(
-                        _getTitle(stars),
-                        style:
-                            Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                  color: onPrimary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                        textAlign: TextAlign.center,
-                      ),
-
-                      const SizedBox(height: AppConstants.largePadding),
-
-                      if (shouldCelebrate) ...[
-                        TweenAnimationBuilder<double>(
-                          duration: AppConstants.celebrationPopDuration,
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          curve: Curves.easeOutBack,
-                          builder: (context, t, child) {
-                            final scale = 0.85 + (0.15 * t);
-                            return Opacity(
-                              opacity: t.clamp(0.0, 1.0),
-                              child: Transform.scale(
-                                scale: scale,
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: SizedBox(
-                            height: 150.h,
-                            child: Lottie.asset(
-                              'assets/animations/celebration.json',
-                              fit: BoxFit.contain,
-                              repeat: false,
-                            ),
-                          ),
-                        ),
-                      ],
-                      // Star rating
-                      StarRating(stars: stars),
-
-                      const SizedBox(height: AppConstants.largePadding),
-
-                      // Stats card
-                      Container(
-                        padding:
-                            const EdgeInsets.all(AppConstants.defaultPadding),
-                        decoration: BoxDecoration(
-                          color: panelColor,
-                          borderRadius:
-                              BorderRadius.circular(AppConstants.borderRadius),
-                          border: Border.all(
-                            color: onPrimary.withValues(
-                              alpha: AppOpacities.borderSubtle,
-                            ),
-                          ),
-                        ),
-                        child: Column(
+                  child: useTwoColumnResults
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildStatRow(
-                              context,
-                              'Rätt!',
-                              '${session.correctAnswers} / ${session.totalQuestions}',
-                            ),
-                            SizedBox(height: AppConstants.defaultPadding.h),
-                            _buildStatRow(
-                              context,
-                              'Din tid',
-                              timeText,
-                            ),
-                            SizedBox(height: AppConstants.defaultPadding.h),
-                            _buildStatRow(
-                              context,
-                              'Dina poäng',
-                              totalPoints.toString(),
-                            ),
-                            if (bonusPoints > 0) ...[
-                              SizedBox(height: AppConstants.smallPadding.h),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  'Bonus +$bonusPoints!',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(
-                                        color: scheme.secondary,
-                                        fontWeight: FontWeight.w800,
-                                      ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  right: AppConstants.defaultPadding,
                                 ),
+                                child: summaryHero,
                               ),
-                            ],
+                            ),
+                            Expanded(
+                              child: actionColumn,
+                            ),
+                          ],
+                        )
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            summaryHero,
+                            const SizedBox(height: AppConstants.largePadding),
+                            actionColumn,
                           ],
                         ),
-                      ),
-
-                      const SizedBox(height: AppConstants.largePadding),
-
-                      _buildBadgePanel(
-                        context,
-                        panelColor: panelColor,
-                        onPrimary: onPrimary,
-                        mutedOnPrimary: mutedOnPrimary,
-                        badgeTeaser: badgeTeaser,
-                      ),
-
-                      const SizedBox(height: AppConstants.largePadding),
-
-                      // Buttons
-                      ElevatedButton(
-                        onPressed: () {
-                          final user = ref.read(userProvider).activeUser;
-                          if (user == null) {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (_) => const HomeScreen(),
-                              ),
-                              (route) => false,
-                            );
-                            return;
-                          }
-
-                          // Respect parent settings (if present). If the operation is
-                          // disabled, return to Home.
-                          final allowedOps =
-                              ref.read(parentSettingsProvider)[user.userId] ??
-                                  {
-                                    OperationType.addition,
-                                    OperationType.subtraction,
-                                    OperationType.multiplication,
-                                    OperationType.division,
-                                  };
-
-                          if (!allowedOps.contains(session.operationType)) {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (_) => const HomeScreen(),
-                              ),
-                              (route) => false,
-                            );
-                            return;
-                          }
-
-                          final effectiveAgeGroup =
-                              DifficultyConfig.effectiveAgeGroup(
-                            fallback: user.ageGroup,
-                            gradeLevel: user.gradeLevel,
-                          );
-
-                          final effectiveDifficulty =
-                              DifficultyConfig.effectiveDifficulty(
-                            fallback: session.difficulty,
-                            gradeLevel: user.gradeLevel,
-                          );
-
-                          final steps = DifficultyConfig.buildDifficultySteps(
-                            storedSteps: user.operationDifficultySteps,
-                            defaultDifficulty: effectiveDifficulty,
-                            gradeLevel: user.gradeLevel,
-                          );
-
-                          final wordProblemsEnabled = ref.read(
-                            wordProblemsEnabledProvider(user.userId),
-                          );
-
-                          final missingNumberEnabled = ref.read(
-                            missingNumberEnabledProvider(user.userId),
-                          );
-
-                          ref.read(quizProvider.notifier).startSession(
-                                userId: user.userId,
-                                ageGroup: effectiveAgeGroup,
-                                gradeLevel: user.gradeLevel,
-                                operationType: session.operationType,
-                                difficulty: effectiveDifficulty,
-                                initialDifficultyStepsByOperation: steps,
-                                wordProblemsEnabled: wordProblemsEnabled,
-                                missingNumberEnabled: missingNumberEnabled,
-                              );
-
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (_) => const QuizScreen(),
-                            ),
-                            (route) => false,
-                          );
-                        },
-                        child: Text(
-                          'Spela igen!',
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                        ),
-                      ),
-
-                      SizedBox(height: AppConstants.defaultPadding.h),
-
-                      OutlinedButton(
-                        onPressed: () {
-                          final user = ref.read(userProvider).activeUser;
-                          if (user == null) {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (_) => const HomeScreen(),
-                              ),
-                              (route) => false,
-                            );
-                            return;
-                          }
-
-                          // Respect parent settings (if present). If the operation is
-                          // disabled, return to Home.
-                          final allowedOps =
-                              ref.read(parentSettingsProvider)[user.userId] ??
-                                  {
-                                    OperationType.addition,
-                                    OperationType.subtraction,
-                                    OperationType.multiplication,
-                                    OperationType.division,
-                                  };
-
-                          if (!allowedOps.contains(session.operationType)) {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (_) => const HomeScreen(),
-                              ),
-                              (route) => false,
-                            );
-                            return;
-                          }
-
-                          final effectiveAgeGroup =
-                              DifficultyConfig.effectiveAgeGroup(
-                            fallback: user.ageGroup,
-                            gradeLevel: user.gradeLevel,
-                          );
-
-                          final effectiveDifficulty =
-                              DifficultyConfig.effectiveDifficulty(
-                            fallback: session.difficulty,
-                            gradeLevel: user.gradeLevel,
-                          );
-
-                          final steps = DifficultyConfig.buildDifficultySteps(
-                            storedSteps: user.operationDifficultySteps,
-                            defaultDifficulty: effectiveDifficulty,
-                            gradeLevel: user.gradeLevel,
-                          );
-
-                          final wordProblemsEnabled = ref.read(
-                            wordProblemsEnabledProvider(user.userId),
-                          );
-
-                          final missingNumberEnabled = ref.read(
-                            missingNumberEnabledProvider(user.userId),
-                          );
-
-                          final count = DifficultyConfig.getQuestionsPerSession(
-                            effectiveAgeGroup,
-                          );
-
-                          final miniQuestions = _buildFocusedMiniPassQuestions(
-                            session,
-                            hardest,
-                            count,
-                          );
-
-                          if (miniQuestions.isEmpty) {
-                            ref.read(quizProvider.notifier).startSession(
-                                  userId: user.userId,
-                                  ageGroup: effectiveAgeGroup,
-                                  gradeLevel: user.gradeLevel,
-                                  operationType: session.operationType,
-                                  difficulty: effectiveDifficulty,
-                                  initialDifficultyStepsByOperation: steps,
-                                  wordProblemsEnabled: wordProblemsEnabled,
-                                  missingNumberEnabled: missingNumberEnabled,
-                                );
-                          } else {
-                            ref.read(quizProvider.notifier).startCustomSession(
-                                  userId: user.userId,
-                                  operationType: session.operationType,
-                                  difficulty: effectiveDifficulty,
-                                  questions: miniQuestions,
-                                  ageGroup: effectiveAgeGroup,
-                                  gradeLevel: user.gradeLevel,
-                                  initialDifficultyStepsByOperation: steps,
-                                  wordProblemsEnabled: wordProblemsEnabled,
-                                  missingNumberEnabled: missingNumberEnabled,
-                                );
-                          }
-
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (_) => const QuizScreen(),
-                            ),
-                            (route) => false,
-                          );
-                        },
-                        child: Text(
-                          'Snabbträna (2 min)',
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                        ),
-                      ),
-
-                      SizedBox(height: AppConstants.smallPadding.h),
-
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (_) => const HomeScreen(),
-                            ),
-                            (route) => false,
-                          );
-                        },
-                        child: Text(
-                          'Hem',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: mutedOnPrimary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ),

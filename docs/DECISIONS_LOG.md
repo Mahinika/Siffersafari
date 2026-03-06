@@ -24,3 +24,6 @@
 - Uppdateringsflöde i Föräldraläge: appen kontrollerar senaste GitHub Release (`/releases/latest`) och öppnar extern APK/release-länk; ingen in-app installer för att minimera risk/komplexitet.
 - Svårighetsprogression: benchmark-steg ska vara mjukare år-för-år, inte samma block för Åk 4–6 och 7–9.
 - Högstadiet (Åk 7–9): signed +/− och M5a-specialer ska introduceras gradvis via step-gates; step 1 i Mix ska fortfarande kännas som lugn aritmetik.
+- Responsiv layout ska styras av tillgänglig fönsterbredd, inte enhetstyp: `compact < 600`, `medium >= 600`, `expanded >= 840`.
+- På smala skärmar ska dropdown-/inställningskontroller ligga under texten i stället för i `ListTile.trailing` för att undvika overflow i portrait/landscape och vid större textskalning.
+- På `expanded`-bredd ska informationsrika skärmar föredra riktiga tvåkolumnslayouter framför en ensam centrerad telefonkolumn.
