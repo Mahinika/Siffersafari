@@ -99,4 +99,48 @@ void main() {
       expect(find.text('Sam'), findsOneWidget);
     },
   );
+
+  testWidgets(
+    '[Widget] App home – can open story map',
+    (WidgetTester tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(375, 812);
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await repository.clearAllData();
+
+      const userId = 'story-user';
+      const user = UserProgress(
+        userId: userId,
+        name: 'Saga',
+        ageGroup: AgeGroup.middle,
+      );
+      await repository.saveUserProgress(user);
+      await repository.saveSetting('onboarding_done_$userId', true);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
+        ),
+      );
+
+      await pumpUntilFound(tester, find.text('Öppna kartan'));
+
+      expect(find.text('Öppna kartan'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Öppna kartan'));
+      await tester.tap(find.text('Öppna kartan'));
+      await tester.pump();
+      await pumpFor(
+        tester,
+        AppConstants.pageTransitionSlow + const Duration(milliseconds: 150),
+      );
+
+      expect(find.text('Djungelkartan'), findsOneWidget);
+      expect(find.text('Hela expeditionen'), findsOneWidget);
+    },
+  );
 }

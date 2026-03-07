@@ -1,4 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
+enum MascotMotionPreset {
+  none,
+  float,
+  bounce,
+}
 
 class MascotView extends StatefulWidget {
   const MascotView({
@@ -10,6 +18,7 @@ class MascotView extends StatefulWidget {
     this.fit = BoxFit.contain,
     this.cacheHeight,
     this.excludeFromSemantics = true,
+    this.motion = MascotMotionPreset.none,
   }) : assert(fps > 0, 'fps must be > 0');
 
   /// Fallback/static asset (used when [frames] is null/empty).
@@ -31,13 +40,15 @@ class MascotView extends StatefulWidget {
 
   final bool excludeFromSemantics;
 
+  final MascotMotionPreset motion;
+
   @override
   State<MascotView> createState() => _MascotViewState();
 }
 
-class _MascotViewState extends State<MascotView>
-    with SingleTickerProviderStateMixin {
+class _MascotViewState extends State<MascotView> with TickerProviderStateMixin {
   AnimationController? _controller;
+  AnimationController? _motionController;
 
   List<String> get _frames {
     final frames = widget.frames;
@@ -49,6 +60,7 @@ class _MascotViewState extends State<MascotView>
   void initState() {
     super.initState();
     _syncController();
+    _syncMotionController();
   }
 
   @override
@@ -56,6 +68,9 @@ class _MascotViewState extends State<MascotView>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.fps != widget.fps || oldWidget.frames != widget.frames) {
       _syncController();
+    }
+    if (oldWidget.motion != widget.motion) {
+      _syncMotionController();
     }
   }
 
@@ -68,7 +83,8 @@ class _MascotViewState extends State<MascotView>
       return;
     }
 
-    final totalMs = ((frames.length * 1000) / widget.fps).round().clamp(1, 60000);
+    final totalMs =
+        ((frames.length * 1000) / widget.fps).round().clamp(1, 60000);
     final controller = _controller;
     if (controller == null) {
       _controller = AnimationController(
@@ -83,10 +99,78 @@ class _MascotViewState extends State<MascotView>
     }
   }
 
+  void _syncMotionController() {
+    if (widget.motion == MascotMotionPreset.none) {
+      _motionController?.dispose();
+      _motionController = null;
+      return;
+    }
+
+    final duration = switch (widget.motion) {
+      MascotMotionPreset.none => const Duration(milliseconds: 1600),
+      MascotMotionPreset.float => const Duration(milliseconds: 2200),
+      MascotMotionPreset.bounce => const Duration(milliseconds: 1200),
+    };
+
+    final controller = _motionController;
+    if (controller == null) {
+      _motionController = AnimationController(vsync: this, duration: duration)
+        ..repeat();
+    } else {
+      controller.duration = duration;
+      if (!controller.isAnimating) {
+        controller.repeat();
+      }
+    }
+  }
+
   @override
   void dispose() {
     _controller?.dispose();
+    _motionController?.dispose();
     super.dispose();
+  }
+
+  Widget _applyMotion(Widget child) {
+    final motionController = _motionController;
+    if (motionController == null || widget.motion == MascotMotionPreset.none) {
+      return child;
+    }
+
+    final mascotHeight = widget.height ?? 160;
+    final verticalAmplitude = (mascotHeight * 0.035).clamp(2.0, 8.0);
+
+    return AnimatedBuilder(
+      animation: motionController,
+      child: child,
+      builder: (context, child) {
+        final t = motionController.value;
+        final wave =
+            Curves.easeInOut.transform((1 - (2 * t - 1).abs()).clamp(0.0, 1.0));
+
+        return switch (widget.motion) {
+          MascotMotionPreset.none => child!,
+          MascotMotionPreset.float => Transform.translate(
+              offset: Offset(
+                0,
+                -verticalAmplitude * (0.5 + 0.5 * math.sin(t * math.pi * 2)),
+              ),
+              child: Transform.rotate(
+                angle: math.sin(t * math.pi * 2) * 0.03,
+                child: child,
+              ),
+            ),
+          MascotMotionPreset.bounce => Transform.translate(
+              offset: Offset(0, -verticalAmplitude * 1.4 * wave),
+              child: Transform.scale(
+                scaleX: 1 + 0.02 * wave,
+                scaleY: 1 - 0.035 * wave,
+                child: child,
+              ),
+            ),
+        };
+      },
+    );
   }
 
   @override
@@ -94,7 +178,8 @@ class _MascotViewState extends State<MascotView>
     final cacheHeight = widget.cacheHeight ??
         (widget.height == null
             ? null
-            : (widget.height! * MediaQuery.devicePixelRatioOf(context)).round());
+            : (widget.height! * MediaQuery.devicePixelRatioOf(context))
+                .round());
 
     Widget buildImage(String assetPath, {required bool isFrame}) {
       return Image.asset(
@@ -114,10 +199,10 @@ class _MascotViewState extends State<MascotView>
     final controller = _controller;
 
     if (frames.length < 2 || controller == null) {
-      return buildImage(widget.asset, isFrame: false);
+      return _applyMotion(buildImage(widget.asset, isFrame: false));
     }
 
-    return AnimatedBuilder(
+    final animatedImage = AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
         final frameIndex = (controller.value * frames.length).floor();
@@ -125,5 +210,7 @@ class _MascotViewState extends State<MascotView>
         return buildImage(frames[safeIndex], isFrame: true);
       },
     );
+
+    return _applyMotion(animatedImage);
   }
 }

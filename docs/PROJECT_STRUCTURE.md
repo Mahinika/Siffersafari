@@ -166,20 +166,6 @@ assets/
 
 ```
 artifacts/
-├─ comfyui/                         ├─ ComfyUI-genererade bilder
-│  ├─ txt2img_<date>/               │
-│  │  ├─ mascot_0.png               │
-│  │  ├─ mascot_1.png               │
-│  │  └─ ...                        │
-│  │
-│  ├─ img2img_<date>/               │
-│  │  └─ mascot_jumping_0.png       │
-│  │
-│  └─ animations/
-│     ├─ idle_000.png
-│     ├─ idle_001.png
-│     └─ ...
-│
 ├─ screenshots/                     ├─ Integration test screenshots
 │  ├─ home_screen_1.png             │
 │  ├─ quiz_screen_2.png             │
@@ -201,22 +187,7 @@ scripts/
 ├─ convert_wav_to_mp3.ps1           ├─ Audio format conversion
 ├─ extract_integration_screenshots.ps1 ├─ Export screenshots
 ├─ generate_android_launcher_icons.dart ├─ Icon generation
-├─ generate_character_v2_animation_frames.ps1 ├─ Character sprites
-├─ generate_character_v2_pose_pack.ps1 ├─ Pose variations
-├─ generate_images_comfyui.dart     ├─ ComfyUI API client
 ├─ generate_sfx_wav.dart            ├─ Sound effect generation
-│
-└─ comfyui/
-   ├─ start_comfyui.ps1             ├─ Start server
-   ├─ bench_comfyui.ps1             ├─ Performance benchmark
-   ├─ README.md                     ├─ Documentation
-   ├─ prompt_packs/                 │
-   │  ├─ badges/                    │
-   │  ├─ jungle_backgrounds/        │
-   │  └─ space_backgrounds/         │
-   └─ workflows/
-      ├─ txt2img_api.json           ├─ Text-to-image
-      └─ img2img_color_api.json     └─ Image-to-image
 ```
 
 ---
@@ -278,7 +249,6 @@ docs/
 ├─ DECISIONS_LOG.md                 ├─ EXPLANATION: Design choices
 ├─ KUNSKAPSNIVA_PER_AK.md           ├─ EXPLANATION: Pedagogisk mapping
 ├─ CHARACTER_ANIMATIONS.md          ├─ EXPLANATION: Animation pipeline
-├─ COMFYUI_STRATEGI.md              ├─ EXPLANATION: Image AI strategy
 │
 └─ PARENTS_TEACHERS_GUIDE.md        ├─ (separate audience: föräldrar/lärare)
 ```
@@ -340,7 +310,7 @@ assets/sounds/correct.wav
 
 # Scripts
 scripts/flutter_pixel6.ps1
-scripts/generate_images_comfyui.dart
+scripts/generate_sfx_wav.dart
 
 # Konfigurering
 pubspec.yaml

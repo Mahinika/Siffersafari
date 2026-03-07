@@ -63,7 +63,7 @@ class _InteractiveMascotState extends ConsumerState<InteractiveMascot>
     if (_isCelebrating) return;
 
     widget.onTap?.call();
-    
+
     setState(() => _isCelebrating = true);
 
     // Play celebration sound
@@ -84,18 +84,37 @@ class _InteractiveMascotState extends ConsumerState<InteractiveMascot>
         alignment: Alignment.center,
         children: [
           // Main mascot
-          MascotView(
-            asset: widget.asset,
-            frames: widget.idleFrames,
-            height: widget.height,
-            fit: BoxFit.contain,
+          AnimatedBuilder(
+            animation: _celebrationController,
+            builder: (context, child) {
+              final celebrationAmount = Curves.easeOutBack.transform(
+                _celebrationController.value,
+              );
+              final bounce = _isCelebrating ? celebrationAmount : 0.0;
+
+              return Transform.translate(
+                offset: Offset(0, -widget.height * 0.08 * bounce),
+                child: Transform.rotate(
+                  angle: bounce * 0.08,
+                  child: child,
+                ),
+              );
+            },
+            child: MascotView(
+              asset: widget.asset,
+              frames: widget.idleFrames,
+              height: widget.height,
+              fit: BoxFit.contain,
+              motion: MascotMotionPreset.float,
+            ),
           ),
           // Celebration emoji (animates on tap)
           if (_isCelebrating)
             AnimatedBuilder(
               animation: _celebrationController,
               builder: (context, child) {
-                final index = DateTime.now().microsecond % _celebrationEmojis.length;
+                final index =
+                    DateTime.now().microsecond % _celebrationEmojis.length;
                 return Transform.translate(
                   offset: Offset(
                     0,

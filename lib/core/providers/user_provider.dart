@@ -26,6 +26,7 @@ class UserState {
     this.isLoading = false,
     this.errorMessage,
     this.lastReward,
+    this.lastQuestCompletion,
     this.questStatus,
     this.questNotice,
   });
@@ -35,6 +36,7 @@ class UserState {
   final bool isLoading;
   final String? errorMessage;
   final AchievementReward? lastReward;
+  final QuestCompletionEvent? lastQuestCompletion;
   final QuestStatus? questStatus;
   final String? questNotice;
 
@@ -46,6 +48,7 @@ class UserState {
     bool? isLoading,
     String? errorMessage,
     AchievementReward? lastReward,
+    Object? lastQuestCompletion = _unset,
     QuestStatus? questStatus,
     Object? questNotice = _unset,
   }) {
@@ -55,11 +58,28 @@ class UserState {
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
       lastReward: lastReward,
+      lastQuestCompletion: lastQuestCompletion == _unset
+          ? this.lastQuestCompletion
+          : lastQuestCompletion as QuestCompletionEvent?,
       questStatus: questStatus ?? this.questStatus,
       questNotice:
           questNotice == _unset ? this.questNotice : questNotice as String?,
     );
   }
+}
+
+class QuestCompletionEvent {
+  const QuestCompletionEvent({
+    required this.completedQuestId,
+    required this.completedQuestTitle,
+    required this.completedQuestDescription,
+    this.nextQuestTitle,
+  });
+
+  final String completedQuestId;
+  final String completedQuestTitle;
+  final String completedQuestDescription;
+  final String? nextQuestTitle;
 }
 
 // endregion
@@ -191,6 +211,11 @@ class UserNotifier extends StateNotifier<UserState> {
   void clearQuestNotice() {
     if (state.questNotice == null) return;
     state = state.copyWith(questNotice: null);
+  }
+
+  void clearLastQuestCompletion() {
+    if (state.lastQuestCompletion == null) return;
+    state = state.copyWith(lastQuestCompletion: null);
   }
 
   void _syncAudioSettings(UserProgress user) {
@@ -342,6 +367,8 @@ class UserNotifier extends StateNotifier<UserState> {
       return;
     }
 
+    QuestCompletionEvent? questCompletion;
+
     final now = DateTime.now();
 
     final updatedStreak = _calculateStreak(
@@ -417,6 +444,11 @@ class UserNotifier extends StateNotifier<UserState> {
         currentQuestId: nextId ?? beforeQuestStatus.quest.id,
         completedQuestIds: updatedCompleted,
       );
+      questCompletion = QuestCompletionEvent(
+        completedQuestId: beforeQuestStatus.quest.id,
+        completedQuestTitle: beforeQuestStatus.quest.title,
+        completedQuestDescription: beforeQuestStatus.quest.description,
+      );
     }
 
     // If grade/age-group changed earlier, ensure the quest pointer still
@@ -459,9 +491,24 @@ class UserNotifier extends StateNotifier<UserState> {
     await _repository.saveUserProgress(updatedUser);
     await loadUsers();
     _syncAudioSettings(updatedUser);
+
+    final resolvedQuestCompletion = questCompletion == null
+        ? null
+        : QuestCompletionEvent(
+            completedQuestId: questCompletion.completedQuestId,
+            completedQuestTitle: questCompletion.completedQuestTitle,
+            completedQuestDescription:
+                questCompletion.completedQuestDescription,
+            nextQuestTitle:
+                questStatus.quest.id == questCompletion.completedQuestId
+                    ? null
+                    : questStatus.quest.title,
+          );
+
     state = state.copyWith(
       activeUser: updatedUser,
       lastReward: reward,
+      lastQuestCompletion: resolvedQuestCompletion,
       questStatus: questStatus,
     );
   }

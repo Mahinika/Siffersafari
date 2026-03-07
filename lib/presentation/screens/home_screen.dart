@@ -10,6 +10,7 @@ import '../../core/providers/local_storage_repository_provider.dart';
 import '../../core/providers/missing_number_settings_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
+import '../../core/providers/story_progress_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
 import '../../core/utils/adaptive_layout.dart';
@@ -18,7 +19,9 @@ import '../../domain/entities/user_progress.dart';
 import '../../domain/enums/difficulty_level.dart';
 import '../../domain/enums/operation_type.dart';
 import '../dialogs/create_user_dialog.dart';
+import '../screens/story_map_screen.dart';
 import '../widgets/interactive_mascot.dart';
+import '../widgets/story_progress_card.dart';
 import '../widgets/themed_background_scaffold.dart';
 import 'onboarding_screen.dart';
 import 'parent_pin_screen.dart';
@@ -153,6 +156,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
     final user = userState.activeUser;
+    final storyProgress = ref.watch(storyProgressProvider);
 
     final themeCfg = ref.watch(appThemeConfigProvider);
     final backgroundAsset = themeCfg.backgroundAsset;
@@ -588,161 +592,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
 
                     if (user != null &&
+                        storyProgress != null &&
                         userState.questStatus != null &&
                         allowedOps
                             .contains(userState.questStatus!.quest.operation))
-                      Container(
-                        constraints: isWideScreen
-                            ? const BoxConstraints(maxWidth: 800)
-                            : null,
-                        margin: const EdgeInsets.only(
-                          top: AppConstants.defaultPadding,
+                      StoryProgressCard(
+                        story: storyProgress,
+                        heroAsset: questHeroAsset,
+                        backgroundAsset: backgroundAsset,
+                        characterAsset: characterAsset,
+                        accentColor: accentColor,
+                        onPrimary: onPrimary,
+                        mutedOnPrimary: mutedOnPrimary,
+                        subtleOnPrimary: subtleOnPrimary,
+                        faintOnPrimary: faintOnPrimary,
+                        cacheWidth: questHeroCacheWidth,
+                        cacheHeight: questHeroCacheHeight,
+                        onStartQuest: () => _startQuiz(
+                          operationType: userState.questStatus!.quest.operation,
+                          difficulty: userState.questStatus!.quest.difficulty,
                         ),
-                        padding:
-                            const EdgeInsets.all(AppConstants.defaultPadding),
-                        decoration: BoxDecoration(
-                          color: onPrimary.withValues(
-                            alpha: AppOpacities.panelFill,
-                          ),
-                          borderRadius:
-                              BorderRadius.circular(AppConstants.borderRadius),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                AppConstants.borderRadius,
-                              ),
-                              child: SizedBox(
-                                height: 110,
-                                child: Image.asset(
-                                  questHeroAsset,
-                                  fit: BoxFit.cover,
-                                  cacheWidth: questHeroCacheWidth,
-                                  cacheHeight: questHeroCacheHeight,
-                                  excludeFromSemantics: true,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Image.asset(
-                                      backgroundAsset,
-                                      fit: BoxFit.cover,
-                                      cacheWidth: questHeroCacheWidth,
-                                      cacheHeight: questHeroCacheHeight,
-                                      excludeFromSemantics: true,
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: AppConstants.defaultPadding),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.flag,
-                                  color: accentColor,
-                                ),
-                                const SizedBox(
-                                  width: AppConstants.smallPadding,
-                                ),
-                                Text(
-                                  'Nästa äventyr',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(
-                                        color: mutedOnPrimary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: AppConstants.smallPadding),
-                            Text(
-                              userState.questStatus!.quest.title,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    color: onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            if (userState.questNotice != null) ...[
-                              const SizedBox(height: AppConstants.smallPadding),
-                              Text(
-                                userState.questNotice!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: mutedOnPrimary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ],
-                            const SizedBox(height: AppConstants.smallPadding),
-                            Text(
-                              userState.questStatus!.quest.description,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: subtleOnPrimary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            const SizedBox(height: AppConstants.defaultPadding),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'På väg',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: subtleOnPrimary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                ),
-                                Text(
-                                  '${(userState.questStatus!.progress * 100).round()}%',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: mutedOnPrimary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: AppConstants.smallPadding),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                AppConstants.borderRadius,
-                              ),
-                              child: LinearProgressIndicator(
-                                value: userState.questStatus!.progress,
-                                minHeight: AppConstants.progressBarHeightSmall,
-                                backgroundColor: onPrimary.withValues(
-                                  alpha: AppOpacities.progressTrackLight,
-                                ),
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(accentColor),
-                              ),
-                            ),
-                            const SizedBox(height: AppConstants.defaultPadding),
-                            ElevatedButton(
-                              onPressed: () => _startQuiz(
-                                operationType:
-                                    userState.questStatus!.quest.operation,
-                                difficulty:
-                                    userState.questStatus!.quest.difficulty,
-                              ),
-                              child: const Text('Starta uppdrag'),
-                            ),
-                          ],
+                        onOpenMap: () => context.pushSmooth(
+                          const StoryMapScreen(),
                         ),
                       ),
 

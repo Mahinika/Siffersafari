@@ -24,7 +24,7 @@ Steg-för-steg instruktioner för vanliga uppgifter:
 | [CONTRIBUTING.md](CONTRIBUTING.md) | QA-rutiner, testning, commits & git-flöde |
 | [ADD_FEATURE.md](ADD_FEATURE.md) | Lägg till en ny feature (praktiskt exempel: Expert Mode) |
 | [DEPLOY_ANDROID.md](DEPLOY_ANDROID.md) | Build debug/release APK, signering, Google Play upload |
-| [ASSET_GENERATION.md](ASSET_GENERATION.md) | Generera grafik (ComfyUI), animationer, ljud-effekter |
+| [ASSET_GENERATION.md](ASSET_GENERATION.md) | Kuratera grafik, animationer, ljud-effekter och ikoner |
 
 ---
 
@@ -47,8 +47,7 @@ Fördjupad förståelse för designbeslut och strategier:
 | Fil | Beskrivning |
 |-----|-------------|
 | [DECISIONS_LOG.md](DECISIONS_LOG.md) | Designbeslut: varför Riverpod, Hive, offline-first, etc. |
-| [CHARACTER_ANIMATIONS.md](CHARACTER_ANIMATIONS.md) | Animation-pipeline: ComfyUI → assets → UI |
-| [COMFYUI_STRATEGI.md](COMFYUI_STRATEGI.md) | Bild-AI-strategi: reproducibility, prompts, workflows |
+| [CHARACTER_ANIMATIONS.md](CHARACTER_ANIMATIONS.md) | Hur Ville används med befintliga frames och procedural rörelse |
 | [KUNSKAPSNIVA_PER_AK.md](KUNSKAPSNIVA_PER_AK.md) | Pedagogisk mappning: difficultys per årskurs (Åk 1-9) |
 
 ---

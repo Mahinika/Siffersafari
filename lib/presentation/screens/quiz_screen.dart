@@ -8,10 +8,12 @@ import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/quiz_provider.dart';
+import '../../core/providers/story_progress_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/utils/adaptive_layout.dart';
 import '../../core/utils/page_transitions.dart';
 import '../../domain/entities/question.dart';
+import '../../domain/entities/story_progress.dart';
 import '../widgets/answer_button.dart';
 import '../widgets/feedback_dialog.dart';
 import '../widgets/progress_indicator_bar.dart';
@@ -155,6 +157,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final quizState = ref.watch(quizProvider);
     final session = quizState.session;
     final feedback = quizState.feedback;
+    final storyProgress = ref.watch(storyProgressProvider);
 
     final themeCfg = ref.watch(appThemeConfigProvider);
     final scheme = Theme.of(context).colorScheme;
@@ -218,8 +221,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final layout = AdaptiveLayoutInfo.fromConstraints(constraints);
-          final useSplitLayout =
-              layout.isExpandedWidth || (layout.isLandscape && !layout.isCompactWidth);
+          final useSplitLayout = layout.isExpandedWidth ||
+              (layout.isLandscape && !layout.isCompactWidth);
           final maxContentWidth = useSplitLayout
               ? layout.contentMaxWidth
               : (layout.isMediumWidth ? 760.0 : double.infinity);
@@ -233,6 +236,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       question: question,
                       progress: progress,
                       quizState: quizState,
+                      storyProgress: storyProgress,
                       primaryActionColor: primaryActionColor,
                       accentColor: accentColor,
                       cardColor: cardColor,
@@ -248,6 +252,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       question: question,
                       progress: progress,
                       quizState: quizState,
+                      storyProgress: storyProgress,
                       primaryActionColor: primaryActionColor,
                       accentColor: accentColor,
                       cardColor: cardColor,
@@ -270,6 +275,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     required Question question,
     required double progress,
     required QuizState quizState,
+    required StoryProgress? storyProgress,
     required Color primaryActionColor,
     required Color accentColor,
     required Color cardColor,
@@ -307,6 +313,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 child: _buildStatusPanel(
                   context,
                   question: question,
+                  storyProgress: storyProgress,
                   correctStreak: quizState.correctStreak,
                   speedBonusCount: quizState.speedBonusCount,
                   onPrimary: onPrimary,
@@ -345,6 +352,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     required Question question,
     required double progress,
     required QuizState quizState,
+    required StoryProgress? storyProgress,
     required Color primaryActionColor,
     required Color accentColor,
     required Color cardColor,
@@ -403,6 +411,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       _buildStatusPanel(
                         context,
                         question: question,
+                        storyProgress: storyProgress,
                         correctStreak: quizState.correctStreak,
                         speedBonusCount: quizState.speedBonusCount,
                         onPrimary: onPrimary,
@@ -487,6 +496,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   Widget _buildStatusPanel(
     BuildContext context, {
     required Question question,
+    required StoryProgress? storyProgress,
     required int correctStreak,
     required int speedBonusCount,
     required Color onPrimary,
@@ -512,6 +522,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             correctStreak: correctStreak,
             speedBonusCount: speedBonusCount,
           ),
+          if (storyProgress != null) ...[
+            SizedBox(height: AppConstants.smallPadding.h),
+            _buildStoryRibbon(
+              context,
+              storyProgress: storyProgress,
+              accent: scheme.secondary,
+              onPrimary: onPrimary,
+            ),
+          ],
           SizedBox(height: AppConstants.microSpacing6.h),
           Text(
             'Uppdrag nu',
@@ -542,6 +561,87 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               accent: scheme.secondary,
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStoryRibbon(
+    BuildContext context, {
+    required StoryProgress storyProgress,
+    required Color accent,
+    required Color onPrimary,
+  }) {
+    final mutedOnPrimary = onPrimary.withValues(alpha: AppOpacities.mutedText);
+    final currentNode = storyProgress.currentNode;
+    final nextTitle = currentNode?.title ?? storyProgress.currentObjectiveTitle;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: AppConstants.smallPadding.w,
+        vertical: AppConstants.smallPadding.h,
+      ),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: AppOpacities.accentFillSubtle),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        border: Border.all(
+          color: accent.withValues(alpha: AppOpacities.highlightStrong),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.explore, color: accent, size: 18),
+              SizedBox(width: AppConstants.microSpacing6.w),
+              Expanded(
+                child: Text(
+                  'Djungelspår',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: onPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+              ),
+              SizedBox(width: AppConstants.smallPadding.w),
+              Flexible(
+                child: Text(
+                  storyProgress.chapterTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: mutedOnPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: AppConstants.microSpacing4.h),
+          Text(
+            'Ville: ${currentNode?.landmark ?? 'stigen'}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: onPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          SizedBox(height: AppConstants.microSpacing2.h),
+          Text(
+            'Nästa mål: $nextTitle',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: mutedOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
         ],
       ),
     );

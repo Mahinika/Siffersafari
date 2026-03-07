@@ -62,8 +62,6 @@ app.*.map.json
 artifacts/ui*.xml
 artifacts/screenshots/**/ui*.xml
 
-# Artifacts (ComfyUI generations)
-artifacts/comfyui/
 artifacts/mascot_frames/
 
 # Artifacts (procedural mascot capture / experiments)

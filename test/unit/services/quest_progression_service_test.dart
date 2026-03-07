@@ -26,6 +26,20 @@ void main() {
       expect(status.isCompleted, isFalse);
     });
 
+    test('middle-path innehåller 20 quests för hela kartan', () {
+      const user = UserProgress(
+        userId: 'u1',
+        name: 'Test',
+        ageGroup: AgeGroup.middle,
+      );
+
+      final path = service.questsForUser(user);
+
+      expect(path, hasLength(20));
+      expect(path.first.id, 'q_plus_easy');
+      expect(path.last.id, 'q_div_medium_4');
+    });
+
     test('Åk 1– 2 innehåller bara easy-quests', () {
       const user = UserProgress(
         userId: 'u1',

@@ -93,6 +93,7 @@ class FirstRunSetupScreen extends ConsumerWidget {
                           frames: _mascotIdleFramesFor(characterAsset),
                           height: mascotHeight,
                           fit: BoxFit.contain,
+                          motion: MascotMotionPreset.float,
                         ),
                       ),
                     ),

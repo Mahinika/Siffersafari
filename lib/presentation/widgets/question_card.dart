@@ -118,9 +118,8 @@ class QuestionCard extends StatelessWidget {
                     ? AppConstants.smallPadding.w
                     : AppConstants.defaultPadding.w)
                 : AppConstants.largePadding.w;
-            final maxQuestionWidth = constraints.maxWidth < 520.w
-              ? constraints.maxWidth
-              : 520.w;
+            final maxQuestionWidth =
+                constraints.maxWidth < 520.w ? constraints.maxWidth : 520.w;
 
             final questionStyle = isWordProblem
                 ? (compact ? textTheme.titleMedium : textTheme.headlineSmall)
@@ -197,7 +196,8 @@ class QuestionCard extends StatelessWidget {
                         Expanded(
                           child: Center(
                             child: ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: maxQuestionWidth),
+                              constraints:
+                                  BoxConstraints(maxWidth: maxQuestionWidth),
                               child: isWordProblem
                                   ? Text(
                                       question.displayQuestionText,

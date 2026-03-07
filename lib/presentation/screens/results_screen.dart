@@ -10,11 +10,13 @@ import '../../core/providers/audio_service_provider.dart';
 import '../../core/providers/missing_number_settings_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
+import '../../core/providers/story_progress_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
 import '../../core/utils/adaptive_layout.dart';
 import '../../domain/entities/question.dart';
 import '../../domain/entities/quiz_session.dart';
+import '../../domain/entities/story_progress.dart';
 import '../../domain/enums/operation_type.dart';
 import '../widgets/star_rating.dart';
 import '../widgets/themed_background_scaffold.dart';
@@ -171,6 +173,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final userState = ref.watch(userProvider);
     final session = quizState.session;
     final reward = userState.lastReward;
+    final storyProgress = ref.watch(storyProgressProvider);
+    final questCompletion = userState.lastQuestCompletion;
 
     final themeCfg = ref.watch(appThemeConfigProvider);
 
@@ -303,6 +307,17 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         statsCard,
+        if (questCompletion != null && storyProgress != null) ...[
+          const SizedBox(height: AppConstants.largePadding),
+          _buildStoryCheckpointPanel(
+            context,
+            onPrimary: onPrimary,
+            mutedOnPrimary: mutedOnPrimary,
+            panelColor: panelColor,
+            storyProgress: storyProgress,
+            questCompletion: questCompletion,
+          ),
+        ],
         const SizedBox(height: AppConstants.largePadding),
         _buildBadgePanel(
           context,
@@ -314,6 +329,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         const SizedBox(height: AppConstants.largePadding),
         ElevatedButton(
           onPressed: () {
+            ref.read(userProvider.notifier).clearLastQuestCompletion();
             final user = ref.read(userProvider).activeUser;
             if (user == null) {
               Navigator.of(context).pushAndRemoveUntil(
@@ -396,6 +412,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         SizedBox(height: AppConstants.defaultPadding.h),
         OutlinedButton(
           onPressed: () {
+            ref.read(userProvider.notifier).clearLastQuestCompletion();
             final user = ref.read(userProvider).activeUser;
             if (user == null) {
               Navigator.of(context).pushAndRemoveUntil(
@@ -502,6 +519,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         SizedBox(height: AppConstants.smallPadding.h),
         TextButton(
           onPressed: () {
+            ref.read(userProvider.notifier).clearLastQuestCompletion();
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
                 builder: (_) => const HomeScreen(),
@@ -688,6 +706,77 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: scheme.secondary,
                   fontWeight: FontWeight.w800,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStoryCheckpointPanel(
+    BuildContext context, {
+    required Color panelColor,
+    required Color onPrimary,
+    required Color mutedOnPrimary,
+    required StoryProgress storyProgress,
+    required QuestCompletionEvent questCompletion,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    final currentNode = storyProgress.currentNode;
+    final reachedLandmark = currentNode?.landmark ?? 'nästa plats';
+    final nextTitle =
+        questCompletion.nextQuestTitle ?? storyProgress.currentObjectiveTitle;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(AppConstants.largePadding.w),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        border: Border.all(
+          color: scheme.secondary.withValues(alpha: AppOpacities.borderSubtle),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ny checkpoint i djungeln!',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: onPrimary,
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          SizedBox(height: AppConstants.smallPadding.h),
+          Text(
+            'Ville tog sig förbi ${questCompletion.completedQuestTitle.toLowerCase()} och nådde $reachedLandmark.',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: mutedOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          SizedBox(height: AppConstants.defaultPadding.h),
+          Text(
+            storyProgress.chapterTitle,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: scheme.secondary,
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          SizedBox(height: AppConstants.smallPadding.h),
+          Text(
+            'Nästa mål: $nextTitle',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: onPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          SizedBox(height: AppConstants.smallPadding.h),
+          Text(
+            storyProgress.worldSubtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: mutedOnPrimary,
+                  fontWeight: FontWeight.w600,
                 ),
           ),
         ],

@@ -1,167 +1,64 @@
 # Asset Generation (How-To)
 
-Denna guide visar hur du genererar grafik, ljud och animationer för Siffersafari.
+Denna guide visar hur du tar fram, granskar och kuraterar grafik, ljud och animationer för Siffersafari.
 
-**Assets** genereras ofta offline (tex i ComfyUI) och läggs sedan in i `assets/`. Under development ligger de i `artifacts/`.
+Regeln i repo:t är enkel: endast godkända produktionsassets ska ligga i `assets/`. Tillfälliga exporter, utkast och testmaterial ska ligga i `artifacts/` tills de antingen används eller kastas.
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Starta ComfyUI (om du använder det)
-powershell -ExecutionPolicy Bypass -File scripts/comfyui/start_comfyui.ps1
+# 1. Generera eller bearbeta ett ljud
+dart run scripts/generate_sfx_wav.dart --prompt "bell chime" --output artifacts/bell.wav
 
-# 2. Generera bilder via API
-dart run scripts/generate_images_comfyui.dart --prompt "cute mascot" --output mascot.png
+# 2. Konvertera till MP3 för appen
+powershell -ExecutionPolicy Bypass -File scripts/convert_wav_to_mp3.ps1 -InputFile artifacts/bell.wav -OutputFile assets/sounds/bell.mp3 -Bitrate 192
 
-# 3. Generera ljud
-dart run scripts/generate_sfx_wav.dart --prompt "bell chime" --output bell.wav
-
-# 4. Generera animationsframes
-powershell -ExecutionPolicy Bypass -File scripts/generate_character_v2_animation_frames.ps1 -Anim idle -Frames 8
+# 3. Generera Android-ikoner
+dart run scripts/generate_android_launcher_icons.dart --input assets/images/app_logo.png --output android/app/src/main/res/
 ```
 
 ---
 
-## 1. Graphics (ComfyUI)
+## 1. Graphics & Animation Assets
 
-### Overview
+Grafik till appen tas fram utanför runtime-koden och läggs sedan in manuellt i `assets/` efter granskning.
 
-Vi använder **ComfyUI** (Stable Diffusion UI) för att generera barnvänliga bilder:
-- Tema-bakgrunder (jungle, space)
-- Quest-hero (större illustrationer)
-- Karaktär-sprites (Ville the mascot)
+Vanliga mål:
+- tema-bakgrunder
+- quest-illustrationer
+- karaktärsbilder och eventuella frame-sekvenser
 
-**Varför ComfyUI?**
-- ✅ Reproducible workflows (sparade JSON-filer)
-- ✅ Möjlighet att loopa/batch-generera
-- ✅ Exakt kontroll (seed, sampler, prompts)
+### Rekommenderat arbetsflöde
 
-### Setup ComfyUI (First Time)
+1. Ta fram ett eller flera utkast utanför appen.
+2. Lägg utkasten i `artifacts/` under en beskrivande mapp.
+3. Granska stil, transparens, dimensioner och läsbarhet.
+4. Flytta bara godkända filer till rätt plats i `assets/`.
+5. Verifiera i appen innan commit.
 
-```bash
-# 1. Installera ComfyUI (separate installation, inte i repo)
-# https://github.com/comfyanonymous/ComfyUI
+### Ville i UI
 
-# 2. Starta servern
-cd C:\Users\Ropbe\Comfyui
-.\start.bat
-# Eller via script:
-powershell -ExecutionPolicy Bypass -File scripts/comfyui/start_comfyui.ps1
+För Ville gäller just nu:
+- använd idle-frame-sekvensen om den redan finns i `assets/images/characters/character_v2/idle/`
+- använd procedural rörelse i `MascotView` när en vy behöver liv utan nya sprites
 
-# 3. Webb-UI öppnas på http://127.0.0.1:8000
-# 4. Verifiera att den är uppe innan du kör generation-scripts
-```
+Se `docs/CHARACTER_ANIMATIONS.md` för hur den delen är tänkt att användas i UI:t.
 
-**Configuration:**
-- Vi använder **port 8000** (se `scripts/generate_images_comfyui.dart`)
-- Workflows sparas i `C:\Users\Ropbe\Comfyui\user\default\workflows\`
-
-### Generate Images (API)
-
-Använd `scripts/generate_images_comfyui.dart` för att generera via API:
+### Organize Approved Assets
 
 ```bash
-# Enkel txt2img (text to image)
-dart run scripts/generate_images_comfyui.dart \
-  --workflow txt2img \
-  --positive-prompt "cute mascot character, anime, cheerful, transparent background" \
-  --negative-prompt "blurry, deformed, ugly" \
-  --output artifacts/mascot_v1.png
+# Exempel: bakgrund
+cp artifacts/jungle/background_v3.png assets/images/themes/jungle/background.png
 
-# Med init-bild (img2img = transformation)
-dart run scripts/generate_images_comfyui.dart \
-  --workflow img2img \
-  --init-image assets/images/mascot_v1.png \
-  --positive-prompt "same character, jumping pose, happy expression" \
-  --denoise 0.35 \
-  --output artifacts/mascot_jumping.png
-```
+# Exempel: idle-frames
+cp artifacts/mascot_frames/idle_000.png assets/images/characters/character_v2/idle/idle_000.png
+cp artifacts/mascot_frames/idle_001.png assets/images/characters/character_v2/idle/idle_001.png
 
-**Tips:**
-- **`--seed`:** Samma seed = samma bild (debugging)
-- **`--denoise`:** 0.0–1.0, låga värden = mindre förändring
-- **`--steps`:** Högre = bättre kvalitet men långsammare (standard: 20)
-
-### Theme Backgrounds
-
-Generation av tema-bakgrunder:
-
-```bash
-# Jungle tema
-dart run scripts/generate_images_comfyui.dart \
-  --workflow txt2img \
-  --positive-prompt "jungle background, nature, trees, plants, bright colors, cartoon style, suitable for kids game, clean" \
-  --output artifacts/jungle_bg_v1.png
-
-# Space tema
-dart run scripts/generate_images_comfyui.dart \
-  --workflow txt2img \
-  --positive-prompt "space background, planets, stars, colorful, cartoon style, kids game, clean" \
-  --output artifacts/space_bg_v1.png
-```
-
-Väl godkända bilder kopieras till `assets/images/themes/<theme>/background.png`.
-
-### Character Animations
-
-Generera animationsframes för Ville (mascot):
-
-```powershell
-# Idle animation (8 frames)
-powershell -ExecutionPolicy Bypass -File scripts/generate_character_v2_animation_frames.ps1 `
-  -Anim idle `
-  -Frames 8 `
-  -AlphaAll  # Gör bakgrunden transparent
-
-# Jump animation
-powershell -ExecutionPolicy Bypass -File scripts/generate_character_v2_animation_frames.ps1 `
-  -Anim jump `
-  -Frames 6 `
-  -StableSeed 42  # Samma seed = samma karaktär
-
-# Preview som GIF
-dart run scripts/preview_animation_gif.dart --animation idle --output artifacts/idle_preview.gif
-```
-
-**Parametrar:**
-- **`-Anim`:** idle, jump, run, wave, dance
-- **`-Frames`:** Antal frames (vanligt 6–12)
-- **`-StableSeed`:** Håller karaktären likadan över alla frames
-- **`-Denoise`:** 0.25–0.45 rekommenderat (låg = mindre drift)
-- **`-AlphaAll`:** Gör alla frames transparenta
-
-**Output:** Frames sparas i `artifacts/comfyui/`. Välj bästa och flytta till `assets/images/characters/character_v2/<anim>/`.
-
-### Organize Generated Assets
-
-Efter generation:
-
-```bash
-# 1. Review i artifacts/comfyui/
-ls artifacts/comfyui/
-
-# 2. Välj bästa bilden
-# - Rätt stil (barnvänlig, tydlig)
-# - Rätt transparens (rena kanter)
-# - Rätt storlek
-
-# 3. Kopiera till assets/
-# För bakgrunder:
-cp artifacts/mascot_v1.png assets/images/themes/jungle/background.png
-
-# För karaktärer:
-cp artifacts/idle_000.png assets/images/characters/character_v2/idle/idle_000.png
-cp artifacts/idle_001.png assets/images/characters/character_v2/idle/idle_001.png
-# (återhål för alla frames)
-
-# 4. Verifiera att pubspec.yaml listar dem
-cat pubspec.yaml | grep -A 5 "assets:"
-
-# 5. Rebuild appen
-flutter pub get
-flutter run
+# Verifiera att assets finns med i pubspec
+grep -r "assets/images" pubspec.yaml
+grep -r "assets/sounds" pubspec.yaml
 ```
 
 ---
@@ -268,9 +165,9 @@ flutter test
 
 ```
 1. DRAFT
-   └─ Generera många bilder i ComfyUI
-   └─ Spara till artifacts/comfyui/
-   └─ Välj 2–3 bästa
+  └─ Ta fram flera utkast utanför appen
+  └─ Spara till artifacts/
+  └─ Välj 2–3 bästa
 
 2. REVIEW
    └─ Öppna bilder i bild-viewer
@@ -287,68 +184,17 @@ flutter test
    └─ Commit message: "assets: add new jungle background"
 ```
 
-### Reproducibility (Save Workflow & Seed)
+### Curation Checklist
 
-ComfyUI workflows sparas som JSON:
-
-```json
-{
-  "1": {
-    "class_type": "CheckpointLoader",
-    "inputs": {
-      "ckpt_name": "sd_xl_base_1.0.safetensors"
-    }
-  },
-  "2": {
-    "class_type": "CLIPTextEncode",
-    "inputs": {
-      "text": "cute mascot character, transparent background",
-      "clip": ["1", 0]
-    }
-  },
-  ...
-}
-```
-
-**Spara den!** Nästa gång du behöver varianter kan du:
-- Ändra **seed** (#olika bilder, same style)
-- Ändra **prompt** (#different style, same seed-base)
-- Skapa versionshistorik av bra workflows
-
-Workflows sparas i `C:\Users\Ropbe\Comfyui\user\default\workflows\` och committas INTE till Git (för stort).
-
----
-
-## 6. ComfyUI Troubleshooting
-
-### "ComfyUI won't start"
-```bash
-# Kontrollera port 8000 är inte occupied
-netstat -an | findstr :8000
-
-# Om occupied, starta på annan port
-python main.py --listen 127.0.0.1 --port 8001
-```
-
-### "API call fails: 'Can't find service'"
-```bash
-# Verifiera ComfyUI server är uppe
-curl http://127.0.0.1:8000/system_stats
-
-# Om fail, starta ComfyUI igen
-powershell -ExecutionPolicy Bypass -File scripts/comfyui/start_comfyui.ps1
-```
-
-### "Generated image is blurry/deformed"
-- Öka **steps** (20 → 30 eller 40)
-- Använd bättre **sampler** (euler_a, ddim)
-- Clarifiera **prompt** (ta bort vaga ord)
+- rätt storlek för målplattformen
+- rena kanter och korrekt transparens
+- konsekvent stil mot resten av appen
+- begripligt motiv även på mindre mobilytor
+- rimlig filstorlek
 
 ---
 
 ## Resources
 
-- **Detaljerad setup:** [scripts/comfyui/README.md](../scripts/comfyui/README.md)
 - **Karaktärsanimation:** [CHARACTER_ANIMATIONS.md](CHARACTER_ANIMATIONS.md)
-- **ComfyUI-strategi:** [COMFYUI_STRATEGI.md](COMFYUI_STRATEGI.md)
 - **Sound conversion:** [assets/sounds/CONVERT_TO_MP3.md](../assets/sounds/CONVERT_TO_MP3.md)

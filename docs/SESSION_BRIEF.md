@@ -1,8 +1,71 @@
 # Session Status Brief
 
 > Syfte: Sammanfattar aktuell projektläge, pågående arbete, och nästa steg för att underlätta kontextöverföring mellan sessioner.
-> 
+>
 > Uppdateras efter större milestones/förluster av kontext.
+
+## 2026-03-06 — Jungle story progression, fas 1
+
+### Mål (denna del)
+✅ Starta implementationen av en visuell story/progression ovanpå befintliga quests
+
+### Gjort
+- Infört en första derived story-modell i `lib/domain/entities/story_progress.dart`.
+- Infört `StoryProgressionService` som mappar befintlig quest-path + current/completed quests till jungle-storystate.
+- Infört provider-lager i `lib/core/providers/story_progress_provider.dart` som bygger UI-färdig storydata från nuvarande användare, quests och parent settings.
+- Bytt Home från ett rent "Nästa äventyr"-kort till en första kompakt jungle/story-sektion via `lib/presentation/widgets/story_progress_card.dart`.
+- Storysektionen visar nu world/chapter, Ville-position i en enkel nodbana, nästa mål och quest-progress utan att ändra spelmekanik eller lagring.
+- Lagt till riktade enhetstester för story-mappningen.
+- Resultatskärmen visar nu en checkpoint-reveal när ett quest faktiskt färdigställs och nästa del av storyn låses upp.
+- Infört transient `QuestCompletionEvent` i user-state så story-reveal triggas på faktisk quest-progress, inte bara på hög poäng.
+- Quiz visar nu en kompakt story-ribbon i HUD-panelen.
+- Home kan nu öppna en separat `Djungelkartan`-skärm med hela expeditionen visualiserad som en större karta.
+- Story-UI:t har förfinats visuellt med badges, legend, rikare paneler och mjukare kartspår för att kännas mer som en sammanhängande djungelvärld.
+- Story-landmarks har nu även beskrivande platsbeats (`landmarkHint`) så Home-kort och karta känns mer som riktiga platser än generiska checkpoints.
+- Home-storykortets hero är nu uppgraderad till en faktisk scen med befintlig Ville-illustration från temat, dekorativa glow-former och platscaption ovanpå quest-bakgrunden.
+- Kartans nodkort har nu platsunika motiv (`sceneTag`) med egen chip, ikon, färgton och kort motivtext per checkpoint.
+- Standardkartan för den vanliga story-pathen är nu utbyggd till 20 riktiga uppdrag/checkpoints i stället för 8, och kartans canvas växer dynamiskt för att visa hela expeditionen.
+- 20-stegskartan är nu visuellt uppdelad i tydliga etapper med mellanrum mellan varje 5-block, kapitelmarkörer i själva kartan och etappinfo i header/nodkort.
+
+### Verifiering
+- `flutter analyze`: ✅ grönt
+- Riktade testfiler: `quest_progression_service_test.dart` + `story_progression_service_test.dart`: ✅ 9/9 gröna
+
+### Nästa steg
+1. Validera den nya 20-stegskartan visuellt på Pixel_6, särskilt scroll, rytm och läsbarhet över etappövergångarna.
+2. Förfina vidare med ännu tydligare node-illustrationer eller små platsdekaler ovanpå de nya sceneTag-motiven om du vill gå längre visuellt.
+3. Vid behov: extrahera story-HUD/kartan till gemensamma widgets om fler skärmar ska dela samma visual language.
+
+## 2026-03-08 — Procedural fallback för Ville-animationer
+
+### Mål (denna del)
+✅ Säkerställa att Ville känns levande i UI:t utan att blockera arbetet på nya assetleveranser
+
+### Gjort
+- `MascotView` stöder nu procedural rörelse direkt i Flutter via `MascotMotionPreset` (`none`, `float`, `bounce`).
+- `InteractiveMascot` använder nu en subtil flytrörelse i idle och extra bounce/rotation vid tap-celebration.
+- `FirstRunSetupScreen` använder nu också procedural rörelse för Ville, även utan nya spritepacks.
+- `docs/CHARACTER_ANIMATIONS.md` beskriver procedural rörelse som rekommenderad fallback när separata jump/run/wave-assets saknas.
+
+### Verifiering
+- Editorfel: inga fel i berörda Flutter-filer.
+
+### Nästa steg
+1. Verifiera visuellt på startskärm och first-run att rörelsen känns lekfull men inte distraherande.
+2. Om det känns bra: använd samma pattern på fler Ville-ytor i appen i stället för att vänta på nya framepacks.
+
+## 2026-03-08 — Rensning av borttaget assetspår
+
+### Mål (denna del)
+✅ Ta bort hela det övergivna experimentspåret ur repo:t och lämna bara nuvarande arbetsflöde kvar
+
+### Gjort
+- Raderat tillhörande scripts, workflowfiler och dokumentation.
+- Skrivit om docs-hubben och assetdokumentationen så att de beskriver repo:ts faktiska nuvarande arbetssätt.
+- Rensat ignore-regler och intern notering så att den borttagna pipelinen inte längre ligger kvar som aktivt repo-spår.
+
+### Nästa steg
+1. Om nya grafikflöden behövs senare: introducera dem som ett separat, avgränsat spår med tydligt produktbehov först.
 
 ## 2026-03-06 — Integrationstest-härdning efter release
 
