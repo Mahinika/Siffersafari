@@ -59,7 +59,7 @@ void main() {
       );
 
       expect(
-        find.bySemanticsLabel('Fråga: 2 + 3. Vad blir resultatet?'),
+        find.bySemanticsLabel('Fråga: 2 + 3 = ?. Vad blir resultatet?'),
         findsOneWidget,
       );
       semantics.dispose();

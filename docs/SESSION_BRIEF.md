@@ -6,6 +6,28 @@
 
 ## 2026-03-06 — Jungle story progression, fas 1
 
+## 2026-03-08 — Releaseförberedelser för v1.3.0
+
+### Mål (denna del)
+✅ Få repo:t till ett releasbart läge och bygga en ny release-APK
+
+### Gjort
+- Rensat bort lokala mascot-/SVG-experiment från releaseunderlaget så diffen bara innehåller releaserelevanta ändringar.
+- Bumpat appversionen i `pubspec.yaml` från `1.2.1+7` till `1.3.0+8`.
+- Skapat release notes i `artifacts/release_notes/v1.3.0.md`.
+- Uppdaterat accessibility-testet för `QuestionCard` så det matchar aktuell semantiktext från `Question.displayQuestionText`.
+- Byggt release-APK lokalt.
+
+### Verifiering
+- `flutter analyze`: ✅ grönt
+- Full test suite: ✅ 107/107 gröna
+- `flutter build apk --release`: ✅ byggde `build/app/outputs/flutter-apk/app-release.apk`
+
+### Nästa steg
+1. Commita releaseförberedelserna.
+2. Tagga releasen som `v1.3.0` och pusha commit + tag.
+3. Publicera GitHub release med release notes och den byggda APK:n om du vill distribuera artefakten direkt.
+
 ### Mål (denna del)
 ✅ Starta implementationen av en visuell story/progression ovanpå befintliga quests
 
