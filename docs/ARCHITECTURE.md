@@ -22,25 +22,37 @@ flowchart TB
   end
 
   subgraph Presentation[Presentation / Screens]
+    SPLASH[LaunchSplashGate]
     ENTRY[AppEntryScreen]
+    ONBOARD[OnboardingScreen]
+    FIRSTRUN[FirstRunSetupScreen]
     PICKER[ProfilePickerScreen]
     HOME[HomeScreen]
     QUIZ[QuizScreen]
     RESULTS[ResultsScreen]
     SETTINGS[SettingsScreen]
     PIN[ParentPinScreen]
+    PINRECOV[PinRecoveryScreen]
     PARENT[ParentDashboardScreen]
+    STORY[StoryMapScreen]
+    PRIVACY[PrivacyPolicyScreen]
 
-    APP --> ENTRY
-    ENTRY --> HOME
-    ENTRY --> PICKER
+    APP --> SPLASH
+    SPLASH --> ENTRY
+    ENTRY --> ONBOARD
+    ONBOARD --> FIRSTRUN
+    FIRSTRUN --> PICKER
     PICKER --> HOME
     HOME --> QUIZ
     QUIZ --> RESULTS
     HOME --> SETTINGS
     HOME --> PIN
     PIN --> PARENT
+    PIN --> PINRECOV
     PARENT --> SETTINGS
+    HOME --> STORY
+    HOME --> PRIVACY
+    SETTINGS --> PRIVACY
   end
 
   subgraph State[State (Riverpod providers)]

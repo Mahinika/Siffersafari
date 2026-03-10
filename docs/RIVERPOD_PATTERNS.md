@@ -1,11 +1,11 @@
 # Riverpod Patterns & Standards
 
-This document establishes consistent patterns for defining and using Riverpod providers across Siffersafari.
+Detta dokument etablerar konsekventa mönster för att definiera och använda Riverpod providers i Siffersafari.
 
-## 1. Provider Types
+## 1. Provider-typer
 
 ### Service Provider
-Simple holder for a dependency-injected service (no state).
+Enkel behållare för en injicerad service (ingen state).
 
 ```dart
 // lib/core/providers/audio_service_provider.dart
@@ -18,13 +18,13 @@ final audioServiceProvider = Provider<AudioService>((ref) {
 });
 ```
 
-**When to use:** For service singletons that don't change or depend on other providers.  
-**watch vs read:** Use `ref.watch()` if the service is observed in real-time; use `ref.read()` in event handlers.
+**När ska jag använda denna:** För service-singletons som inte förändras eller beror på andra providers.  
+**watch vs read:** Använd `ref.watch()` om servicen observeras i realtid; använd `ref.read()` i event handlers.
 
 ---
 
 ### State Provider
-Simple mutable state owned by the UI (e.g., filter selections, temporary UI state).
+Enkel mutable state som ägs av UI:t (t.ex. filterval, temporär UI-state).
 
 ```dart
 // lib/core/providers/difficulty_provider.dart
@@ -33,13 +33,13 @@ final operationTypeProvider = StateProvider<OperationType>((ref) => OperationTyp
 final difficultyLevelProvider = StateProvider<DifficultyLevel>((ref) => DifficultyLevel.easy);
 ```
 
-**When to use:** For UI-transient state that doesn't need persisted logic.  
-**Lifecycle:** Reset on app close; use `ref.read(provider.notifier).state = newValue` to update.
+**När ska jag använda denna:** För UI-transient state som inte kräver persisterad logik.  
+**Livscykel:** Sätts om på app-stäng; uppdatera med `ref.read(provider.notifier).state = newValue`.
 
 ---
 
 ### Computed Provider
-Read-only value derived from watching other providers.
+Skrivskyddad värde härledd från att observera andra providers.
 
 ```dart
 // lib/core/providers/app_theme_provider.dart
@@ -54,18 +54,18 @@ final appThemeConfigProvider = Provider<AppThemeConfig>((ref) {
 });
 ```
 
-**When to use:** For derived state that depends on one or more other providers.  
-**watch vs read:** Always use `ref.watch()` to stay synchronized.
+**När ska jag använda denna:** För härledd state som beror på en eller fler andra providers.  
+**watch vs read:** Använd alltid `ref.watch()` för att hålla synk.
 
 ---
 
 ### StateNotifier Provider
-Complex state with business logic. Encapsulates mutations and invariants.
+Komplex state med affärslogik. Kapslar in mutationer och invarianter.
 
-**File structure:**
-1. State class (manual `copyWith`)
-2. StateNotifier class (holds logic & mutations)
-3. Final provider definition
+**Filstruktur:**
+1. State-klass (manuell `copyWith`)
+2. StateNotifier-klass (innehåller logik & mutationer)
+3. Final provider-definition
 
 ```dart
 // lib/core/providers/user_provider.dart
@@ -125,44 +125,44 @@ final userProvider = StateNotifierProvider<UserNotifier, UserState>((ref) {
 });
 ```
 
-**When to use:** For domain state with behavior (e.g., quiz session, user profile, settings).  
-**watch vs read:** Use `ref.watch()` in build; use `ref.read()` in event handlers (button tap, form submit).
+**När ska jag använda denna:** För domain state med beteende (t.ex. quiz-session, användarprofil, inställningar).  
+**watch vs read:** Använd `ref.watch()` i build; använd `ref.read()` i event handlers (knappklick, formuläruppsändning).
 
 ---
 
-## 2. Naming Conventions
+## 2. Namngivningskonventioner
 
-| Pattern | Example | Comment |
-|---------|---------|---------|
-| Service provider | `audioServiceProvider` | Not `audioProvider` |
-| State provider | `ageGroupProvider` | Name the state, not the provider |
-| Computed provider | `appThemeConfigProvider` | Descriptive name for derived value |
-| StateNotifier | `UserNotifier` | Suffix with `Notifier` |
-| StateNotifier provider | `userProvider` | Not `userNotifierProvider` |
+| Mönster | Exempel | Kommentar |
+|---------|---------|----------|
+| Service provider | `audioServiceProvider` | Inte `audioProvider` |
+| State provider | `ageGroupProvider` | Namnge staten, inte providern |
+| Computed provider | `appThemeConfigProvider` | Beskrivande namn för härledd värde |
+| StateNotifier | `UserNotifier` | Suffix med `Notifier` |
+| StateNotifier provider | `userProvider` | Inte `userNotifierProvider` |
 
 ---
 
-## 3. watch vs read Guidelines
+## 3. watch vs read Riktlinjer
 
-### Use `watch()`:
-- In widget build methods
-- For any provider that needs real-time synchronization
-- When the result is used in the UI
+### Använd `watch()`:
+- I widget build-metoder
+- För alla providers som behöver realtidssynkronisering
+- När resultatet används i UI:n
 
 ```dart
 class MyWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider).activeUser; // Rebuild when user changes
-    return Text(user?.name ?? 'No user');
+    final user = ref.watch(userProvider).activeUser; // Bygga om när användare ändras
+    return Text(user?.name ?? 'Ingen användare');
   }
 }
 ```
 
-### Use `read()`:
-- In event handlers (button taps, form submits)
-- When you need the current value once, not subscribe
-- Before calling `.notifier` methods
+### Använd `read()`:
+- I event handlers (knappklick, formuläruppsändning)
+- När du behöver aktuellt värde en gång, inte prenumerera
+- Före anrop av `.notifier` metoder
 
 ```dart
 onPressed: () {
@@ -175,62 +175,62 @@ onPressed: () {
 
 ---
 
-## 4. Dependency Graph Tips
+## 4. Tips för Dependency Graph
 
-- **Keep providers shallow.** If `providerA` watches `providerB`, and `providerB` watches `providerC`, code that watches `providerA` will rebuild when `providerC` changes.
-- **Use `.select()`** to subscribe to a single field instead of the whole state:
+- **Håll providers grundliga.** Om `providerA` observerar `providerB`, och `providerB` observerar `providerC`, kommer kod som observerar `providerA` att bygga om när `providerC` ändras.
+- **Använd `.select()`** för att prenumerara på ett enda fält istället för hela staten:
   ```dart
   final userName = ref.watch(userProvider.select((state) => state.activeUser?.name));
   ```
-- **Avoid circular dependencies.** If suspicious, run `flutter analyze`.
+- **Undvik cirkulära beroenden.** Om du är misstänksam, kör `flutter analyze`.
 
 ---
 
-## 5. File Organization
+## 5. Filorganisation
 
-Save each provider (or closely-related provider group) in its own file under `lib/core/providers/`:
+Spara varje provider (eller nära befolkad provider-grupp) i sin egen fil under `lib/core/providers/`:
 
 ```
 lib/core/providers/
   audio_service_provider.dart
-  user_provider.dart           (includes UserState + UserNotifier)
-  quiz_provider.dart           (includes QuizState + QuizNotifier)
-  app_theme_provider.dart      (multiple computed providers)
-  difficulty_provider.dart     (multiple StateProviders)
+  user_provider.dart           (inkluderar UserState + UserNotifier)
+  quiz_provider.dart           (inkluderar QuizState + QuizNotifier)
+  app_theme_provider.dart      (flera beräknade providers)
+  difficulty_provider.dart     (flera StateProviders)
 ```
 
 ---
 
-## 6. Comments & Documentation
+## 6. Kommentarer & Dokumentation
 
-- **Complex providers only:** If a StateNotifier has non-obvious behavior, add a brief comment:
+- **Endast komplexa providers:** Om en StateNotifier har icke-uppenbart beteende, lägg till en kort kommentar:
   ```dart
-  /// Manages user profile, quiz history, and quest state.
-  /// loadUsers() cleans up legacy demo users and syncs audio settings.
+  /// Hanterar användarprofil, quizhistorik och quest-state.
+  /// loadUsers() rensar äldre demo-användare och synkroniserar ljudinställningar.
   class UserNotifier extends StateNotifier<UserState> { ... }
   ```
-- **Avoid comment clutter:** If the code is self-explanatory, skip it.
+- **Undvik kommentarverkan:** Om koden är självförklarande, hoppa över den.
 
 ---
 
-## Examples from Current Codebase
+## Exempel från Aktuell Kodbas
 
-| Provider | Type | Status |
-|----------|------|--------|
-| `audioServiceProvider` | Service | ✓ Clean |
-| `appThemeProvider` | Computed | ✓ Clean |
-| `userProvider` | StateNotifier | ✓ Follows pattern |
-| `quizProvider` | StateNotifier | ✓ Follows pattern |
-| `ageGroupProvider` | State | ✓ Clean |
-| `parentSettingsProvider` | StateNotifier | ✓ Follows pattern |
+| Provider | Typ | Status |
+|----------|-----|--------|
+| `audioServiceProvider` | Service | ✓ Ren |
+| `appThemeProvider` | Computed | ✓ Ren |
+| `userProvider` | StateNotifier | ✓ Följer mönster |
+| `quizProvider` | StateNotifier | ✓ Följer mönster |
+| `ageGroupProvider` | State | ✓ Ren |
+| `parentSettingsProvider` | StateNotifier | ✓ Följer mönster |
 
 ---
 
-## Checklist for New Providers
+## Checklista för Nya Providers
 
-- [ ] Provider is in a dedicated file under `lib/core/providers/`
-- [ ] Naming follows convention: `[feature]Provider` or `[feature]Notifier`
-- [ ] Dependencies use `ref.watch()` (or `ref.read()` if appropriate)
-- [ ] State class (if needed) uses manual `copyWith`
-- [ ] Analyzed with `flutter analyze` (no import errors)
-- [ ] Tested in relevant test suite (unit/widget)
+- [ ] Provider är i en dedikerad fil under `lib/core/providers/`
+- [ ] Namngivning följer konvention: `[feature]Provider` eller `[feature]Notifier`
+- [ ] Beroenden använder `ref.watch()` (eller `ref.read()` om lämpligt)
+- [ ] State-klass (om behövs) använder manuell `copyWith`
+- [ ] Analyserad med `flutter analyze` (inga importfel)
+- [ ] Testad i relevant testsvit (unit/widget)

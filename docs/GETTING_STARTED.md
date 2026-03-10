@@ -255,7 +255,7 @@ flutter pub get
    - `docs/SESSION_BRIEF.md` - Status och nästa steg
 
 3. **Börja implementera:**
-   - Välj en uppgift från roadmapen i `TODO.md`
+   - Se [ADD_FEATURE.md](ADD_FEATURE.md) för steg-för-steg guiden
    - (Valfritt) Skapa en ny branch: `git checkout -b feature/my-feature`
    - Implementera och testa
    - Commit: `git commit -m "feat: add my feature"`
@@ -271,7 +271,7 @@ flutter pub get
 
 För frågor eller problem, se:
 - `docs/ARCHITECTURE.md` - Teknisk dokumentation
-- `TODO.md` - Roadmap och framtida features
+- `docs/ADD_FEATURE.md` - Guide för att lägga till features
 - `docs/SESSION_BRIEF.md` - Kort status + nästa steg
 
 ---

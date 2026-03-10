@@ -44,34 +44,42 @@ lib/
 │  ├─ di/                             ├─ Dependency injection (GetIt)
 │  │  └─ injection.dart
 │  ├─ providers/                      ├─ Riverpod providers (state/services)
-│  ├─ services/                       ├─ App services (t.ex. QuestionGenerator)
+│  ├─ services/                       ├─ App services (QuestionGenerator, AudioService, etc.)
 │  ├─ theme/                          ├─ Theme/tokens
 │  └─ utils/                          └─ Små utilities
 │
 ├─ domain/                            ← DOMAIN (UI-agnostic)
 │  ├─ constants/
-│  ├─ entities/                       ├─ Core entities (Question, QuizSession, ...)
-│  ├─ enums/                          ├─ AgeGroup, DifficultyLevel, OperationType, ...
-│  └─ services/                       └─ Pure domain services
+│  ├─ entities/                       ├─ Core entities (Question, QuizSession, UserProgress, ...)
+│  ├─ enums/                          ├─ AgeGroup, DifficultyLevel, OperationType, AppTheme, ...
+│  └─ services/                       └─ Pure domain services (ParentPinService, FeedbackService, ...)
 │
 ├─ data/                              ← DATA IMPLEMENTATION
 │  └─ repositories/                   └─ Persistence (Hive/LocalStorage)
 │
 └─ presentation/                      ← UI LAYER
-   ├─ dialogs/
+   ├─ dialogs/                        ├─ Reusable dialog components
    ├─ screens/                        ├─ Full-page views
-   │  ├─ app_entry_screen.dart
-   │  ├─ home_screen.dart
-   │  ├─ onboarding_screen.dart
-   │  ├─ quiz_screen.dart
-   │  ├─ results_screen.dart
-   │  ├─ parent_pin_screen.dart
-   │  └─ parent_dashboard_screen.dart
+   │  ├─ app_entry_screen.dart        ├─ Initial routing/gate logic
+   │  ├─ launch_splash_gate.dart      ├─ Splash screen
+   │  ├─ onboarding_screen.dart       ├─ Child onboarding flow (3-step)
+   │  ├─ first_run_setup_screen.dart  ├─ Settings on first run
+   │  ├─ profile_picker_screen.dart   ├─ Select child profile
+   │  ├─ home_screen.dart             ├─ Main hub with story progress
+   │  ├─ quiz_screen.dart             ├─ Quiz gameplay
+   │  ├─ results_screen.dart          ├─ Quiz results + story reveal
+   │  ├─ story_map_screen.dart        ├─ Visual story progression map
+   │  ├─ settings_screen.dart         ├─ Child settings/theme choice
+   │  ├─ parent_pin_screen.dart       ├─ PIN entry to parent mode
+   │  ├─ pin_recovery_screen.dart     ├─ Security question for PIN reset
+   │  ├─ parent_dashboard_screen.dart ├─ Parent dashboard/statistics
+   │  └─ privacy_policy_screen.dart   └─ Privacy policy view
    └─ widgets/                        ├─ Reusable UI components
       ├─ answer_button.dart
       ├─ question_card.dart
       ├─ progress_indicator_bar.dart
-      ├─ theme_mascot.dart
+      ├─ theme_mascot.dart            ├─ Lottie-based character animation
+      ├─ story_progress_card.dart     ├─ Story progression UI
       └─ themed_background_scaffold.dart
 ```
 
@@ -81,13 +89,16 @@ lib/
 
 ```
 test/
-├─ test_utils.dart                             ├─ Shared test helpers/mocks
+├─ test_utils.dart                             ├─ Shared test helpers (mocks, DI setup)
 ├─ unit/
 │  ├─ audits/
 │  │  ├─ offline_only_audit_test.dart
 │  │  └─ mix_distribution_audit_test.dart
 │  ├─ logic/
-│  │  ├─ difficulty_config_*_test.dart
+│  │  ├─ difficulty_config_operations_test.dart
+│  │  ├─ difficulty_config_grade_test.dart
+│  │  ├─ difficulty_config_ranges_test.dart
+│  │  ├─ difficulty_config_helpers_test.dart
 │  │  ├─ adaptive_difficulty_test.dart
 │  │  ├─ spaced_repetition_test.dart
 │  │  └─ quiz_progression_edge_cases_test.dart
@@ -95,14 +106,17 @@ test/
 │     ├─ achievement_service_test.dart
 │     ├─ parent_pin_service_test.dart
 │     ├─ profile_backup_service_test.dart
+│     ├─ story_progression_service_test.dart
 │     └─ quest_progression_service_test.dart
 └─ widget/
    ├─ app_home_test.dart
    ├─ app_quiz_flow_test.dart
-   └─ app_results_test.dart
+   ├─ app_results_test.dart
+   ├─ app_parent_mode_test.dart
+   └─ app_onboarding_test.dart
 ```
 
-**Namngivning:** `<feature>_test.dart` (wildcard `_test.dart` lookas upp av `flutter test`)
+**Namngivning:** `[Unit/Widget] Feature – description` (t.ex. `Unit – Adaptive difficulty step increase on streak`)
 
 ---
 
@@ -110,10 +124,11 @@ test/
 
 ```
 integration_test/
-├─ app_smoke_test.dart              ├─ Alla app-flöden (home → quiz → result)
+├─ test_utils.dart                  └─ Shared utilities (backOnce, waitForText, etc.)
+├─ app_smoke_test.dart              ├─ Smoke test: onboarding → home → quiz → results
 ├─ parent_features_test.dart        ├─ Parent mode: PIN, profile reset
-├─ screenshots_test.dart            ├─ Screenshot generation för Play Store
-└─ test_utils.dart                  └─ Shared utilities
+├─ parent_pin_security_question_flow_test.dart ├─ PIN recovery via security question
+└─ screenshots_test.dart            └─ Screenshot generation för assets/artifacts
 ```
 
 ---
@@ -278,37 +293,59 @@ docs/
 Snabbrefenser för ofta använda paths:
 
 ```bash
-# App entry
+# App entry & routing
 lib/main.dart                                 # Main entrypoint
 lib/presentation/screens/app_entry_screen.dart # Initial routing/gate
-lib/presentation/screens/home_screen.dart      # Home
+lib/presentation/screens/launch_splash_gate.dart # Splash screen
+lib/presentation/screens/home_screen.dart      # Main hub
 
-# Business logic
-lib/domain/services/adaptive_difficulty_service.dart
-lib/core/config/difficulty_config.dart
+# Story progression
+lib/core/providers/story_progress_provider.dart
+lib/core/services/story_progression_service.dart
+lib/presentation/screens/story_map_screen.dart
+
+# Quiz & difficulty
 lib/core/services/question_generator_service.dart
+lib/core/config/difficulty_config.dart
+lib/domain/services/adaptive_difficulty_service.dart
+lib/presentation/screens/quiz_screen.dart
+
+# Parent/admin
+lib/presentation/screens/parent_dashboard_screen.dart
+lib/presentation/screens/parent_pin_screen.dart
+lib/domain/services/parent_pin_service.dart
+
+# Data & persistence
+lib/data/repositories/local_storage_repository.dart
 lib/core/services/achievement_service.dart
 
-# Data access
-lib/data/repositories/local_storage_repository.dart
-
-# Tests
-test/unit/logic/curriculum_logic_coverage_test.dart
+# Tests (unit + widget)
+test/unit/logic/adaptive_difficulty_test.dart
 test/unit/services/achievement_service_test.dart
+test/widget/app_home_test.dart
 test/widget/app_quiz_flow_test.dart
 
-# Assets
+# Integration tests
+integration_test/app_smoke_test.dart
+integration_test/screenshots_test.dart
+
+# Assets (Lottie, images, sounds)
+assets/animations/celebration.json
 assets/images/themes/jungle/background.png
+assets/images/themes/space/background.png
 assets/sounds/correct.wav
 
-# Scripts
-scripts/flutter_pixel6.ps1
-scripts/generate_sfx_wav.dart
-
-# Konfigurering
+# Build & deployment
 pubspec.yaml
-analysis_options.yaml
 android/app/build.gradle.kts
+scripts/flutter_pixel6.ps1
+scripts/extract_integration_screenshots.ps1
+
+# Configuration & CI
+analysis_options.yaml
+.github/workflows/flutter.yml
+.github/workflows/build.yml
+copilot-instructions.md
 ```
 
 ---
