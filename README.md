@@ -96,8 +96,15 @@ flutter build apk --release
 - Riverpod för state management
 - Hive för lokal persistens
 - audioplayers för ljud
-- Lottie för animationer
+- Rive för interaktiva karaktärsanimationer (Ville)
+- Lottie för UI-effekter (konfetti, stjärnor, pulser)
 - flutter_screenutil för responsiv skalning
+
+Karaktärspipelinen är nu hybrid:
+
+- Karaktärsrigg/specs under `assets/characters/ville/`
+- UI-effekter under `assets/ui/lottie/`
+- Rive-widget med triggers i quiz/home/results för `answer_correct`, `answer_wrong`, `user_tap`, `screen_change`
 
 Projektet följer en tydlig lagerindelning:
 

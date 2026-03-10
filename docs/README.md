@@ -47,8 +47,10 @@ Fördjupad förståelse för designbeslut och strategier:
 | Fil | Beskrivning |
 |-----|-------------|
 | [DECISIONS_LOG.md](DECISIONS_LOG.md) | Designbeslut: varför Riverpod, Hive, offline-first, etc. |
-| [CHARACTER_ANIMATIONS.md](CHARACTER_ANIMATIONS.md) | Lottie-only-strategi för Ville och andra karaktärsanimationer |
+| [CHARACTER_ANIMATIONS.md](CHARACTER_ANIMATIONS.md) | Hybridstrategi: Rive för karaktärer + Lottie för UI-effekter |
 | [KUNSKAPSNIVA_PER_AK.md](KUNSKAPSNIVA_PER_AK.md) | Pedagogisk mappning: difficultys per årskurs (Åk 1-9) |
+
+| [ANIMATION_PIPELINE_TODO.md](ANIMATION_PIPELINE_TODO.md) | Konkreta steg för Ville-pipeline (assets, Rive, triggers, migration) |
 
 ---
 

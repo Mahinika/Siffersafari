@@ -28,7 +28,8 @@ Grafik till appen tas fram utanför runtime-koden och läggs sedan in manuellt i
 Vanliga mål:
 - tema-bakgrunder
 - quest-illustrationer
-- karaktärsbilder och Lottie-animationer
+- karaktärsbilder och riggade karaktärsanimationer (Rive)
+- UI-effekter (Lottie)
 
 ### Rekommenderat arbetsflöde
 
@@ -41,8 +42,9 @@ Vanliga mål:
 ### Ville i UI
 
 För Ville gäller just nu:
-- använd en kuraterad Lottie-fil när Ville ska vara animerad
-- om Lottie ännu inte är klar ska ytan visa placeholder tills animationen finns
+- använd Rive (`assets/characters/ville/rive/ville_character.riv`) för karaktärsrörelser och state machine
+- använd Lottie i `assets/ui/lottie/` för UI-effekter (confetti/stars/success/error)
+- om Rive-fil eller state machine saknas ska UI:t falla tillbaka till placeholder/fallback
 
 Se `docs/CHARACTER_ANIMATIONS.md` för hur den delen är tänkt att användas i UI:t.
 
@@ -52,12 +54,16 @@ Se `docs/CHARACTER_ANIMATIONS.md` för hur den delen är tänkt att användas i 
 # Exempel: bakgrund
 cp artifacts/jungle/background_v3.png assets/images/themes/jungle/background.png
 
-# Exempel: Lottie-animation
-cp artifacts/ville/ville_idle.json assets/animations/ville_idle.json
+# Exempel: Rive-karaktär
+cp artifacts/ville/ville_character.riv assets/characters/ville/rive/ville_character.riv
+
+# Exempel: UI-Lottie-effekt
+cp artifacts/ui/confetti.json assets/ui/lottie/confetti.json
 
 # Verifiera att assets finns med i pubspec
 grep -r "assets/images" pubspec.yaml
-grep -r "assets/animations" pubspec.yaml
+grep -r "assets/characters" pubspec.yaml
+grep -r "assets/ui/lottie" pubspec.yaml
 grep -r "assets/sounds" pubspec.yaml
 ```
 
@@ -134,6 +140,8 @@ Innan du committar nya assets:
 ```bash
 # 1. Verifiera pubspec.yaml listar alla assets
 grep -r "assets/images" pubspec.yaml
+grep -r "assets/characters" pubspec.yaml
+grep -r "assets/ui/lottie" pubspec.yaml
 grep -r "assets/sounds" pubspec.yaml
 
 # 2. Checkra filstorlek (goal: < 50 MB APK)

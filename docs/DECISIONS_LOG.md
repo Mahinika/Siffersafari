@@ -37,3 +37,8 @@
 - Om en avsedd mascot-Lottie ännu inte finns på sin path ska UI:t visa placeholder i mascot-ytor, inte falla tillbaka till bild- eller spriteanimation.
 - Om en lokal preview behövs för snabb visuell kontroll ska den läsa samma JSON från `assets/animations/` som appen använder eller planerar att använda, inte en separat preview-spec.
 - Adaptiv svårighetsgrad: hybrid-modell med mikro (3 rätt / 2 fel i rad) + makro (5-fråge-fönster, 0.85/0.60) + 2-fråge-cooldown. Steg ändras när mikro+makro är överens eller mikro neutral + makro har signal. Persisteras per räknesätt i `UserProgress.operationDifficultySteps`.
+
+## 2026-03-10
+- Karaktärsanimationer går vidare med hybridstrategi: **Rive för karaktärer** (Ville med state machine) och **Lottie för UI-effekter** (confetti/stars/success/error).
+- Assetstruktur för karaktärer ligger under `assets/characters/ville/{svg,rive,config}` och UI-effekter under `assets/ui/lottie`.
+- Triggerkoppling för Ville ska finnas i huvudscreens: `home` (enter/screen change), `quiz` (answer_correct/answer_wrong/user_tap/screen_change), `results` (celebrate).

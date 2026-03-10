@@ -139,9 +139,22 @@ integration_test/
 
 ```
 assets/
+├─ characters/
+│  └─ ville/
+│     ├─ svg/                     ├─ Modulära delar för riggning (head, eyes, arm, leg...)
+│     ├─ rive/                    ├─ Runtime-rigg (`ville_character.riv`)
+│     └─ config/                  └─ Visual/animation spec (JSON)
+│
+├─ ui/
+│  └─ lottie/
+│     ├─ confetti.json            ├─ UI-effekt
+│     ├─ stars.json               ├─ UI-effekt
+│     ├─ success_pulse.json       ├─ UI-effekt
+│     └─ error_shake.json         └─ UI-effekt
+│
 ├─ animations/
-│  ├─ celebration.json             ├─ Produktgodkänd Lottie-animation
-│  └─ ...                          └─ Fler godkända Lottie-filer
+│  ├─ celebration.json             ├─ Legacy/generell effektanimation
+│  └─ ...                          └─ Övriga Lottie-filer (migreras gradvis)
 │
 ├─ images/
 │  ├─ themes/
@@ -330,6 +343,10 @@ integration_test/app_smoke_test.dart
 integration_test/screenshots_test.dart
 
 # Assets (Lottie, images, sounds)
+assets/characters/ville/config/ville_visual_spec.json
+assets/characters/ville/config/ville_animation_spec.json
+assets/characters/ville/rive/ville_character.riv
+assets/ui/lottie/confetti.json
 assets/animations/celebration.json
 assets/images/themes/jungle/background.png
 assets/images/themes/space/background.png

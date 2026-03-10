@@ -4,6 +4,28 @@
 >
 > Uppdateras efter större milestones/förluster av kontext.
 
+## 2026-03-10 — Rive + Lottie hybrid för Ville-pipeline
+
+### Mål (denna del)
+✅ Etablera konkret och körbar pipeline: Rive för Ville-karaktär + Lottie för UI-effekter.
+
+### Gjort
+- Skapat ny assetstruktur för karaktärer under `assets/characters/ville/` med `svg/`, `rive/`, `config/`.
+- Lagt in `ville_visual_spec.json` och `ville_animation_spec.json` som source-of-truth för stil/rigg/states/transitions.
+- Lagt in `assets/ui/lottie/` med dedikerade UI-effektpaths (`confetti`, `stars`, `success_pulse`, `error_shake`).
+- Infört `VilleCharacter`-widget med Rive state machine-triggers (`answer_correct`, `answer_wrong`, `user_tap`, `screen_change`).
+- Kopplat triggerflöden i appen: Home (enter/screen change), Quiz (correct/wrong/tap/screen change), Results (celebrate).
+- Uppdaterat tema-konfig till `characterRiveAsset: assets/characters/ville/rive/ville_character.riv` och `characterRiveStateMachine: VilleStateMachine`.
+- Uppdaterat docs med ny TODO/guide för animation-pipelinen.
+
+### Verifiering
+- `flutter analyze`: ✅ grönt.
+
+### Nästa steg
+1. Ersätt placeholder med riktig exporterad `ville_character.riv` från Rive.
+2. Ersätt placeholder-UI-lotties med riktiga effekter.
+3. Validera triggermappning manuellt i quiz/home/results på enhet.
+
 ## 2026-03-06 — Jungle story progression, fas 1
 
 ## 2026-03-09 — UX-polisering av quiz, onboarding och resultatflöde
