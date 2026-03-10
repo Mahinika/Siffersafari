@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rive/rive.dart';
 
 enum VilleReaction {
@@ -128,6 +129,18 @@ class _VilleCharacterState extends State<VilleCharacter> {
   }
 
   Widget _fallback(BuildContext context) {
+    // Show composite SVG as fallback when Rive file is not available
+    return SizedBox(
+      height: widget.height,
+      child: SvgPicture.asset(
+        'assets/characters/ville/svg/ville_composite.svg',
+        fit: widget.fit,
+        placeholderBuilder: (context) => _iconFallback(context),
+      ),
+    );
+  }
+
+  Widget _iconFallback(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
       height: widget.height,

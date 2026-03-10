@@ -171,12 +171,26 @@
       }
     },
     {
+      "label": "Assets: Generate Ville Composite SVG",
+      "type": "shell",
+      "command": "dart",
+      "args": ["run", "scripts/generate_ville_composite.dart"],
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      }
+    },
+    {
       "label": "Assets: Generate All (SVG + Lottie + Rive Blueprint)",
       "dependsOrder": "sequence",
       "dependsOn": [
         "Assets: Generate Ville SVG Parts",
         "Assets: Generate Lottie Effects",
-        "Assets: Generate Rive Blueprint"
+        "Assets: Generate Rive Blueprint",
+        "Assets: Generate Ville Composite SVG"
       ],
       "group": "build",
       "problemMatcher": []
