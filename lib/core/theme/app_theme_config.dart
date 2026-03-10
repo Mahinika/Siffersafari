@@ -98,9 +98,8 @@ class AppThemeConfig {
           questHeroAsset: 'assets/images/themes/jungle/quest_hero.png',
           characterAsset: 'assets/images/themes/jungle/character_v2.png',
           characterLottieAsset: 'assets/animations/ville_jungle_idle.json',
-          // Enable when a real .riv is added to assets/animations.
-          characterRiveAsset: null,
-          characterRiveStateMachine: 'State Machine 1',
+          characterRiveAsset: 'assets/characters/ville/rive/ville_character.riv',
+          characterRiveStateMachine: 'VilleStateMachine',
           // New: separate animation states for more dynamic character
           characterIdleAsset: 'assets/animations/ville_jungle_idle.json',
           characterHappyAsset: 'assets/animations/ville_jungle_happy.json',
@@ -122,9 +121,8 @@ class AppThemeConfig {
           questHeroAsset: 'assets/images/themes/space/quest_hero.png',
           characterAsset: 'assets/images/themes/space/character.png',
           characterLottieAsset: 'assets/animations/ville_space_idle.json',
-          // Enable when a real .riv is added to assets/animations.
-          characterRiveAsset: null,
-          characterRiveStateMachine: 'State Machine 1',
+          characterRiveAsset: 'assets/characters/ville/rive/ville_character.riv',
+          characterRiveStateMachine: 'VilleStateMachine',
           // New: separate animation states (fallback to idle for now)
           characterIdleAsset: 'assets/animations/ville_space_idle.json',
           characterHappyAsset: 'assets/animations/ville_space_happy.json',

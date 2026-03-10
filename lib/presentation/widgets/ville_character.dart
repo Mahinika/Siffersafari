@@ -3,8 +3,10 @@ import 'package:rive/rive.dart';
 
 enum VilleReaction {
   idle,
+  enter,
   answerCorrect,
   answerWrong,
+  celebrate,
   userTap,
   screenChange,
 }
@@ -90,10 +92,14 @@ class _VilleCharacterState extends State<VilleCharacter> {
     switch (reaction) {
       case VilleReaction.idle:
         break;
+      case VilleReaction.enter:
+        _userTap?.fire();
       case VilleReaction.answerCorrect:
         _answerCorrect?.fire();
       case VilleReaction.answerWrong:
         _answerWrong?.fire();
+      case VilleReaction.celebrate:
+        _answerCorrect?.fire();
       case VilleReaction.userTap:
         _userTap?.fire();
       case VilleReaction.screenChange:

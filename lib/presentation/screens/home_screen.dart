@@ -13,7 +13,6 @@ import '../../core/providers/quiz_provider.dart';
 import '../../core/providers/story_progress_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
-import '../../core/theme/app_theme_config.dart';
 import '../../core/utils/adaptive_layout.dart';
 import '../../core/utils/page_transitions.dart';
 import '../../domain/entities/user_progress.dart';
@@ -22,8 +21,8 @@ import '../../domain/enums/operation_type.dart';
 import '../dialogs/create_user_dialog.dart';
 import '../screens/story_map_screen.dart';
 import '../widgets/story_progress_card.dart';
-import '../widgets/theme_mascot.dart';
 import '../widgets/themed_background_scaffold.dart';
+import '../widgets/ville_character.dart';
 import 'onboarding_screen.dart';
 import 'parent_pin_screen.dart';
 import 'quiz_screen.dart';
@@ -44,6 +43,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _checkedOnboardingForUserId;
   String _appVersionLabel = '...';
   bool _onboardingPushInFlight = false;
+  VilleReaction _villeReaction = VilleReaction.idle;
+  int _villeReactionNonce = 0;
 
   @override
   void initState() {
@@ -56,6 +57,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       // Start background music when home screen loads
       ref.read(audioServiceProvider).playMusic();
+
+      if (mounted) {
+        setState(() {
+          _villeReaction = VilleReaction.enter;
+          _villeReactionNonce++;
+        });
+      }
     });
   }
 
@@ -132,6 +140,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           missingNumberEnabled: missingNumberEnabled,
         );
 
+    setState(() {
+      _villeReaction = VilleReaction.screenChange;
+      _villeReactionNonce++;
+    });
     context.pushSmooth(const QuizScreen());
   }
 
@@ -344,10 +356,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: AppConstants.defaultPadding),
                       SizedBox(
                         height: isWideScreen ? 140 : 120,
-                        child: ThemeMascot.withState(
-                          appThemeConfig: themeCfg,
-                          state: CharacterAnimationState.idle,
+                        child: VilleCharacter(
+                          reaction: _villeReaction,
+                          reactionNonce: _villeReactionNonce,
                           height: isWideScreen ? 140 : 120,
+                          riveAssetPath:
+                              themeCfg.characterRiveAsset ??
+                              'assets/characters/ville/rive/ville_character.riv',
+                          stateMachineName:
+                              themeCfg.characterRiveStateMachine ??
+                              'VilleStateMachine',
                         ),
                       ),
                       const SizedBox(height: AppConstants.smallPadding),

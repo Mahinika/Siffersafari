@@ -21,6 +21,7 @@ import '../../domain/entities/user_progress.dart';
 import '../../domain/enums/operation_type.dart';
 import '../widgets/star_rating.dart';
 import '../widgets/themed_background_scaffold.dart';
+import '../widgets/ville_character.dart';
 import 'home_screen.dart';
 import 'quiz_screen.dart';
 
@@ -219,6 +220,17 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final summaryHero = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        SizedBox(
+          height: 112.h,
+          child: VilleCharacter(
+            reaction: shouldCelebrate
+                ? VilleReaction.celebrate
+                : VilleReaction.idle,
+            reactionNonce: shouldCelebrate ? 1 : 0,
+            height: 112.h,
+          ),
+        ),
+        const SizedBox(height: AppConstants.defaultPadding),
         Text(
           _getTitle(stars),
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
