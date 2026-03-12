@@ -92,7 +92,7 @@ class VilleSVGGenerator {
   });
 
   String _wrapSVG(String content,
-      {double? width, double? height, String? viewBox}) {
+      {double? width, double? height, String? viewBox,}) {
     final w = width ?? baseSize;
     final h = height ?? baseSize;
     final vb = viewBox ?? '0 0 $w $h';

@@ -63,7 +63,7 @@ class FirstRunSetupScreen extends ConsumerWidget {
                       ),
                       border: Border.all(
                         color: onPrimary.withValues(
-                            alpha: AppOpacities.cardBorder),
+                            alpha: AppOpacities.cardBorder,),
                       ),
                     ),
                     child: Column(

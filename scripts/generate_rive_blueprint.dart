@@ -99,51 +99,51 @@ class RiveBlueprintGenerator {
       'svg_parts': [
         {
           'file': 'assets/characters/ville/svg/ville_head.svg',
-          'layer_name': 'head'
+          'layer_name': 'head',
         },
         {
           'file': 'assets/characters/ville/svg/ville_eyes_open.svg',
-          'layer_name': 'eyes_open'
+          'layer_name': 'eyes_open',
         },
         {
           'file': 'assets/characters/ville/svg/ville_eyes_closed.svg',
-          'layer_name': 'eyes_closed'
+          'layer_name': 'eyes_closed',
         },
         {
           'file': 'assets/characters/ville/svg/ville_mouth_smile.svg',
-          'layer_name': 'mouth_smile'
+          'layer_name': 'mouth_smile',
         },
         {
           'file': 'assets/characters/ville/svg/ville_mouth_sad.svg',
-          'layer_name': 'mouth_sad'
+          'layer_name': 'mouth_sad',
         },
         {
           'file': 'assets/characters/ville/svg/ville_mouth_neutral.svg',
-          'layer_name': 'mouth_neutral'
+          'layer_name': 'mouth_neutral',
         },
         {
           'file': 'assets/characters/ville/svg/ville_body.svg',
-          'layer_name': 'body'
+          'layer_name': 'body',
         },
         {
           'file': 'assets/characters/ville/svg/ville_arm_left.svg',
-          'layer_name': 'arm_left'
+          'layer_name': 'arm_left',
         },
         {
           'file': 'assets/characters/ville/svg/ville_arm_right.svg',
-          'layer_name': 'arm_right'
+          'layer_name': 'arm_right',
         },
         {
           'file': 'assets/characters/ville/svg/ville_leg_left.svg',
-          'layer_name': 'leg_left'
+          'layer_name': 'leg_left',
         },
         {
           'file': 'assets/characters/ville/svg/ville_leg_right.svg',
-          'layer_name': 'leg_right'
+          'layer_name': 'leg_right',
         },
         {
           'file': 'assets/characters/ville/svg/ville_antennas.svg',
-          'layer_name': 'antennas'
+          'layer_name': 'antennas',
         },
       ],
       'import_order': [
@@ -361,7 +361,7 @@ class RiveBlueprintGenerator {
         'jump 50px',
         'arms wave',
         'antennas spring',
-        'smile big'
+        'smile big',
       ],
       'sad': ['head tilt down 15°', 'arms down', 'sad mouth visible'],
       'confused': ['head tilt left/right', 'eyes narrow', 'neutral mouth'],

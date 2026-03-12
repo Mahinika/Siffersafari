@@ -148,7 +148,7 @@ class _LokeWalkCharacterState extends State<LokeWalkCharacter>
                           oppositeSwing * 0.08,
                       alignment: Alignment.topCenter,
                       child: _svg(
-                          'assets/characters/loke/svg/loke_shoe_right.svg'),
+                          'assets/characters/loke/svg/loke_shoe_right.svg',),
                     ),
                   ),
                   _positioned(
@@ -205,7 +205,7 @@ class _LokeWalkCharacterState extends State<LokeWalkCharacter>
                           children: [
                             Positioned.fill(
                               child: _svg(
-                                  'assets/characters/loke/svg/loke_head.svg'),
+                                  'assets/characters/loke/svg/loke_head.svg',),
                             ),
                             Positioned(
                               left: 0,
@@ -224,7 +224,7 @@ class _LokeWalkCharacterState extends State<LokeWalkCharacter>
                               width: 260,
                               height: 120,
                               child: _svg(
-                                  'assets/characters/loke/svg/loke_mouth_happy.svg'),
+                                  'assets/characters/loke/svg/loke_mouth_happy.svg',),
                             ),
                             Positioned(
                               left: -30,
@@ -235,7 +235,7 @@ class _LokeWalkCharacterState extends State<LokeWalkCharacter>
                                 angle: swing * 0.025,
                                 alignment: Alignment.bottomCenter,
                                 child: _svg(
-                                    'assets/characters/loke/svg/loke_hat.svg'),
+                                    'assets/characters/loke/svg/loke_hat.svg',),
                               ),
                             ),
                           ],
