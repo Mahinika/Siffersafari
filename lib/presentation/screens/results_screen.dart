@@ -316,6 +316,9 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         ],
       ),
     );
+    final actionPrompt = questCompletion != null && storyProgress != null
+        ? 'Fortsatt direkt pa stigen, snabbtrana pa det kluriga eller ga hem.'
+        : 'Kor en ny runda direkt, snabbtrana pa det kluriga eller ga hem.';
 
     final actionColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -353,6 +356,22 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
           badgeTeaser: badgeTeaser,
         ),
         const SizedBox(height: AppConstants.largePadding),
+        Text(
+          'Vad vill du gora nu?',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: onPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+        ),
+        SizedBox(height: AppConstants.smallPadding.h),
+        Text(
+          actionPrompt,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: mutedOnPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        SizedBox(height: AppConstants.defaultPadding.h),
         ElevatedButton(
           onPressed: () {
             ref.read(userProvider.notifier).clearLastQuestCompletion();
@@ -831,6 +850,9 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     final reachedLandmark = currentNode?.landmark ?? 'nästa plats';
     final nextTitle =
         questCompletion.nextQuestTitle ?? storyProgress.currentObjectiveTitle;
+    final nextBody = questCompletion.nextQuestTitle == null
+        ? 'Du ar snart framme vid slutet av den har stigen.'
+        : 'Nasta mal: $nextTitle';
 
     return Container(
       width: double.infinity,
@@ -861,12 +883,45 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                 ),
           ),
           SizedBox(height: AppConstants.defaultPadding.h),
-          Text(
-            storyProgress.chapterTitle,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: scheme.secondary,
-                  fontWeight: FontWeight.w800,
-                ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final stackCards = constraints.maxWidth < 620;
+              final currentCard = _StoryFocusCard(
+                label: 'Du ar har',
+                title: reachedLandmark,
+                body: storyProgress.chapterTitle,
+                icon: Icons.place_rounded,
+                color: scheme.secondary,
+                onPrimary: onPrimary,
+              );
+              final nextCard = _StoryFocusCard(
+                label: 'Nasta stopp',
+                title: nextTitle,
+                body: nextBody,
+                icon: Icons.flag_rounded,
+                color: const Color(0xFFD39A2F),
+                onPrimary: onPrimary,
+              );
+
+              if (stackCards) {
+                return Column(
+                  children: [
+                    currentCard,
+                    SizedBox(height: AppConstants.defaultPadding.h),
+                    nextCard,
+                  ],
+                );
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: currentCard),
+                  SizedBox(width: AppConstants.defaultPadding.w),
+                  Expanded(child: nextCard),
+                ],
+              );
+            },
           ),
           SizedBox(height: AppConstants.smallPadding.h),
           Text(
@@ -1020,6 +1075,92 @@ class _BadgeTeaser {
   final String badgeTitle;
   final String badgeBody;
   final String teaser;
+}
+
+class _StoryFocusCard extends StatelessWidget {
+  const _StoryFocusCard({
+    required this.label,
+    required this.title,
+    required this.body,
+    required this.icon,
+    required this.color,
+    required this.onPrimary,
+  });
+
+  final String label;
+  final String title;
+  final String body;
+  final IconData icon;
+  final Color color;
+  final Color onPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(AppConstants.defaultPadding.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.20),
+            color.withValues(alpha: 0.08),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        border: Border.all(color: color.withValues(alpha: 0.72), width: 2),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44.w,
+            height: 44.w,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.22),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: onPrimary),
+          ),
+          SizedBox(width: AppConstants.smallPadding.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: onPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+                SizedBox(height: AppConstants.microSpacing4.h),
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: onPrimary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+                SizedBox(height: AppConstants.microSpacing4.h),
+                Text(
+                  body,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: onPrimary.withValues(alpha: 0.88),
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _HardestQuestion {

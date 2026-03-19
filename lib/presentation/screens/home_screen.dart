@@ -232,6 +232,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       parentAllowedOperations: parentAllowedOps,
       gradeLevel: user?.gradeLevel,
     );
+    final hasStoryQuest = user != null &&
+        storyProgress != null &&
+        userState.questStatus != null &&
+        allowedOps.contains(userState.questStatus!.quest.operation);
 
     final operationCards = <Widget>[];
     if (allowedOps.contains(OperationType.addition)) {
@@ -360,12 +364,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           reaction: _mascotReaction,
                           reactionNonce: _mascotReactionNonce,
                           height: isWideScreen ? 140 : 120,
-                          riveAssetPath: themeCfg.shouldUseRiveCharacter
-                              ? themeCfg.characterRiveAsset
-                              : null,
-                          stateMachineName:
-                              themeCfg.characterRiveStateMachine ??
-                                  'MascotStateMachine',
                         ),
                       ),
                       const SizedBox(height: AppConstants.smallPadding),
@@ -491,7 +489,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Ditt uppdrag',
+                                  'Nasta steg',
                                   style: Theme.of(context)
                                       .textTheme
                                       .titleSmall
@@ -596,11 +594,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
 
-                    if (user != null &&
-                        storyProgress != null &&
-                        userState.questStatus != null &&
-                        allowedOps
-                            .contains(userState.questStatus!.quest.operation))
+                    if (hasStoryQuest)
                       StoryProgressCard(
                         story: storyProgress,
                         heroAsset: questHeroAsset,
@@ -623,6 +617,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
 
                     const SizedBox(height: AppConstants.largePadding),
+
+                    if (user != null) ...[
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          hasStoryQuest
+                              ? 'Eller valj en egen matte-runda'
+                              : 'Valj ditt nasta uppdrag',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: onPrimary,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.microSpacing6),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          hasStoryQuest
+                              ? 'Fortsatt pa stigen ovanfor eller tryck pa en skylt har nedan.'
+                              : 'Tryck pa en skylt sa startar vi direkt.',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: subtleOnPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.defaultPadding),
+                    ],
 
                     // Operation selection (responsive grid)
                     ConstrainedBox(
