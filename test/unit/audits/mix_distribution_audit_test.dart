@@ -74,14 +74,14 @@ double _expectedLateM4NegativeChance({
 }
 
 void main() {
-  group('[Unit] Mix distribution – Audit', () {
-    test('Åk 4–6: M4-andel i Mix ligger nära förväntat per step-bucket', () {
-      // This test is intentionally deterministic and prints a small report.
-      // Goal: quickly catch accidental changes in Mix distribution.
-      const seeds = <int>[101, 202, 303];
-      const grades = <int>[4, 5, 6];
-      const stepBuckets = <int>[2, 5, 9]; // represents 1–3, 4–6, 7–10
-      const nPerCase = 5000;
+  group('[Unit] Mix distribution – Quick guardrail', () {
+    test('Åk 4 och Åk 6: M4-andel i Mix ligger nära förväntat', () {
+      // Deterministic and intentionally light-weight so it can run on every CI pass.
+      // The full heavy distribution audit lives in difficulty_mix_audit_test.dart.
+      const seeds = <int>[101, 303];
+      const grades = <int>[4, 6];
+      const stepBuckets = <int>[2, 9];
+      const nPerCase = 600;
 
       for (final grade in grades) {
         for (final step in stepBuckets) {

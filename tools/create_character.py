@@ -475,6 +475,8 @@ def style_settings() -> dict[str, Any]:
         "useGradients": False,
         "useTextures": False,
         "rigFriendly": True,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
     }
 
 
@@ -626,32 +628,32 @@ def hat_shape(theme: str, palette: dict[str, str], brief: str) -> str:
     variant = detect_hat_variant(theme, brief)
     if variant == "helmet":
         return f"""
-  <ellipse cx="160" cy="102" rx="110" ry="74" fill="{palette['hat']}" stroke="{outline}" stroke-width="4"/>
-  <path d="M 88 110 Q 160 58 232 110 Q 220 138 160 142 Q 100 138 88 110 Z" fill="{lighten(palette['hat'], 0.30)}" stroke="{outline}" stroke-width="3"/>
+  <ellipse cx="160" cy="102" rx="110" ry="74" fill="{palette['hat']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 88 110 Q 160 58 232 110 Q 220 138 160 142 Q 100 138 88 110 Z" fill="{lighten(palette['hat'], 0.30)}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
   <rect x="112" y="50" width="96" height="16" rx="8" fill="{palette['hatBand']}" opacity="0.9"/>
 """
     if variant == "cap":
         return f"""
-  <path d="M 88 118 Q 112 48 176 44 Q 232 44 252 118 L 88 118 Z" fill="{palette['hat']}" stroke="{outline}" stroke-width="4"/>
-  <path d="M 124 118 Q 174 138 246 118 Q 210 148 124 134 Z" fill="{palette['hatShadow']}" stroke="{outline}" stroke-width="3"/>
+  <path d="M 88 118 Q 112 48 176 44 Q 232 44 252 118 L 88 118 Z" fill="{palette['hat']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 124 118 Q 174 138 246 118 Q 210 148 124 134 Z" fill="{palette['hatShadow']}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
   <rect x="118" y="84" width="88" height="14" rx="7" fill="{palette['hatBand']}"/>
 """
     if variant == "antenna":
         return f"""
-  <rect x="84" y="56" width="152" height="88" rx="36" fill="{palette['hat']}" stroke="{outline}" stroke-width="4"/>
-  <rect x="126" y="82" width="68" height="22" rx="11" fill="{lighten(palette['hat'], 0.18)}" stroke="{outline}" stroke-width="3"/>
-  <line x1="160" y1="56" x2="160" y2="18" stroke="{outline}" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="160" cy="18" r="10" fill="{palette['hatBand']}" stroke="{outline}" stroke-width="3"/>
+  <rect x="84" y="56" width="152" height="88" rx="36" fill="{palette['hat']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="126" y="82" width="68" height="22" rx="11" fill="{lighten(palette['hat'], 0.18)}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="160" y1="56" x2="160" y2="18" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="160" cy="18" r="10" fill="{palette['hatBand']}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 """
     if variant == "beanie":
         return f"""
-  <path d="M 94 116 Q 100 52 160 44 Q 220 52 226 116 L 94 116 Z" fill="{palette['hat']}" stroke="{outline}" stroke-width="4"/>
-  <rect x="104" y="102" width="112" height="24" rx="12" fill="{palette['hatShadow']}" stroke="{outline}" stroke-width="3"/>
-  <circle cx="160" cy="36" r="12" fill="{palette['hatBand']}" stroke="{outline}" stroke-width="3"/>
+  <path d="M 94 116 Q 100 52 160 44 Q 220 52 226 116 L 94 116 Z" fill="{palette['hat']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="104" y="102" width="112" height="24" rx="12" fill="{palette['hatShadow']}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="160" cy="36" r="12" fill="{palette['hatBand']}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 """
     return f"""
-  <ellipse cx="160" cy="128" rx="118" ry="22" fill="{palette['hatShadow']}" stroke="{outline}" stroke-width="4"/>
-  <rect x="108" y="52" width="104" height="76" rx="32" fill="{palette['hat']}" stroke="{outline}" stroke-width="4"/>
+  <ellipse cx="160" cy="128" rx="118" ry="22" fill="{palette['hatShadow']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="108" y="52" width="104" height="76" rx="32" fill="{palette['hat']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <rect x="116" y="88" width="88" height="18" rx="9" fill="{palette['hatBand']}"/>
 """
 
@@ -661,33 +663,33 @@ def backpack_shape(theme: str, palette: dict[str, str]) -> str:
     variant = THEME_DEFAULTS[theme]["backpack_variant"]
     if variant == "jetpack":
         return f"""
-  <rect x="62" y="58" width="58" height="126" rx="20" fill="{palette['backpack']}" stroke="{outline}" stroke-width="4"/>
-  <rect x="140" y="58" width="58" height="126" rx="20" fill="{palette['backpack']}" stroke="{outline}" stroke-width="4"/>
-  <rect x="110" y="42" width="40" height="146" rx="18" fill="{lighten(palette['backpack'], 0.12)}" stroke="{outline}" stroke-width="4"/>
-  <circle cx="91" cy="196" r="14" fill="{palette['hatBand']}" stroke="{outline}" stroke-width="3"/>
-  <circle cx="169" cy="196" r="14" fill="{palette['hatBand']}" stroke="{outline}" stroke-width="3"/>
+  <rect x="62" y="58" width="58" height="126" rx="20" fill="{palette['backpack']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="140" y="58" width="58" height="126" rx="20" fill="{palette['backpack']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="110" y="42" width="40" height="146" rx="18" fill="{lighten(palette['backpack'], 0.12)}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="91" cy="196" r="14" fill="{palette['hatBand']}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="169" cy="196" r="14" fill="{palette['hatBand']}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 """
     if variant == "cape_pack":
         return f"""
-  <path d="M 68 72 Q 130 24 192 72 L 192 190 Q 130 224 68 190 Z" fill="{palette['backpack']}" stroke="{outline}" stroke-width="4"/>
-  <path d="M 192 72 Q 230 116 216 190 Q 184 214 150 208 Q 182 152 192 72 Z" fill="{lighten(palette['backpack'], 0.08)}" stroke="{outline}" stroke-width="4"/>
+  <path d="M 68 72 Q 130 24 192 72 L 192 190 Q 130 224 68 190 Z" fill="{palette['backpack']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 192 72 Q 230 116 216 190 Q 184 214 150 208 Q 182 152 192 72 Z" fill="{lighten(palette['backpack'], 0.08)}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <rect x="88" y="88" width="84" height="18" rx="9" fill="{palette['strap']}"/>
 """
     return f"""
-  <rect x="74" y="48" width="112" height="148" rx="32" fill="{palette['backpack']}" stroke="{outline}" stroke-width="4"/>
+  <rect x="74" y="48" width="112" height="148" rx="32" fill="{palette['backpack']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <rect x="96" y="74" width="68" height="20" rx="10" fill="{palette['strap']}"/>
-  <rect x="88" y="108" width="84" height="60" rx="22" fill="{lighten(palette['backpack'], 0.10)}" stroke="{outline}" stroke-width="3"/>
+  <rect x="88" y="108" width="84" height="60" rx="22" fill="{lighten(palette['backpack'], 0.10)}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 """
 
 
 def glasses_layer(palette: dict[str, str]) -> str:
     frame = darken(palette["outline"], 0.08)
     return f"""
-  <rect x="70" y="44" width="36" height="24" rx="9" fill="none" stroke="{frame}" stroke-width="4"/>
-  <rect x="130" y="44" width="36" height="24" rx="9" fill="none" stroke="{frame}" stroke-width="4"/>
-  <line x1="106" y1="56" x2="130" y2="56" stroke="{frame}" stroke-width="4" stroke-linecap="round"/>
-  <line x1="60" y1="56" x2="70" y2="54" stroke="{frame}" stroke-width="4" stroke-linecap="round"/>
-  <line x1="166" y1="54" x2="176" y2="56" stroke="{frame}" stroke-width="4" stroke-linecap="round"/>
+  <rect x="70" y="44" width="36" height="24" rx="9" fill="none" stroke="{frame}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="130" y="44" width="36" height="24" rx="9" fill="none" stroke="{frame}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="106" y1="56" x2="130" y2="56" stroke="{frame}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="60" y1="56" x2="70" y2="54" stroke="{frame}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="166" y1="54" x2="176" y2="56" stroke="{frame}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
 """
 
 
@@ -705,24 +707,24 @@ def part_svg_map(palette: dict[str, str], theme: str, brief: str) -> dict[str, s
     glasses = glasses_layer(palette) if has_glasses else ""
 
     torso_svg = f"""
-  <path d="M 60 30 Q 80 8 118 8 Q 156 8 176 30 L 184 142 Q 154 174 118 174 Q 82 174 52 142 Z" fill="{palette['shirt']}" stroke="{outline}" stroke-width="4"/>
+  <path d="M 60 30 Q 80 8 118 8 Q 156 8 176 30 L 184 142 Q 154 174 118 174 Q 82 174 52 142 Z" fill="{palette['shirt']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <path d="M 88 28 Q 102 16 118 16 Q 134 16 148 28 L 142 46 Q 130 38 118 38 Q 106 38 94 46 Z" fill="{lighten(palette['shirt'], 0.18)}" opacity="0.85"/>
-  <rect x="84" y="132" width="68" height="18" rx="9" fill="{lighten(palette['shirt'], 0.08)}" stroke="{outline}" stroke-width="3"/>
+  <rect x="84" y="132" width="68" height="18" rx="9" fill="{lighten(palette['shirt'], 0.08)}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 """
     if not has_shorts:
         torso_svg = f"""
-  <path d="M 60 30 Q 80 8 118 8 Q 156 8 176 30 L 190 210 Q 158 238 118 238 Q 78 238 46 210 Z" fill="{palette['shirt']}" stroke="{outline}" stroke-width="4"/>
-  <path d="M 82 82 Q 98 54 118 54 Q 138 54 154 82 L 164 206 Q 142 226 118 226 Q 94 226 72 206 Z" fill="{palette['overallsPrimary']}" stroke="{outline}" stroke-width="4"/>
-  <rect x="96" y="94" width="44" height="62" rx="16" fill="{lighten(palette['overallsPrimary'], 0.14)}" stroke="{outline}" stroke-width="3"/>
-  <rect x="76" y="82" width="18" height="82" rx="9" fill="{palette['overallsSecondary']}" stroke="{outline}" stroke-width="3"/>
-  <rect x="142" y="82" width="18" height="82" rx="9" fill="{palette['overallsSecondary']}" stroke="{outline}" stroke-width="3"/>
+  <path d="M 60 30 Q 80 8 118 8 Q 156 8 176 30 L 190 210 Q 158 238 118 238 Q 78 238 46 210 Z" fill="{palette['shirt']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 82 82 Q 98 54 118 54 Q 138 54 154 82 L 164 206 Q 142 226 118 226 Q 94 226 72 206 Z" fill="{palette['overallsPrimary']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="96" y="94" width="44" height="62" rx="16" fill="{lighten(palette['overallsPrimary'], 0.14)}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="76" y="82" width="18" height="82" rx="9" fill="{palette['overallsSecondary']}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="142" y="82" width="18" height="82" rx="9" fill="{palette['overallsSecondary']}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 """
 
     parts = {
         "head": wrap_svg(
             f"""
-  <path d="M 58 74 Q 68 28 118 22 Q 168 28 178 76 Q 158 58 118 56 Q 80 58 58 74 Z" fill="{palette['hair']}" stroke="{outline}" stroke-width="4"/>
-  <ellipse cx="118" cy="106" rx="60" ry="62" fill="{palette['skin']}" stroke="{outline}" stroke-width="4"/>
+  <path d="M 58 74 Q 68 28 118 22 Q 168 28 178 76 Q 158 58 118 56 Q 80 58 58 74 Z" fill="{palette['hair']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="118" cy="106" rx="60" ry="62" fill="{palette['skin']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <ellipse cx="88" cy="132" rx="12" ry="8" fill="{palette['blush']}" opacity="0.55"/>
   <ellipse cx="148" cy="132" rx="12" ry="8" fill="{palette['blush']}" opacity="0.55"/>
 """,
@@ -731,8 +733,8 @@ def part_svg_map(palette: dict[str, str], theme: str, brief: str) -> dict[str, s
         ),
         "eyes_open": wrap_svg(
             f"""
-  <ellipse cx="88" cy="54" rx="12" ry="16" fill="white" stroke="{outline}" stroke-width="3"/>
-  <ellipse cx="148" cy="54" rx="12" ry="16" fill="white" stroke="{outline}" stroke-width="3"/>
+  <ellipse cx="88" cy="54" rx="12" ry="16" fill="white" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="148" cy="54" rx="12" ry="16" fill="white" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
   <circle cx="88" cy="57" r="6" fill="{palette['eyes']}"/>
   <circle cx="148" cy="57" r="6" fill="{palette['eyes']}"/>
   <circle cx="91" cy="53" r="2" fill="white"/>
@@ -775,15 +777,15 @@ def part_svg_map(palette: dict[str, str], theme: str, brief: str) -> dict[str, s
 
     for side in ("left", "right"):
         parts[f"arm_upper_{side}"] = wrap_svg(
-            f"""  <rect x="24" y="8" width="28" height="118" rx="14" fill="{palette['shirt']}" stroke="{outline}" stroke-width="4"/>""",
+            f"""  <rect x="24" y="8" width="28" height="118" rx="14" fill="{palette['shirt']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>""",
             76,
             134,
         )
         parts[f"arm_lower_{side}"] = wrap_svg(
             f"""
-  <rect x="24" y="8" width="28" height="98" rx="14" fill="{palette['skin']}" stroke="{outline}" stroke-width="4"/>
-  <circle cx="38" cy="122" r="16" fill="{palette['skin']}" stroke="{outline}" stroke-width="4"/>
-  <rect x="18" y="4" width="40" height="14" rx="7" fill="{palette['overallsSecondary']}" stroke="{outline}" stroke-width="3"/>
+  <rect x="24" y="8" width="28" height="98" rx="14" fill="{palette['skin']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="38" cy="122" r="16" fill="{palette['skin']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="18" y="4" width="40" height="14" rx="7" fill="{palette['overallsSecondary']}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 """,
             80,
             144,
@@ -791,29 +793,29 @@ def part_svg_map(palette: dict[str, str], theme: str, brief: str) -> dict[str, s
         parts[f"leg_upper_{side}"] = wrap_svg(
             (
                 f"""
-  <rect x="16" y="8" width="48" height="30" rx="12" fill="{palette['overallsPrimary']}" stroke="{outline}" stroke-width="4"/>
-  <rect x="20" y="32" width="40" height="96" rx="18" fill="{palette['skin']}" stroke="{outline}" stroke-width="4"/>
+  <rect x="16" y="8" width="48" height="30" rx="12" fill="{palette['overallsPrimary']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="20" y="32" width="40" height="96" rx="18" fill="{palette['skin']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
 """
                 if has_shorts
-                else f"""  <rect x="18" y="8" width="44" height="128" rx="18" fill="{palette['overallsPrimary']}" stroke="{outline}" stroke-width="4"/>"""
+                else f"""  <rect x="18" y="8" width="44" height="128" rx="18" fill="{palette['overallsPrimary']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>"""
             ),
             80,
             144,
         )
         parts[f"leg_lower_{side}"] = wrap_svg(
             (
-                f"""  <rect x="18" y="6" width="36" height="132" rx="18" fill="{palette['skin']}" stroke="{outline}" stroke-width="4"/>"""
+                f"""  <rect x="18" y="6" width="36" height="132" rx="18" fill="{palette['skin']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>"""
                 if has_shorts
-                else f"""  <rect x="18" y="6" width="36" height="132" rx="18" fill="{palette['overallsSecondary']}" stroke="{outline}" stroke-width="4"/>"""
+                else f"""  <rect x="18" y="6" width="36" height="132" rx="18" fill="{palette['overallsSecondary']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>"""
             ),
             72,
             150,
         )
         parts[f"shoe_{side}"] = wrap_svg(
             f"""
-  <path d="M 22 68 Q 40 42 90 42 Q 122 44 138 60 L 136 82 Q 118 98 62 100 Q 18 98 14 80 Z" fill="{palette['shoe']}" stroke="{outline}" stroke-width="4"/>
+  <path d="M 22 68 Q 40 42 90 42 Q 122 44 138 60 L 136 82 Q 118 98 62 100 Q 18 98 14 80 Z" fill="{palette['shoe']}" stroke="{outline}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <path d="M 24 76 Q 70 88 130 82" fill="none" stroke="{palette['lace']}" stroke-width="4" stroke-linecap="round"/>
-  <path d="M 18 84 Q 74 104 140 92 L 140 100 Q 78 112 16 96 Z" fill="{palette['sole']}" stroke="{outline}" stroke-width="3"/>
+  <path d="M 18 84 Q 74 104 140 92 L 140 100 Q 78 112 16 96 Z" fill="{palette['sole']}" stroke="{outline}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 """,
             156,
             110,

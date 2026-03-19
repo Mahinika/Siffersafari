@@ -6,8 +6,7 @@ import 'package:siffersafari/main.dart' as app;
 import 'test_utils.dart' as it;
 
 /// Integration tests for parent-facing critical features:
-/// - PIN creation and verification
-/// - PIN recovery flow
+/// - PIN creation happy path
 /// - Profile management
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +32,11 @@ void main() {
       expect(parentModeButton, findsOneWidget);
 
       await it.tap(tester, parentModeButton, after: const Duration(seconds: 1));
-      await it.waitForText(tester, 'Skapa PIN', timeout: const Duration(seconds: 12));
+      await it.waitForText(
+        tester,
+        'Skapa PIN',
+        timeout: const Duration(seconds: 12),
+      );
 
       // Should show PIN creation screen.
       expect(find.text('Skapa PIN'), findsWidgets);
@@ -49,7 +52,11 @@ void main() {
 
       final savePinButton = find.text('Spara PIN');
       expect(savePinButton, findsOneWidget);
-      await it.tap(tester, savePinButton, after: const Duration(milliseconds: 450));
+      await it.tap(
+        tester,
+        savePinButton,
+        after: const Duration(milliseconds: 450),
+      );
 
       // If recovery setup dialog appears, close it.
       if (find.text('Sätt säkerhetsfråga').evaluate().isNotEmpty) {
@@ -65,105 +72,12 @@ void main() {
       }
 
       // Should now be in Parent Dashboard.
-      await it.waitForText(tester, 'Översikt', timeout: const Duration(seconds: 20));
+      await it.waitForText(
+        tester,
+        'Översikt',
+        timeout: const Duration(seconds: 20),
+      );
       expect(find.text('Översikt'), findsWidgets);
-    },
-    timeout: const Timeout(Duration(minutes: 2)),
-  );
-
-  testWidgets(
-    'Integration (Parent): verifiera PIN efter att ha skapat en',
-    (tester) async {
-      await app.main();
-      await it.settle(tester, const Duration(milliseconds: 600));
-
-      // Go to settings.
-      final settingsIcon = find.byIcon(Icons.settings);
-      if (settingsIcon.evaluate().isEmpty) return;
-
-      await it.tap(tester, settingsIcon, after: const Duration(seconds: 1));
-      await it.settle(tester, const Duration(milliseconds: 300));
-
-      // Tap "Föräldraläge".
-      final parentModeButton = find.text('Föräldraläge');
-      if (parentModeButton.evaluate().isEmpty) return;
-
-      await it.tap(tester, parentModeButton, after: const Duration(seconds: 1));
-      await it.settle(tester, const Duration(milliseconds: 300));
-
-      // If PIN already exists, should ask for PIN verification.
-      final pinVerifyText = find.textContaining('Ange PIN');
-      if (pinVerifyText.evaluate().isNotEmpty) {
-        // Enter the PIN (1234 from previous test, or any 4-digit if fresh).
-        final pinFields = find.byType(TextField);
-        if (pinFields.evaluate().isNotEmpty) {
-          await tester.enterText(pinFields.first, '1234');
-          await tester.pump(const Duration(milliseconds: 150));
-
-          final confirmButton = find.text('Öppna');
-          if (confirmButton.evaluate().isNotEmpty) {
-            await it.tap(
-              tester,
-              confirmButton,
-              after: const Duration(milliseconds: 450),
-            );
-            await it.waitForText(tester, 'Översikt', timeout: const Duration(seconds: 20));
-          }
-        }
-
-        // Should now be in Parent Dashboard.
-        expect(find.text('Översikt'), findsWidgets);
-      }
-    },
-    timeout: const Timeout(Duration(minutes: 2)),
-  );
-
-  testWidgets(
-    'Integration (Parent): PIN recovery med security question',
-    (tester) async {
-      await app.main();
-      await it.settle(tester, const Duration(milliseconds: 600));
-
-      // Navigate to Parent Mode.
-      final settingsIcon = find.byIcon(Icons.settings);
-      if (settingsIcon.evaluate().isEmpty) return;
-
-      await it.tap(tester, settingsIcon, after: const Duration(seconds: 1));
-      await it.settle(tester, const Duration(milliseconds: 300));
-
-      final parentModeButton = find.text('Föräldraläge');
-      if (parentModeButton.evaluate().isEmpty) return;
-
-      await it.tap(tester, parentModeButton, after: const Duration(seconds: 1));
-      await it.settle(tester, const Duration(milliseconds: 300));
-
-      // Look for "Glömt PIN?" link.
-      final forgotPinLink = find.text('Glömt PIN?');
-      if (forgotPinLink.evaluate().isEmpty) {
-        // PIN recovery not configured yet, skip test.
-        return;
-      }
-
-      await it.tap(tester, forgotPinLink, after: const Duration(seconds: 1));
-      await it.waitForText(tester, 'Återställ PIN', timeout: const Duration(seconds: 12));
-
-      // Should show security question.
-      expect(find.text('Återställ PIN'), findsWidgets);
-
-      // Enter security answer (from previous test: "Mat").
-      final securityAnswerField = find.byType(TextField).first;
-      await tester.enterText(securityAnswerField, 'Mat');
-      await tester.pump(const Duration(milliseconds: 150));
-
-      final verifyButton = find.text('Verifiera svar');
-      if (verifyButton.evaluate().isNotEmpty) {
-        await it.tap(tester, verifyButton, after: const Duration(milliseconds: 450));
-        await it.settle(tester, const Duration(milliseconds: 450));
-      }
-
-      // Should proceed to PIN reset screen.
-      // (This depends on implementation; just verify no crash.)
-      expect(tester.takeException(), isNull);
     },
     timeout: const Timeout(Duration(minutes: 2)),
   );

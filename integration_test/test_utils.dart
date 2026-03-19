@@ -63,14 +63,15 @@ Future<bool> tryTap(
     find.ancestor(of: finder, matching: find.byType(InkResponse)),
     find.ancestor(of: finder, matching: find.byType(GestureDetector)),
 
+    // If the finder already points at a tappable/composite widget, prefer
+    // scrolling and tapping that before drilling into internal render objects.
+    finder,
+
     // If the finder targets a composite (e.g. ElevatedButton/DropdownButton),
     // tap on an internal render box that participates in hit testing.
     find.descendant(of: finder, matching: find.byType(InkResponse)),
     find.descendant(of: finder, matching: find.byType(InkWell)),
     find.descendant(of: finder, matching: find.byType(GestureDetector)),
-
-    // Last resort.
-    finder,
   ];
 
   for (final candidate in candidates) {
@@ -83,11 +84,16 @@ Future<bool> tryTap(
     if (!hasMatch) continue;
 
     final hitTestableCandidate = candidate.hitTestable();
-    final target = hitTestableCandidate.evaluate().isNotEmpty
+    var target = hitTestableCandidate.evaluate().isNotEmpty
         ? hitTestableCandidate.first
         : candidate.first;
     await tester.ensureVisible(target);
     await settle(tester, const Duration(milliseconds: 200));
+
+    final postScrollHitTestable = candidate.hitTestable();
+    if (postScrollHitTestable.evaluate().isNotEmpty) {
+      target = postScrollHitTestable.first;
+    }
 
     try {
       await tester.tap(target);

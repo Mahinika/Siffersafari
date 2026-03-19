@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="76" height="134" viewBox="0 0 76 134" xmlns="http://www.w3.org/2000/svg">
-  <rect x="24" y="8" width="28" height="118" rx="14" fill="#4A7CFF" stroke="#926F5D" stroke-width="4"/>
+  <rect x="24" y="8" width="28" height="118" rx="14" fill="#4A7CFF" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
 </svg>

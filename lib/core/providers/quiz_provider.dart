@@ -4,8 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/config/app_features.dart';
 import '../../core/config/difficulty_config.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/settings_keys.dart';
 import '../../data/repositories/local_storage_repository.dart';
 import '../../domain/constants/learning_constants.dart';
 import '../../domain/entities/question.dart';
@@ -15,12 +17,14 @@ import '../../domain/enums/difficulty_level.dart';
 import '../../domain/enums/operation_type.dart';
 import '../../domain/services/adaptive_difficulty_service.dart';
 import '../../domain/services/feedback_service.dart';
+import '../../domain/services/spaced_repetition_service.dart';
 import '../services/audio_service.dart';
 import '../services/question_generator_service.dart';
 import 'audio_service_provider.dart';
 import 'feedback_service_provider.dart';
 import 'local_storage_repository_provider.dart';
 import 'question_generator_service_provider.dart';
+import 'spaced_repetition_service_provider.dart';
 
 // region QuizState Class
 
@@ -37,6 +41,8 @@ class QuizState {
     this.correctStreak = 0,
     this.bestCorrectStreak = 0,
     this.speedBonusCount = 0,
+    this.reviewSchedulesByKey = const {},
+    this.dueReviewCount = 0,
   });
 
   final String? userId;
@@ -50,6 +56,8 @@ class QuizState {
   final int correctStreak;
   final int bestCorrectStreak;
   final int speedBonusCount;
+  final Map<String, ReviewSchedule> reviewSchedulesByKey;
+  final int dueReviewCount;
 
   QuizState copyWith({
     String? userId,
@@ -63,6 +71,8 @@ class QuizState {
     int? correctStreak,
     int? bestCorrectStreak,
     int? speedBonusCount,
+    Map<String, ReviewSchedule>? reviewSchedulesByKey,
+    int? dueReviewCount,
   }) {
     return QuizState(
       userId: userId ?? this.userId,
@@ -74,12 +84,14 @@ class QuizState {
           difficultyStepsByOperation ?? this.difficultyStepsByOperation,
       recentResultsByOperation:
           recentResultsByOperation ?? this.recentResultsByOperation,
-        questionsSinceLastStepChangeByOperation:
+      questionsSinceLastStepChangeByOperation:
           questionsSinceLastStepChangeByOperation ??
-          this.questionsSinceLastStepChangeByOperation,
+              this.questionsSinceLastStepChangeByOperation,
       correctStreak: correctStreak ?? this.correctStreak,
       bestCorrectStreak: bestCorrectStreak ?? this.bestCorrectStreak,
       speedBonusCount: speedBonusCount ?? this.speedBonusCount,
+      reviewSchedulesByKey: reviewSchedulesByKey ?? this.reviewSchedulesByKey,
+      dueReviewCount: dueReviewCount ?? this.dueReviewCount,
     );
   }
 }
@@ -105,16 +117,130 @@ class QuizNotifier extends StateNotifier<QuizState> {
     this._audioService,
     this._repository, {
     AdaptiveDifficultyService? adaptiveDifficultyService,
-  }) : _adaptiveDifficultyService =
-           adaptiveDifficultyService ?? AdaptiveDifficultyService(),
-       super(const QuizState());
+    SpacedRepetitionService? spacedRepetitionService,
+  })  : _adaptiveDifficultyService =
+            adaptiveDifficultyService ?? AdaptiveDifficultyService(),
+        _spacedRepetitionService =
+            spacedRepetitionService ?? SpacedRepetitionService(),
+        super(const QuizState());
 
   final QuestionGeneratorService _questionGenerator;
   final FeedbackService _feedbackService;
   final AudioService _audioService;
   final LocalStorageRepository _repository;
   final AdaptiveDifficultyService _adaptiveDifficultyService;
+  final SpacedRepetitionService _spacedRepetitionService;
   final _uuid = const Uuid();
+
+  String _reviewKeyForQuestion(Question question) {
+    // Question IDs are per-session UUIDs, so use a stable content key instead.
+    return '${question.operationType.name}|${question.displayQuestionText}';
+  }
+
+  Map<String, ReviewSchedule> _loadReviewSchedules(String userId) {
+    dynamic raw;
+    try {
+      raw = _repository.getSetting(
+        SettingsKeys.spacedRepetitionSchedules(userId),
+      );
+    } catch (e) {
+      debugPrint(
+        '[QuizNotifier] _loadReviewSchedules skipped (storage unavailable): $e',
+      );
+      return const <String, ReviewSchedule>{};
+    }
+    if (raw is! List) return const <String, ReviewSchedule>{};
+
+    final map = <String, ReviewSchedule>{};
+    for (final item in raw) {
+      if (item is! Map) continue;
+      final entry = Map<String, dynamic>.from(item);
+      final key = entry['key']?.toString();
+      final questionId = entry['questionId']?.toString();
+      final nextReviewRaw = entry['nextReviewDate']?.toString();
+      final intervalDays = entry['intervalDays'];
+      final consecutiveCorrect = entry['consecutiveCorrect'];
+
+      if (key == null || key.isEmpty) continue;
+      if (questionId == null || questionId.isEmpty) continue;
+      final nextReviewDate = DateTime.tryParse(nextReviewRaw ?? '');
+      if (nextReviewDate == null) continue;
+      if (intervalDays is! int || consecutiveCorrect is! int) continue;
+
+      map[key] = ReviewSchedule(
+        questionId: questionId,
+        nextReviewDate: nextReviewDate,
+        intervalDays: intervalDays,
+        consecutiveCorrect: consecutiveCorrect,
+      );
+    }
+
+    return map;
+  }
+
+  Future<void> _saveReviewSchedules(
+    String userId,
+    Map<String, ReviewSchedule> schedules,
+  ) async {
+    final raw = schedules.entries
+        .map(
+          (entry) => {
+            'key': entry.key,
+            'questionId': entry.value.questionId,
+            'nextReviewDate': entry.value.nextReviewDate.toIso8601String(),
+            'intervalDays': entry.value.intervalDays,
+            'consecutiveCorrect': entry.value.consecutiveCorrect,
+          },
+        )
+        .toList(growable: false);
+
+    try {
+      await _repository.saveSetting(
+        SettingsKeys.spacedRepetitionSchedules(userId),
+        raw,
+      );
+    } catch (e) {
+      debugPrint(
+        '[QuizNotifier] _saveReviewSchedules skipped (storage unavailable): $e',
+      );
+    }
+  }
+
+  int _countDueReviews(Map<String, ReviewSchedule> schedules, DateTime now) {
+    return _spacedRepetitionService
+        .getDueQuestionIds(schedules.values.toList(growable: false), now)
+        .length;
+  }
+
+  bool _isSpacedRepetitionEnabled(String userId) {
+    try {
+      final raw = _repository.getSetting(
+        SettingsKeys.spacedRepetitionEnabled(userId),
+        defaultValue: AppFeatures.spacedRepetitionEnabled,
+      );
+      return raw is bool ? raw : AppFeatures.spacedRepetitionEnabled;
+    } catch (_) {
+      return AppFeatures.spacedRepetitionEnabled;
+    }
+  }
+
+  void hydrateReviewSummaryForUser(String userId) {
+    if (userId.isEmpty) return;
+
+    final isEnabled = _isSpacedRepetitionEnabled(userId);
+    final reviewSchedules =
+        isEnabled ? _loadReviewSchedules(userId) : const <String, ReviewSchedule>{};
+    final dueCount =
+        isEnabled ? _countDueReviews(reviewSchedules, DateTime.now()) : 0;
+
+    state = state.copyWith(
+      userId: userId,
+      reviewSchedulesByKey: Map<String, ReviewSchedule>.unmodifiable(
+        reviewSchedules,
+      ),
+      dueReviewCount: dueCount,
+    );
+  }
 
   void _persistInProgressSession({
     required String userId,
@@ -260,6 +386,14 @@ class QuizNotifier extends StateNotifier<QuizState> {
       startTime: DateTime.now(),
     );
 
+    final isSpacedRepetitionEnabled = _isSpacedRepetitionEnabled(userId);
+    final reviewSchedules = isSpacedRepetitionEnabled
+      ? _loadReviewSchedules(userId)
+      : const <String, ReviewSchedule>{};
+    final dueCount = isSpacedRepetitionEnabled
+      ? _countDueReviews(reviewSchedules, DateTime.now())
+      : 0;
+
     state = state.copyWith(
       userId: userId,
       session: session,
@@ -270,6 +404,10 @@ class QuizNotifier extends StateNotifier<QuizState> {
       correctStreak: 0,
       bestCorrectStreak: 0,
       speedBonusCount: 0,
+      reviewSchedulesByKey: Map<String, ReviewSchedule>.unmodifiable(
+        reviewSchedules,
+      ),
+      dueReviewCount: dueCount,
     );
   }
 
@@ -352,6 +490,14 @@ class QuizNotifier extends StateNotifier<QuizState> {
       startTime: DateTime.now(),
     );
 
+    final isSpacedRepetitionEnabled = _isSpacedRepetitionEnabled(userId);
+    final reviewSchedules = isSpacedRepetitionEnabled
+      ? _loadReviewSchedules(userId)
+      : const <String, ReviewSchedule>{};
+    final dueCount = isSpacedRepetitionEnabled
+      ? _countDueReviews(reviewSchedules, DateTime.now())
+      : 0;
+
     state = state.copyWith(
       userId: userId,
       session: session,
@@ -362,6 +508,10 @@ class QuizNotifier extends StateNotifier<QuizState> {
       correctStreak: 0,
       bestCorrectStreak: 0,
       speedBonusCount: 0,
+      reviewSchedulesByKey: Map<String, ReviewSchedule>.unmodifiable(
+        reviewSchedules,
+      ),
+      dueReviewCount: dueCount,
     );
   }
 
@@ -435,11 +585,12 @@ class QuizNotifier extends StateNotifier<QuizState> {
     updatedResultsByOperation[op] = updatedOpResults;
 
     final currentStep = DifficultyConfig.clampDifficultyStep(
-      state.difficultyStepsByOperation[op] ?? DifficultyConfig.minDifficultyStep,
+      state.difficultyStepsByOperation[op] ??
+          DifficultyConfig.minDifficultyStep,
     );
     final questionsSinceLastStepChange =
         state.questionsSinceLastStepChangeByOperation[op] ??
-        LearningConstants.cooldownQuestionsAfterStepChange;
+            LearningConstants.cooldownQuestionsAfterStepChange;
 
     final suggestedStep = _adaptiveDifficultyService.suggestDifficultyStep(
       currentStep: currentStep,
@@ -455,11 +606,9 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
     final updatedQuestionsSinceLastStepChangeByOperation =
         Map<OperationType, int>.from(
-          state.questionsSinceLastStepChangeByOperation,
-        )
-          ..[op] = suggestedStep != currentStep
-              ? 0
-              : questionsSinceLastStepChange + 1;
+      state.questionsSinceLastStepChangeByOperation,
+    )..[op] =
+            suggestedStep != currentStep ? 0 : questionsSinceLastStepChange + 1;
 
     final feedback = _feedbackService.buildFeedback(
       question: question,
@@ -469,6 +618,28 @@ class QuizNotifier extends StateNotifier<QuizState> {
       gotSpeedBonus: gotSpeedBonus,
       correctStreak: isCorrect ? newStreak : previousStreak,
     );
+
+    final userId = state.userId;
+    final isSpacedRepetitionEnabled =
+        userId != null && userId.isNotEmpty && _isSpacedRepetitionEnabled(userId);
+
+    final updatedReviewSchedules = isSpacedRepetitionEnabled
+        ? (() {
+            final reviewKey = _reviewKeyForQuestion(question);
+            final previousReview = state.reviewSchedulesByKey[reviewKey];
+            final updatedReview = _spacedRepetitionService.scheduleNextReview(
+              questionId: reviewKey,
+              wasCorrect: isCorrect,
+              previous: previousReview,
+              now: DateTime.now(),
+            );
+            return Map<String, ReviewSchedule>.from(state.reviewSchedulesByKey)
+              ..[reviewKey] = updatedReview;
+          })()
+        : const <String, ReviewSchedule>{};
+    final dueCount = isSpacedRepetitionEnabled
+        ? _countDueReviews(updatedReviewSchedules, DateTime.now())
+        : 0;
 
     state = state.copyWith(
       session: updatedSession.copyWith(
@@ -487,19 +658,25 @@ class QuizNotifier extends StateNotifier<QuizState> {
       ),
       questionsSinceLastStepChangeByOperation:
           Map<OperationType, int>.unmodifiable(
-            updatedQuestionsSinceLastStepChangeByOperation,
-          ),
+        updatedQuestionsSinceLastStepChangeByOperation,
+      ),
       correctStreak: newStreak,
       bestCorrectStreak: newBestStreak,
       speedBonusCount: newSpeedBonusCount,
+      reviewSchedulesByKey: Map<String, ReviewSchedule>.unmodifiable(
+        updatedReviewSchedules,
+      ),
+      dueReviewCount: dueCount,
     );
 
-    final userId = state.userId;
     if (userId != null && userId.isNotEmpty) {
       debugPrint(
         '[QuizNotifier] submitAnswer: persisting session for userId=$userId',
       );
       _persistInProgressSession(userId: userId, session: updatedSession);
+      if (isSpacedRepetitionEnabled) {
+        unawaited(_saveReviewSchedules(userId, updatedReviewSchedules));
+      }
     }
   }
 
@@ -568,8 +745,15 @@ final quizProvider = StateNotifierProvider<QuizNotifier, QuizState>((ref) {
   final feedback = ref.watch(feedbackServiceProvider);
   final audio = ref.watch(audioServiceProvider);
   final repo = ref.watch(localStorageRepositoryProvider);
+  final spacedRepetition = ref.watch(spacedRepetitionServiceProvider);
 
-  return QuizNotifier(generator, feedback, audio, repo);
+  return QuizNotifier(
+    generator,
+    feedback,
+    audio,
+    repo,
+    spacedRepetitionService: spacedRepetition,
+  );
 });
 
 // endregion

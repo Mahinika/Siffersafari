@@ -23,4 +23,7 @@ class AppFeatures {
   /// Chance (0.0–1.0) that a supported question becomes a missing-number
   /// equation.
   static const double missingNumberChance = 0.20;
+
+  /// Enables spaced repetition scheduling and due-review surfacing.
+  static const bool spacedRepetitionEnabled = true;
 }

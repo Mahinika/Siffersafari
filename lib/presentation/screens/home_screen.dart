@@ -10,6 +10,7 @@ import '../../core/providers/local_storage_repository_provider.dart';
 import '../../core/providers/missing_number_settings_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
 import '../../core/providers/quiz_provider.dart';
+import '../../core/providers/spaced_repetition_settings_provider.dart';
 import '../../core/providers/story_progress_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
@@ -41,6 +42,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _loadedAllowedOpsForUserId;
   String? _checkedOnboardingForUserId;
+  String? _loadedReviewSummaryForUserId;
   String _appVersionLabel = '...';
   bool _onboardingPushInFlight = false;
   MascotReaction _mascotReaction = MascotReaction.idle;
@@ -155,6 +157,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider);
     final user = userState.activeUser;
+    final quizState = ref.watch(quizProvider);
+    final spacedRepetitionEnabled = user == null
+      ? false
+      : ref.watch(spacedRepetitionEnabledProvider(user.userId));
     final storyProgress = ref.watch(storyProgressProvider);
 
     final themeCfg = ref.watch(appThemeConfigProvider);
@@ -179,6 +185,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ref
             .read(parentSettingsProvider.notifier)
             .loadAllowedOperations(user.userId);
+      });
+    }
+
+    if (user != null && _loadedReviewSummaryForUserId != user.userId) {
+      _loadedReviewSummaryForUserId = user.userId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref
+            .read(quizProvider.notifier)
+            .hydrateReviewSummaryForUser(user.userId);
       });
     }
 
@@ -588,6 +604,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       color: subtleOnPrimary,
                                       fontWeight: FontWeight.w600,
                                     ),
+                              ),
+                            ),
+                            const SizedBox(height: AppConstants.smallPadding),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppConstants.smallPadding,
+                                vertical: AppConstants.smallPadding,
+                              ),
+                              decoration: BoxDecoration(
+                                color: accentColor.withValues(alpha: 0.16),
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.borderRadius,
+                                ),
+                                border: Border.all(
+                                  color: accentColor.withValues(alpha: 0.52),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.history_edu,
+                                    color: accentColor,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(
+                                    width: AppConstants.smallPadding,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      !spacedRepetitionEnabled
+                                        ? 'Repetitioner av: aktivera i Föräldraläge'
+                                        : quizState.dueReviewCount == 0
+                                          ? 'Repetitioner redo: inga just nu'
+                                          : 'Repetitioner redo: ${quizState.dueReviewCount}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: mutedOnPrimary,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],

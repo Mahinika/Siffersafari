@@ -38,7 +38,9 @@
     "cornerRadius": 14,
     "useGradients": false,
     "useTextures": false,
-    "rigFriendly": true
+    "rigFriendly": true,
+    "strokeLinecap": "round",
+    "strokeLinejoin": "round"
   },
   "tPosePreviewAlignment": {
     "armUpperTranslateY": {

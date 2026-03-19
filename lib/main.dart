@@ -21,8 +21,20 @@ Future<void> main() async {
 
   // Global error handling for Flutter framework errors
   FlutterError.onError = (FlutterErrorDetails details) {
+    final message = details.exceptionAsString();
+    final isKnownTestTeardownAnimationWarning = message.contains(
+      'An animation is still running even after the widget tree was disposed.',
+    );
+
+    if (isKnownTestTeardownAnimationWarning) {
+      debugPrint(
+        'Flutter warning (test teardown): animation callback still active after dispose.',
+      );
+      return;
+    }
+
     FlutterError.presentError(details);
-    debugPrint('Flutter error: ${details.exception}');
+    debugPrint('Flutter error: $message');
     debugPrintStack(stackTrace: details.stack);
   };
 

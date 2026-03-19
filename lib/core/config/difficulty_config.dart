@@ -569,20 +569,20 @@ class DifficultyConfig {
       case OperationType.addition:
         switch (difficulty) {
           case DifficultyLevel.easy:
-            return const NumberRange(0, 10);
-          case DifficultyLevel.medium:
             return const NumberRange(0, 20);
-          case DifficultyLevel.hard:
+          case DifficultyLevel.medium:
             return const NumberRange(0, 50);
+          case DifficultyLevel.hard:
+            return const NumberRange(0, 100);
         }
       case OperationType.subtraction:
         switch (difficulty) {
           case DifficultyLevel.easy:
-            return const NumberRange(0, 10);
-          case DifficultyLevel.medium:
             return const NumberRange(0, 20);
-          case DifficultyLevel.hard:
+          case DifficultyLevel.medium:
             return const NumberRange(0, 50);
+          case DifficultyLevel.hard:
+            return const NumberRange(0, 100);
         }
       case OperationType.multiplication:
         switch (difficulty) {
@@ -591,7 +591,7 @@ class DifficultyConfig {
           case DifficultyLevel.medium:
             return const NumberRange(0, 10);
           case DifficultyLevel.hard:
-            return const NumberRange(0, 12);
+            return const NumberRange(0, 15);
         }
       case OperationType.division:
         // Note: used for quotient + divisor (dividend becomes divisor * quotient)
@@ -601,7 +601,7 @@ class DifficultyConfig {
           case DifficultyLevel.medium:
             return const NumberRange(0, 10);
           case DifficultyLevel.hard:
-            return const NumberRange(0, 12);
+            return const NumberRange(0, 15);
         }
       case OperationType.mixed:
         // Keep mixed conservative to avoid huge operands for × and ÷
@@ -611,7 +611,7 @@ class DifficultyConfig {
           case DifficultyLevel.medium:
             return const NumberRange(0, 10);
           case DifficultyLevel.hard:
-            return const NumberRange(0, 12);
+            return const NumberRange(0, 15);
         }
     }
   }
@@ -625,30 +625,30 @@ class DifficultyConfig {
       case OperationType.subtraction:
         switch (difficulty) {
           case DifficultyLevel.easy:
-            return const NumberRange(0, 100);
+            return const NumberRange(0, 200);
           case DifficultyLevel.medium:
-            return const NumberRange(0, 500);
-          case DifficultyLevel.hard:
             return const NumberRange(0, 1000);
+          case DifficultyLevel.hard:
+            return const NumberRange(0, 2000);
         }
       case OperationType.multiplication:
         switch (difficulty) {
           case DifficultyLevel.easy:
-            return const NumberRange(0, 12);
-          case DifficultyLevel.medium:
             return const NumberRange(0, 20);
+          case DifficultyLevel.medium:
+            return const NumberRange(0, 50);
           case DifficultyLevel.hard:
-            return const NumberRange(0, 30);
+            return const NumberRange(0, 100);
         }
       case OperationType.division:
         // Note: used for quotient + divisor (dividend becomes divisor * quotient)
         switch (difficulty) {
           case DifficultyLevel.easy:
-            return const NumberRange(0, 12);
-          case DifficultyLevel.medium:
             return const NumberRange(0, 20);
+          case DifficultyLevel.medium:
+            return const NumberRange(0, 50);
           case DifficultyLevel.hard:
-            return const NumberRange(0, 30);
+            return const NumberRange(0, 100);
         }
       case OperationType.mixed:
         // Keep mixed conservative to avoid huge operands for × and ÷

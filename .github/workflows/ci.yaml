@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ main, master ]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+      - run: flutter pub get
+      - run: flutter analyze
+
+  core-smoke:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+      - run: flutter pub get
+      - name: Run core smoke test
+        run: flutter test integration_test/app_smoke_test.dart --dart-define=FULL_SMOKE=false 2>&1 | tee core_smoke.log
+      - name: Upload core smoke log
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-smoke-log
+          path: core_smoke.log
+      - name: Add summary
+        run: |
+          echo '### Core smoke test körd på PR' >> $GITHUB_STEP_SUMMARY
+          tail -n 20 core_smoke.log >> $GITHUB_STEP_SUMMARY
+
+  full-smoke-and-audit:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+      - run: flutter pub get
+      - name: Run full smoke test
+        run: flutter test integration_test/app_smoke_test.dart --dart-define=FULL_SMOKE=true 2>&1 | tee full_smoke.log
+      - name: Upload full smoke log
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-smoke-log
+          path: full_smoke.log
+      - name: Run audit test
+        run: flutter test test/unit/audits/difficulty_mix_audit_test.dart 2>&1 | tee audit.log
+      - name: Upload audit log
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-log
+          path: audit.log
+      - name: Add summary
+        run: |
+          echo '### Full smoke och audit körda på push' >> $GITHUB_STEP_SUMMARY
+          tail -n 20 full_smoke.log >> $GITHUB_STEP_SUMMARY
+          tail -n 20 audit.log >> $GITHUB_STEP_SUMMARY

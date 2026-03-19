@@ -248,6 +248,53 @@
       ],
       "group": "build",
       "problemMatcher": []
+    },
+    {
+      "label": "QA: Difficulty Mix Audit",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["test", "test/unit/audits/difficulty_mix_audit_test.dart"],
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "QA: Integration Smoke (core)",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "test",
+        "integration_test/app_smoke_test.dart",
+        "--dart-define=FULL_SMOKE=false"
+      ],
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "QA: Integration Smoke (full)",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "test",
+        "integration_test/app_smoke_test.dart",
+        "--dart-define=FULL_SMOKE=true"
+      ],
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
     }
   ]
 }

@@ -7,6 +7,10 @@ import 'package:siffersafari/main.dart' as app;
 
 import 'test_utils.dart' as it;
 
+const _kSettleShort = Duration(milliseconds: 250);
+const _kSettleMedium = Duration(milliseconds: 400);
+const _kSettleLong = Duration(milliseconds: 600);
+
 String? _activeOnboardingStep(WidgetTester tester) {
   final stepPattern = RegExp(r'^\d+/\d+$');
 
@@ -20,9 +24,11 @@ String? _activeOnboardingStep(WidgetTester tester) {
   return null;
 }
 
+bool _isVisible(Finder finder) => finder.hitTestable().evaluate().isNotEmpty;
+
 Future<void> _launchCleanApp(WidgetTester tester) async {
   await app.main();
-  await it.settle(tester, const Duration(milliseconds: 1200));
+  await it.settle(tester, _kSettleLong);
 
   if (getIt.isRegistered<LocalStorageRepository>()) {
     await getIt<LocalStorageRepository>().clearAllData();
@@ -30,39 +36,41 @@ Future<void> _launchCleanApp(WidgetTester tester) async {
   }
 
   await app.main();
-  await it.settle(tester, const Duration(milliseconds: 1200));
+  await it.settle(tester, _kSettleLong);
 }
 
 Future<bool> _completeOnboardingStepIfVisible(WidgetTester tester) async {
   final activeStep = _activeOnboardingStep(tester);
+  final gradeTitle = find.text('Vilken årskurs kör du?');
+  final readingTitle = find.text('Kan barnet läsa?');
+  final opsTitle = find.text('Vad vill du räkna först?');
 
-  if ((activeStep?.startsWith('1/') ?? true) &&
-      find.text('Vilken årskurs kör du?').evaluate().isNotEmpty) {
+  if (_isVisible(readingTitle)) {
+    final noButton = find.text('Nej').hitTestable();
+    if (noButton.evaluate().isNotEmpty) {
+      await tester.ensureVisible(noButton.first);
+      await tester.tap(noButton.first);
+      await it.settle(tester, _kSettleMedium);
+      return true;
+    }
+  }
+
+  if ((activeStep?.startsWith('1/') ?? true) && _isVisible(gradeTitle)) {
     final nextButton = find.widgetWithText(ElevatedButton, 'Nästa');
     if (nextButton.evaluate().isNotEmpty) {
       await it.tap(tester, nextButton);
-      await it.settle(tester, const Duration(milliseconds: 500));
+      await it.settle(tester, _kSettleMedium);
       return true;
     }
   }
 
-  if ((activeStep?.startsWith('2/') ?? false) &&
-      find.text('Kan barnet läsa?').evaluate().isNotEmpty) {
-    final noButton = find.widgetWithText(ElevatedButton, 'Nej');
-    if (noButton.evaluate().isNotEmpty) {
-      await it.tap(tester, noButton);
-      await it.settle(tester, const Duration(milliseconds: 500));
-      return true;
-    }
-  }
-
-  if ((activeStep?.startsWith('3/') ?? false) ||
-      ((activeStep?.startsWith('2/') ?? false) &&
-          find.text('Kan barnet läsa?').evaluate().isEmpty)) {
+  if (_isVisible(opsTitle) ||
+      activeStep?.startsWith('3/') == true ||
+      ((activeStep?.startsWith('2/') ?? false) && !_isVisible(readingTitle))) {
     final doneButton = find.widgetWithText(ElevatedButton, 'Starta');
     if (doneButton.evaluate().isNotEmpty) {
       await it.tap(tester, doneButton);
-      await it.settle(tester, const Duration(milliseconds: 600));
+      await it.settle(tester, _kSettleMedium);
       return true;
     }
   }
@@ -70,7 +78,7 @@ Future<bool> _completeOnboardingStepIfVisible(WidgetTester tester) async {
   final skipButton = find.widgetWithText(TextButton, 'Hoppa över');
   if (skipButton.evaluate().isNotEmpty) {
     await it.tap(tester, skipButton);
-    await it.settle(tester, const Duration(milliseconds: 700));
+    await it.settle(tester, _kSettleMedium);
     return true;
   }
 
@@ -135,9 +143,9 @@ void main() {
           await it.tap(
             tester,
             createButton,
-            after: const Duration(milliseconds: 300),
+            after: _kSettleShort,
           );
-          await tester.pump(const Duration(milliseconds: 200));
+          await tester.pump(_kSettleShort);
 
           final nameField = find.byType(TextField);
           if (nameField.evaluate().isNotEmpty) {
@@ -150,7 +158,7 @@ void main() {
             await it.tap(
               tester,
               create,
-              after: const Duration(milliseconds: 500),
+              after: _kSettleMedium,
             );
           }
         }
@@ -161,7 +169,7 @@ void main() {
           await it.tryTap(
             tester,
             skip,
-            after: const Duration(milliseconds: 600),
+            after: _kSettleMedium,
           );
         }
 
@@ -192,9 +200,9 @@ void main() {
         await it.tap(
           tester,
           parentModeTooltip,
-          after: const Duration(milliseconds: 400),
+          after: _kSettleMedium,
         );
-        await tester.pump(const Duration(milliseconds: 200));
+        await tester.pump(_kSettleShort);
       } else {
         // Fallback path: open Settings and tap "Föräldraläge".
         final settingsIcon = find.byIcon(Icons.settings);
@@ -206,9 +214,9 @@ void main() {
         await it.tap(
           tester,
           settingsIcon,
-          after: const Duration(milliseconds: 500),
+          after: _kSettleMedium,
         );
-        await tester.pump(const Duration(milliseconds: 200));
+        await tester.pump(_kSettleShort);
 
         final parentModeButton = find.text('Föräldraläge');
         if (parentModeButton.evaluate().isEmpty) {
@@ -217,9 +225,9 @@ void main() {
         await it.tap(
           tester,
           parentModeButton,
-          after: const Duration(milliseconds: 500),
+          after: _kSettleMedium,
         );
-        await tester.pump(const Duration(milliseconds: 200));
+        await tester.pump(_kSettleShort);
       }
 
       await waitFor(
@@ -246,16 +254,16 @@ void main() {
         await failWithUiState('Expected 2 PIN fields');
       }
       await tester.enterText(pinFields.at(0), '1234');
-      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(_kSettleShort);
       await tester.enterText(pinFields.at(1), '1234');
-      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(_kSettleShort);
 
       final savePin = find.text('Spara PIN');
       if (savePin.evaluate().isEmpty) {
         await failWithUiState('"Spara PIN" button not found');
       }
-      await it.tap(tester, savePin, after: const Duration(seconds: 1));
-      await tester.pump(const Duration(milliseconds: 200));
+      await it.tap(tester, savePin, after: _kSettleMedium);
+      await tester.pump(_kSettleShort);
 
       // Recovery setup dialog.
       final dialogTitle = find.text('Sätt säkerhetsfråga');
@@ -291,9 +299,11 @@ void main() {
       }
 
       // Tap save while keyboard is still up.
-      await it.tap(tester, saveRecovery,
-          after: const Duration(milliseconds: 250),
-        );
+      await it.tap(
+        tester,
+        saveRecovery,
+        after: _kSettleShort,
+      );
 
       // Let dialog pop + navigation settle, and verify we didn't hit framework asserts.
       await waitFor(
@@ -314,7 +324,7 @@ void main() {
       expect(find.text('Översikt'), findsWidgets);
 
       // Extra settle for delayed overlay issues.
-      await it.settle(tester, const Duration(milliseconds: 600));
+      await it.settle(tester, _kSettleMedium);
       expect(tester.takeException(), isNull);
       if (flutterError != null) {
         fail(

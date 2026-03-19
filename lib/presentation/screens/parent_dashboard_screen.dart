@@ -9,6 +9,8 @@ import '../../core/providers/data_export_service_provider.dart';
 import '../../core/providers/local_storage_repository_provider.dart';
 import '../../core/providers/missing_number_settings_provider.dart';
 import '../../core/providers/parent_settings_provider.dart';
+import '../../core/providers/quiz_provider.dart';
+import '../../core/providers/spaced_repetition_settings_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
 import '../../core/services/app_update_service.dart';
@@ -313,6 +315,11 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     final missingNumberNotifier =
         ref.read(missingNumberEnabledProvider(userId).notifier);
 
+    final spacedRepetitionEnabled =
+      ref.watch(spacedRepetitionEnabledProvider(userId));
+    final spacedRepetitionNotifier =
+      ref.read(spacedRepetitionEnabledProvider(userId).notifier);
+
     final overviewCard = _Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -555,6 +562,42 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
                 accentColor.withValues(alpha: AppOpacities.highlightStrong),
             onChanged: (value) {
               missingNumberNotifier.setEnabled(value);
+            },
+          ),
+          const Divider(height: 1),
+          SwitchListTile(
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Spaced repetition',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: mutedOnPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ),
+                infoButton(
+                  title: 'Spaced repetition',
+                  message:
+                      'Nar den ar pa sa schemalaggs repetition av tidigare fragor over tid.\n\nStang av om ni vill kora fria rundor utan repetitionstryck.',
+                ),
+              ],
+            ),
+            subtitle: Text(
+              'Planerad repetition over tid',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: subtleOnPrimary,
+                  ),
+            ),
+            value: spacedRepetitionEnabled,
+            activeThumbColor: accentColor,
+            activeTrackColor:
+                accentColor.withValues(alpha: AppOpacities.highlightStrong),
+            onChanged: (value) async {
+              await spacedRepetitionNotifier.setEnabled(value);
+              if (!mounted) return;
+              ref.read(quizProvider.notifier).hydrateReviewSummaryForUser(userId);
             },
           ),
           const Divider(height: 1),

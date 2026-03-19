@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="236" height="188" viewBox="0 0 236 188" xmlns="http://www.w3.org/2000/svg">
 
-  <path d="M 58 74 Q 68 28 118 22 Q 168 28 178 76 Q 158 58 118 56 Q 80 58 58 74 Z" fill="#C59166" stroke="#926F5D" stroke-width="4"/>
-  <ellipse cx="118" cy="106" rx="60" ry="62" fill="#E7B187" stroke="#926F5D" stroke-width="4"/>
+  <path d="M 58 74 Q 68 28 118 22 Q 168 28 178 76 Q 158 58 118 56 Q 80 58 58 74 Z" fill="#C59166" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="118" cy="106" rx="60" ry="62" fill="#E7B187" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <ellipse cx="88" cy="132" rx="12" ry="8" fill="#EFA990" opacity="0.55"/>
   <ellipse cx="148" cy="132" rx="12" ry="8" fill="#EFA990" opacity="0.55"/>
 

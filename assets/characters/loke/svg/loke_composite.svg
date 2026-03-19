@@ -2,51 +2,51 @@
 <svg width="400" height="600" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
 
   <g id="shadow" transform="translate(90 522)"><ellipse cx="110" cy="34" rx="84" ry="18" fill="#0000001A"/></g>
-  <g id="backpack" transform="translate(86 196) scale(0.62)"><rect x="74" y="48" width="112" height="148" rx="32" fill="#F2C94C" stroke="#926F5D" stroke-width="4"/>
+  <g id="backpack" transform="translate(86 196) scale(0.62)"><rect x="74" y="48" width="112" height="148" rx="32" fill="#F2C94C" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <rect x="96" y="74" width="68" height="20" rx="10" fill="#D0AD41"/>
-  <rect x="88" y="108" width="84" height="60" rx="22" fill="#F3CE5E" stroke="#926F5D" stroke-width="3"/></g>
-  <g id="leg_upper_left" transform="translate(140 300)"><rect x="16" y="8" width="48" height="30" rx="12" fill="#4A7CFF" stroke="#926F5D" stroke-width="4"/>
-  <rect x="20" y="32" width="40" height="96" rx="18" fill="#E7B187" stroke="#926F5D" stroke-width="4"/></g>
-  <g id="leg_lower_left" transform="translate(144 416)"><rect x="18" y="6" width="36" height="132" rx="18" fill="#E7B187" stroke="#926F5D" stroke-width="4"/></g>
-  <g id="shoe_left" transform="translate(108 526) scale(0.52)"><path d="M 22 68 Q 40 42 90 42 Q 122 44 138 60 L 136 82 Q 118 98 62 100 Q 18 98 14 80 Z" fill="#FFF0B8" stroke="#926F5D" stroke-width="4"/>
+  <rect x="88" y="108" width="84" height="60" rx="22" fill="#F3CE5E" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="leg_upper_left" transform="translate(140 300)"><rect x="16" y="8" width="48" height="30" rx="12" fill="#4A7CFF" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="20" y="32" width="40" height="96" rx="18" fill="#E7B187" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="leg_lower_left" transform="translate(144 416)"><rect x="18" y="6" width="36" height="132" rx="18" fill="#E7B187" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="shoe_left" transform="translate(108 526) scale(0.52)"><path d="M 22 68 Q 40 42 90 42 Q 122 44 138 60 L 136 82 Q 118 98 62 100 Q 18 98 14 80 Z" fill="#FFF0B8" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <path d="M 24 76 Q 70 88 130 82" fill="none" stroke="#FF8A5B" stroke-width="4" stroke-linecap="round"/>
-  <path d="M 18 84 Q 74 104 140 92 L 140 100 Q 78 112 16 96 Z" fill="#FFFCEF" stroke="#926F5D" stroke-width="3"/></g>
-  <g id="leg_upper_right" transform="translate(200 300)"><rect x="16" y="8" width="48" height="30" rx="12" fill="#4A7CFF" stroke="#926F5D" stroke-width="4"/>
-  <rect x="20" y="32" width="40" height="96" rx="18" fill="#E7B187" stroke="#926F5D" stroke-width="4"/></g>
-  <g id="leg_lower_right" transform="translate(204 416)"><rect x="18" y="6" width="36" height="132" rx="18" fill="#E7B187" stroke="#926F5D" stroke-width="4"/></g>
-  <g id="shoe_right" transform="translate(180 526) scale(0.52)"><path d="M 22 68 Q 40 42 90 42 Q 122 44 138 60 L 136 82 Q 118 98 62 100 Q 18 98 14 80 Z" fill="#FFF0B8" stroke="#926F5D" stroke-width="4"/>
+  <path d="M 18 84 Q 74 104 140 92 L 140 100 Q 78 112 16 96 Z" fill="#FFFCEF" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="leg_upper_right" transform="translate(200 300)"><rect x="16" y="8" width="48" height="30" rx="12" fill="#4A7CFF" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="20" y="32" width="40" height="96" rx="18" fill="#E7B187" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="leg_lower_right" transform="translate(204 416)"><rect x="18" y="6" width="36" height="132" rx="18" fill="#E7B187" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="shoe_right" transform="translate(180 526) scale(0.52)"><path d="M 22 68 Q 40 42 90 42 Q 122 44 138 60 L 136 82 Q 118 98 62 100 Q 18 98 14 80 Z" fill="#FFF0B8" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <path d="M 24 76 Q 70 88 130 82" fill="none" stroke="#FF8A5B" stroke-width="4" stroke-linecap="round"/>
-  <path d="M 18 84 Q 74 104 140 92 L 140 100 Q 78 112 16 96 Z" fill="#FFFCEF" stroke="#926F5D" stroke-width="3"/></g>
-  <g id="arm_upper_left" transform="translate(100 214) rotate(6 38 14)"><rect x="24" y="8" width="28" height="118" rx="14" fill="#4A7CFF" stroke="#926F5D" stroke-width="4"/></g>
-  <g id="arm_lower_left" transform="translate(92 324) rotate(6 40 14)"><rect x="24" y="8" width="28" height="98" rx="14" fill="#E7B187" stroke="#926F5D" stroke-width="4"/>
-  <circle cx="38" cy="122" r="16" fill="#E7B187" stroke="#926F5D" stroke-width="4"/>
-  <rect x="18" y="4" width="40" height="14" rx="7" fill="#416DE0" stroke="#926F5D" stroke-width="3"/></g>
-  <g id="arm_upper_right" transform="translate(224 214) rotate(-6 38 14)"><rect x="24" y="8" width="28" height="118" rx="14" fill="#4A7CFF" stroke="#926F5D" stroke-width="4"/></g>
-  <g id="arm_lower_right" transform="translate(228 324) rotate(-6 40 14)"><rect x="24" y="8" width="28" height="98" rx="14" fill="#E7B187" stroke="#926F5D" stroke-width="4"/>
-  <circle cx="38" cy="122" r="16" fill="#E7B187" stroke="#926F5D" stroke-width="4"/>
-  <rect x="18" y="4" width="40" height="14" rx="7" fill="#416DE0" stroke="#926F5D" stroke-width="3"/></g>
-  <g id="torso" transform="translate(82 166)"><path d="M 60 30 Q 80 8 118 8 Q 156 8 176 30 L 184 142 Q 154 174 118 174 Q 82 174 52 142 Z" fill="#4A7CFF" stroke="#926F5D" stroke-width="4"/>
+  <path d="M 18 84 Q 74 104 140 92 L 140 100 Q 78 112 16 96 Z" fill="#FFFCEF" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="arm_upper_left" transform="translate(100 214) rotate(6 38 14)"><rect x="24" y="8" width="28" height="118" rx="14" fill="#4A7CFF" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="arm_lower_left" transform="translate(92 324) rotate(6 40 14)"><rect x="24" y="8" width="28" height="98" rx="14" fill="#E7B187" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="38" cy="122" r="16" fill="#E7B187" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="18" y="4" width="40" height="14" rx="7" fill="#416DE0" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="arm_upper_right" transform="translate(224 214) rotate(-6 38 14)"><rect x="24" y="8" width="28" height="118" rx="14" fill="#4A7CFF" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="arm_lower_right" transform="translate(228 324) rotate(-6 40 14)"><rect x="24" y="8" width="28" height="98" rx="14" fill="#E7B187" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="38" cy="122" r="16" fill="#E7B187" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="18" y="4" width="40" height="14" rx="7" fill="#416DE0" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="torso" transform="translate(82 166)"><path d="M 60 30 Q 80 8 118 8 Q 156 8 176 30 L 184 142 Q 154 174 118 174 Q 82 174 52 142 Z" fill="#4A7CFF" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <path d="M 88 28 Q 102 16 118 16 Q 134 16 148 28 L 142 46 Q 130 38 118 38 Q 106 38 94 46 Z" fill="#6B94FF" opacity="0.85"/>
-  <rect x="84" y="132" width="68" height="18" rx="9" fill="#5886FF" stroke="#926F5D" stroke-width="3"/></g>
-  <g id="head" transform="translate(94 36)"><path d="M 58 74 Q 68 28 118 22 Q 168 28 178 76 Q 158 58 118 56 Q 80 58 58 74 Z" fill="#C59166" stroke="#926F5D" stroke-width="4"/>
-  <ellipse cx="118" cy="106" rx="60" ry="62" fill="#E7B187" stroke="#926F5D" stroke-width="4"/>
+  <rect x="84" y="132" width="68" height="18" rx="9" fill="#5886FF" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g id="head" transform="translate(94 36)"><path d="M 58 74 Q 68 28 118 22 Q 168 28 178 76 Q 158 58 118 56 Q 80 58 58 74 Z" fill="#C59166" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="118" cy="106" rx="60" ry="62" fill="#E7B187" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <ellipse cx="88" cy="132" rx="12" ry="8" fill="#EFA990" opacity="0.55"/>
   <ellipse cx="148" cy="132" rx="12" ry="8" fill="#EFA990" opacity="0.55"/></g>
-  <g id="eyes" transform="translate(94 60)"><ellipse cx="88" cy="54" rx="12" ry="16" fill="white" stroke="#926F5D" stroke-width="3"/>
-  <ellipse cx="148" cy="54" rx="12" ry="16" fill="white" stroke="#926F5D" stroke-width="3"/>
+  <g id="eyes" transform="translate(94 60)"><ellipse cx="88" cy="54" rx="12" ry="16" fill="white" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="148" cy="54" rx="12" ry="16" fill="white" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
   <circle cx="88" cy="57" r="6" fill="#785B4C"/>
   <circle cx="148" cy="57" r="6" fill="#785B4C"/>
   <circle cx="91" cy="53" r="2" fill="white"/>
   <circle cx="151" cy="53" r="2" fill="white"/>
   
-  <rect x="70" y="44" width="36" height="24" rx="9" fill="none" stroke="#866656" stroke-width="4"/>
-  <rect x="130" y="44" width="36" height="24" rx="9" fill="none" stroke="#866656" stroke-width="4"/>
-  <line x1="106" y1="56" x2="130" y2="56" stroke="#866656" stroke-width="4" stroke-linecap="round"/>
-  <line x1="60" y1="56" x2="70" y2="54" stroke="#866656" stroke-width="4" stroke-linecap="round"/>
-  <line x1="166" y1="54" x2="176" y2="56" stroke="#866656" stroke-width="4" stroke-linecap="round"/></g>
+  <rect x="70" y="44" width="36" height="24" rx="9" fill="none" stroke="#866656" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="130" y="44" width="36" height="24" rx="9" fill="none" stroke="#866656" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="106" y1="56" x2="130" y2="56" stroke="#866656" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="60" y1="56" x2="70" y2="54" stroke="#866656" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="166" y1="54" x2="176" y2="56" stroke="#866656" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/></g>
   <g id="mouth" transform="translate(94 120)"><path d="M 88 46 Q 118 74 148 46" fill="none" stroke="#785B4C" stroke-width="5" stroke-linecap="round"/></g>
-  <g id="hat" transform="translate(64 -12) scale(0.84)"><path d="M 88 118 Q 112 48 176 44 Q 232 44 252 118 L 88 118 Z" fill="#8ED081" stroke="#926F5D" stroke-width="4"/>
-  <path d="M 124 118 Q 174 138 246 118 Q 210 148 124 134 Z" fill="#7DB772" stroke="#926F5D" stroke-width="3"/>
+  <g id="hat" transform="translate(64 -12) scale(0.84)"><path d="M 88 118 Q 112 48 176 44 Q 232 44 252 118 L 88 118 Z" fill="#8ED081" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 124 118 Q 174 138 246 118 Q 210 148 124 134 Z" fill="#7DB772" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
   <rect x="118" y="84" width="88" height="14" rx="7" fill="#FF8A5B"/></g>
 
 </svg>

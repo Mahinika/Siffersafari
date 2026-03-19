@@ -25,58 +25,88 @@ class StoryMapScreen extends ConsumerWidget {
       BoxConstraints(maxWidth: size.width, maxHeight: size.height),
     );
 
+    if (story == null) {
+      return ThemedBackgroundScaffold(
+        appBar: AppBar(
+          title: const Text('Djungelkartan'),
+        ),
+        body: Center(
+          child: Text(
+            'Ingen karta finns an.',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: mutedOnPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ),
+      );
+    }
+
+    final currentNode = story.currentNode;
+    final nextNode = _nextNode(story);
+
     return ThemedBackgroundScaffold(
       appBar: AppBar(
         title: const Text('Djungelkartan'),
       ),
-      body: story == null
-          ? Center(
-              child: Text(
-                'Ingen karta tillgänglig ännu.',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: mutedOnPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(AppConstants.defaultPadding),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: layout.isExpandedWidth ? 980 : 760,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _StoryMapHeader(
-                        story: story,
-                        heroAsset: themeCfg.questHeroAsset,
-                        backgroundAsset: themeCfg.backgroundAsset,
-                        accentColor: scheme.secondary,
-                        onPrimary: onPrimary,
-                        mutedOnPrimary: mutedOnPrimary,
-                        subtleOnPrimary: subtleOnPrimary,
-                      ),
-                      const SizedBox(height: AppConstants.largePadding),
-                      _StoryMapCanvas(
-                        story: story,
-                        accentColor: scheme.secondary,
-                        onPrimary: onPrimary,
-                        mutedOnPrimary: mutedOnPrimary,
-                        subtleOnPrimary: subtleOnPrimary,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: layout.isExpandedWidth ? 860 : 720,
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _MapHeroCard(
+                  story: story,
+                  heroAsset: themeCfg.questHeroAsset,
+                  backgroundAsset: themeCfg.backgroundAsset,
+                  accentColor: scheme.secondary,
+                  onPrimary: onPrimary,
+                  mutedOnPrimary: mutedOnPrimary,
+                  subtleOnPrimary: subtleOnPrimary,
+                ),
+                const SizedBox(height: AppConstants.largePadding),
+                _NowAndNextPanel(
+                  story: story,
+                  currentNode: currentNode,
+                  nextNode: nextNode,
+                  accentColor: scheme.secondary,
+                  onPrimary: onPrimary,
+                  mutedOnPrimary: mutedOnPrimary,
+                  onContinue: () => Navigator.of(context).maybePop(),
+                ),
+                const SizedBox(height: AppConstants.largePadding),
+                _NearbyStopsPanel(
+                  story: story,
+                  currentNode: currentNode,
+                  nextNode: nextNode,
+                  accentColor: scheme.secondary,
+                  onPrimary: onPrimary,
+                  mutedOnPrimary: mutedOnPrimary,
+                  subtleOnPrimary: subtleOnPrimary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
+  }
+
+  StoryNode? _nextNode(StoryProgress story) {
+    final nextIndex = story.currentNodeIndex + 1;
+    if (nextIndex < 0 || nextIndex >= story.nodes.length) {
+      return null;
+    }
+    return story.nodes[nextIndex];
   }
 }
 
-class _StoryMapHeader extends StatelessWidget {
-  const _StoryMapHeader({
+class _MapHeroCard extends StatelessWidget {
+  const _MapHeroCard({
     required this.story,
     required this.heroAsset,
     required this.backgroundAsset,
@@ -96,7 +126,9 @@ class _StoryMapHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalChapters = ((story.totalNodes - 1) ~/ 5) + 1;
+    final overallProgress =
+        story.totalNodes == 0 ? 0.0 : story.completedNodes / story.totalNodes;
+    final chapterNumber = (story.currentNodeIndex ~/ 5) + 1;
 
     return Container(
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -116,8 +148,8 @@ class _StoryMapHeader extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: AppOpacities.shadowAmbient),
-            blurRadius: 20,
-            offset: const Offset(0, 12),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -128,17 +160,55 @@ class _StoryMapHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppConstants.borderRadius),
             child: SizedBox(
               height: 150,
-              child: Image.asset(
-                heroAsset,
-                fit: BoxFit.cover,
-                excludeFromSemantics: true,
-                errorBuilder: (context, error, stackTrace) {
-                  return Image.asset(
-                    backgroundAsset,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    heroAsset,
                     fit: BoxFit.cover,
                     excludeFromSemantics: true,
-                  );
-                },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        backgroundAsset,
+                        fit: BoxFit.cover,
+                        excludeFromSemantics: true,
+                      );
+                    },
+                  ),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.10),
+                          Colors.black.withValues(alpha: 0.44),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: AppConstants.defaultPadding,
+                    bottom: AppConstants.defaultPadding,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppConstants.smallPadding,
+                        vertical: AppConstants.microSpacing6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.28),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        'Folj stigen steg for steg',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: onPrimary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -152,24 +222,7 @@ class _StoryMapHeader extends StatelessWidget {
           ),
           const SizedBox(height: AppConstants.microSpacing6),
           Text(
-            story.chapterTitle,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: accentColor,
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-          const SizedBox(height: AppConstants.smallPadding),
-          Text(
-            'Hela expeditionen',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: mutedOnPrimary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.3,
-                ),
-          ),
-          const SizedBox(height: AppConstants.microSpacing4),
-          Text(
-            story.worldSubtitle,
+            'Du ser bara det viktigaste: var du ar och vart du ska nu.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: subtleOnPrimary,
                   fontWeight: FontWeight.w600,
@@ -180,34 +233,61 @@ class _StoryMapHeader extends StatelessWidget {
             spacing: AppConstants.smallPadding,
             runSpacing: AppConstants.smallPadding,
             children: [
-              SizedBox(
-                width: 220,
-                child: _HeaderStat(
-                  label: 'Checkpoint',
-                  value: '${story.completedNodes}/${story.totalNodes}',
-                  onPrimary: onPrimary,
-                  mutedOnPrimary: mutedOnPrimary,
-                ),
+              _HeaderChip(
+                label: 'Klara stopp',
+                value: '${story.completedNodes}/${story.totalNodes}',
+                onPrimary: onPrimary,
+                mutedOnPrimary: mutedOnPrimary,
               ),
-              SizedBox(
-                width: 220,
-                child: _HeaderStat(
-                  label: 'Maskoten nu',
-                  value: story.currentNode?.landmark ?? 'Stigen',
-                  onPrimary: onPrimary,
-                  mutedOnPrimary: mutedOnPrimary,
-                ),
+              _HeaderChip(
+                label: 'Del just nu',
+                value: '$chapterNumber',
+                onPrimary: onPrimary,
+                mutedOnPrimary: mutedOnPrimary,
               ),
-              SizedBox(
-                width: 220,
-                child: _HeaderStat(
-                  label: 'Etapper',
-                  value: '$totalChapters delar',
-                  onPrimary: onPrimary,
-                  mutedOnPrimary: mutedOnPrimary,
-                ),
+              _HeaderChip(
+                label: 'Nasta mattegrej',
+                value: story.currentObjectiveTitle,
+                onPrimary: onPrimary,
+                mutedOnPrimary: mutedOnPrimary,
               ),
             ],
+          ),
+          const SizedBox(height: AppConstants.defaultPadding),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Hur langt du har kommit',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: mutedOnPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+              const SizedBox(width: AppConstants.smallPadding),
+              Text(
+                '${(overallProgress * 100).round()}%',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: onPrimary,
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.smallPadding),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+            child: LinearProgressIndicator(
+              value: overallProgress,
+              minHeight: AppConstants.progressBarHeightSmall,
+              backgroundColor: onPrimary.withValues(
+                alpha: AppOpacities.progressTrackLight,
+              ),
+              valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+            ),
           ),
         ],
       ),
@@ -215,8 +295,8 @@ class _StoryMapHeader extends StatelessWidget {
   }
 }
 
-class _HeaderStat extends StatelessWidget {
-  const _HeaderStat({
+class _HeaderChip extends StatelessWidget {
+  const _HeaderChip({
     required this.label,
     required this.value,
     required this.onPrimary,
@@ -230,34 +310,243 @@ class _HeaderStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.smallPadding),
-      decoration: BoxDecoration(
-        color: onPrimary.withValues(alpha: AppOpacities.subtleFill),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        border: Border.all(
-          color: onPrimary.withValues(alpha: AppOpacities.hudBorder),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 160, maxWidth: 240),
+      child: Container(
+        padding: const EdgeInsets.all(AppConstants.smallPadding),
+        decoration: BoxDecoration(
+          color: onPrimary.withValues(alpha: AppOpacities.subtleFill),
+          borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+          border: Border.all(
+            color: onPrimary.withValues(alpha: AppOpacities.hudBorder),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: mutedOnPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: AppConstants.microSpacing4),
+            Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: onPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+          ],
         ),
       ),
-      child: Column(
+    );
+  }
+}
+
+class _NowAndNextPanel extends StatelessWidget {
+  const _NowAndNextPanel({
+    required this.story,
+    required this.currentNode,
+    required this.nextNode,
+    required this.accentColor,
+    required this.onPrimary,
+    required this.mutedOnPrimary,
+    required this.onContinue,
+  });
+
+  final StoryProgress story;
+  final StoryNode? currentNode;
+  final StoryNode? nextNode;
+  final Color accentColor;
+  final Color onPrimary;
+  final Color mutedOnPrimary;
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final useColumns = constraints.maxWidth < 620;
+        final actionBody = nextNode == null
+            ? 'Ga tillbaka och spela sista stoppet pa stigen.'
+            : 'Ga tillbaka och tryck pa Spela nasta stopp for att resa mot ${nextNode!.landmark}.';
+        final currentCard = _FocusCard(
+          label: 'Du ar har',
+          title: currentNode?.landmark ?? 'Starten',
+          body: 'Nu: ${story.currentObjectiveTitle}',
+          icon: Icons.place_rounded,
+          color: accentColor,
+          onPrimary: onPrimary,
+        );
+        final nextCard = _FocusCard(
+          label: nextNode == null ? 'Mallet ar nara' : 'Nasta stopp',
+          title: nextNode?.landmark ?? 'Sista stoppet',
+          body: nextNode == null
+              ? 'Du ar snart framme vid slutet av stigen.'
+              : 'Sedan: ${nextNode!.title}',
+          icon: nextNode == null ? Icons.emoji_events : Icons.flag_rounded,
+          color: nextNode == null
+              ? const Color(0xFFD39A2F)
+              : accentColor.withValues(alpha: 0.92),
+          onPrimary: onPrimary,
+        );
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Vad hander nu?',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: onPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+            const SizedBox(height: AppConstants.microSpacing6),
+            Text(
+              'Titta pa de tva stora rutorna for att se var du ar och vart du ska.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: mutedOnPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: AppConstants.defaultPadding),
+            if (useColumns) ...[
+              currentCard,
+              const SizedBox(height: AppConstants.defaultPadding),
+              nextCard,
+            ] else
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: currentCard),
+                  const SizedBox(width: AppConstants.defaultPadding),
+                  Expanded(child: nextCard),
+                ],
+              ),
+            const SizedBox(height: AppConstants.defaultPadding),
+            Container(
+              padding: const EdgeInsets.all(AppConstants.defaultPadding),
+              decoration: BoxDecoration(
+                color: onPrimary.withValues(alpha: AppOpacities.subtleFill),
+                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                border: Border.all(
+                  color: onPrimary.withValues(alpha: AppOpacities.hudBorder),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.touch_app_rounded,
+                    color: accentColor,
+                    size: 20,
+                  ),
+                  const SizedBox(width: AppConstants.smallPadding),
+                  Expanded(
+                    child: Text(
+                      actionBody,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: mutedOnPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppConstants.defaultPadding),
+            ElevatedButton.icon(
+              onPressed: onContinue,
+              icon: const Icon(Icons.arrow_back_rounded),
+              label: const Text('Tillbaka och spela'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _FocusCard extends StatelessWidget {
+  const _FocusCard({
+    required this.label,
+    required this.title,
+    required this.body,
+    required this.icon,
+    required this.color,
+    required this.onPrimary,
+  });
+
+  final String label;
+  final String title;
+  final String body;
+  final IconData icon;
+  final Color color;
+  final Color onPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.22),
+            color.withValues(alpha: 0.10),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        border: Border.all(color: color.withValues(alpha: 0.72), width: 2),
+      ),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: mutedOnPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.22),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: onPrimary),
           ),
-          const SizedBox(height: AppConstants.microSpacing4),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: onPrimary,
-                  fontWeight: FontWeight.w800,
+          const SizedBox(width: AppConstants.defaultPadding),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: onPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
                 ),
+                const SizedBox(height: AppConstants.microSpacing4),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: onPrimary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+                const SizedBox(height: AppConstants.microSpacing6),
+                Text(
+                  body,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: onPrimary.withValues(alpha: 0.88),
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -265,9 +554,11 @@ class _HeaderStat extends StatelessWidget {
   }
 }
 
-class _StoryMapCanvas extends StatelessWidget {
-  const _StoryMapCanvas({
+class _NearbyStopsPanel extends StatelessWidget {
+  const _NearbyStopsPanel({
     required this.story,
+    required this.currentNode,
+    required this.nextNode,
     required this.accentColor,
     required this.onPrimary,
     required this.mutedOnPrimary,
@@ -275,6 +566,8 @@ class _StoryMapCanvas extends StatelessWidget {
   });
 
   final StoryProgress story;
+  final StoryNode? currentNode;
+  final StoryNode? nextNode;
   final Color accentColor;
   final Color onPrimary;
   final Color mutedOnPrimary;
@@ -282,7 +575,11 @@ class _StoryMapCanvas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalChapters = ((story.nodes.length - 1) ~/ 5) + 1;
+    final visibleNodes = _selectVisibleNodes(
+      story.nodes,
+      currentIndex: story.currentNodeIndex,
+      windowSize: 5,
+    );
 
     return Container(
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -303,464 +600,198 @@ class _StoryMapCanvas extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _StoryMapLegend(
-            accentColor: accentColor,
-            onPrimary: onPrimary,
-            mutedOnPrimary: mutedOnPrimary,
-          ),
-          const SizedBox(height: AppConstants.defaultPadding),
-          for (var chapterIndex = 0;
-              chapterIndex < totalChapters;
-              chapterIndex++) ...[
-            _ChapterMarker(
-              title: _chapterTitle(chapterIndex),
-              subtitle: _chapterSubtitle(chapterIndex),
-              accentColor: accentColor,
-              onPrimary: onPrimary,
-            ),
-            const SizedBox(height: AppConstants.defaultPadding),
-            for (var i = chapterIndex * 5;
-                i < ((chapterIndex + 1) * 5).clamp(0, story.nodes.length);
-                i++) ...[
-              _StoryTimelineRow(
-                node: story.nodes[i],
-                accentColor: accentColor,
-                onPrimary: onPrimary,
-                mutedOnPrimary: mutedOnPrimary,
-                subtleOnPrimary: subtleOnPrimary,
-                isLast: i == story.nodes.length - 1,
-              ),
-              if (i < ((chapterIndex + 1) * 5).clamp(0, story.nodes.length) - 1)
-                const SizedBox(height: AppConstants.smallPadding),
-            ],
-            if (chapterIndex < totalChapters - 1)
-              const SizedBox(height: AppConstants.largePadding),
-          ],
-        ],
-      ),
-    );
-  }
-
-  String _chapterTitle(int chapterIndex) => 'Etapp ${chapterIndex + 1}';
-
-  String _chapterSubtitle(int chapterIndex) {
-    switch (chapterIndex) {
-      case 0:
-        return 'Starten genom låglandet';
-      case 1:
-        return 'Djupare in bland stigarna';
-      case 2:
-        return 'Ruiner, forsar och portvakter';
-      default:
-        return 'Den sista vägen mot templet';
-    }
-  }
-}
-
-class _StoryTimelineRow extends StatelessWidget {
-  const _StoryTimelineRow({
-    required this.node,
-    required this.accentColor,
-    required this.onPrimary,
-    required this.mutedOnPrimary,
-    required this.subtleOnPrimary,
-    required this.isLast,
-  });
-
-  final StoryNode node;
-  final Color accentColor;
-  final Color onPrimary;
-  final Color mutedOnPrimary;
-  final Color subtleOnPrimary;
-  final bool isLast;
-
-  @override
-  Widget build(BuildContext context) {
-    final isCurrent = node.state == StoryNodeState.current;
-    final isCompleted = node.state == StoryNodeState.completed;
-    final markerColor = isCompleted || isCurrent ? accentColor : mutedOnPrimary;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 28,
-          child: Column(
-            children: [
-              Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: isCompleted ? accentColor : Colors.transparent,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: markerColor, width: 2),
-                ),
-                child: isCurrent
-                    ? Icon(Icons.place, size: 10, color: accentColor)
-                    : null,
-              ),
-              if (!isLast)
-                Container(
-                  width: 2,
-                  height: 88,
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  color: mutedOnPrimary.withValues(alpha: 0.45),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(width: AppConstants.smallPadding),
-        Expanded(
-          child: _StoryMapNodeCard(
-            node: node,
-            accentColor: accentColor,
-            onPrimary: onPrimary,
-            mutedOnPrimary: mutedOnPrimary,
-            subtleOnPrimary: subtleOnPrimary,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StoryMapNodeCard extends StatelessWidget {
-  const _StoryMapNodeCard({
-    required this.node,
-    required this.accentColor,
-    required this.onPrimary,
-    required this.mutedOnPrimary,
-    required this.subtleOnPrimary,
-  });
-
-  final StoryNode node;
-  final Color accentColor;
-  final Color onPrimary;
-  final Color mutedOnPrimary;
-  final Color subtleOnPrimary;
-
-  @override
-  Widget build(BuildContext context) {
-    final isCurrent = node.state == StoryNodeState.current;
-    final isCompleted = node.state == StoryNodeState.completed;
-    final chapterIndex = node.stepIndex ~/ 5;
-    final motif = _NodeMotif.forSceneTag(
-      node.sceneTag,
-      accentColor: accentColor,
-      onPrimary: onPrimary,
-    );
-    final borderColor =
-        isCompleted || isCurrent ? accentColor : subtleOnPrimary;
-    final fillColor = isCompleted
-        ? accentColor.withValues(alpha: AppOpacities.accentFillSubtle)
-        : onPrimary.withValues(alpha: AppOpacities.subtleFill);
-
-    final stateLabel = switch (node.state) {
-      StoryNodeState.completed => 'Klar',
-      StoryNodeState.current => 'Här är maskoten nu',
-      StoryNodeState.upcoming => 'Kommer snart',
-    };
-
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.smallPadding),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            fillColor,
-            motif.tint.withValues(alpha: isCompleted ? 0.22 : 0.16),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        border: Border.all(color: borderColor, width: isCurrent ? 2 : 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.16),
-            blurRadius: isCurrent ? 22 : 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Checkpoint ${node.stepIndex + 1}',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: mutedOnPrimary,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.2,
-                      ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.microSpacing6,
-                  vertical: AppConstants.microSpacing4,
-                ),
-                decoration: BoxDecoration(
-                  color:
-                      (isCompleted || isCurrent ? accentColor : mutedOnPrimary)
-                          .withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  stateLabel,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: isCompleted || isCurrent
-                            ? accentColor
-                            : mutedOnPrimary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppConstants.microSpacing4),
-          const SizedBox(height: AppConstants.smallPadding),
           Text(
-            node.landmark,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            'Stigen nara dig',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: onPrimary,
                   fontWeight: FontWeight.w800,
                 ),
           ),
-          const SizedBox(height: AppConstants.microSpacing4),
+          const SizedBox(height: AppConstants.microSpacing6),
           Text(
-            node.landmarkHint,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: subtleOnPrimary,
+            'Las uppifran och nedat. Gront ar klart, gult ar du, gratt kommer senare.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: mutedOnPrimary,
                   fontWeight: FontWeight.w600,
                 ),
           ),
-          const SizedBox(height: AppConstants.smallPadding),
-          Wrap(
-            spacing: AppConstants.smallPadding,
-            runSpacing: AppConstants.microSpacing6,
-            children: [
-              _MiniTag(
-                icon: motif.icon,
-                label: motif.label,
-                color: motif.foreground,
-                fill: motif.tint.withValues(alpha: 0.18),
-              ),
-              _MiniTag(
-                icon: Icons.auto_awesome,
-                label: '${node.operation.emoji} ${node.title}',
-                color: onPrimary,
-                fill: onPrimary.withValues(alpha: 0.10),
-              ),
-              _MiniTag(
-                icon: Icons.flag_outlined,
-                label: 'Etapp ${chapterIndex + 1}',
-                color: mutedOnPrimary,
-                fill: mutedOnPrimary.withValues(alpha: 0.10),
-              ),
-            ],
-          ),
+          const SizedBox(height: AppConstants.defaultPadding),
+          for (final node in visibleNodes) ...[
+            _StopCard(
+              node: node,
+              isCurrent: currentNode?.id == node.id,
+              isNext: nextNode?.id == node.id,
+              accentColor: accentColor,
+              onPrimary: onPrimary,
+              mutedOnPrimary: mutedOnPrimary,
+              subtleOnPrimary: subtleOnPrimary,
+            ),
+            if (node != visibleNodes.last)
+              const SizedBox(height: AppConstants.smallPadding),
+          ],
         ],
       ),
     );
   }
+
+  List<StoryNode> _selectVisibleNodes(
+    List<StoryNode> nodes, {
+    required int currentIndex,
+    required int windowSize,
+  }) {
+    if (nodes.length <= windowSize) {
+      return nodes;
+    }
+
+    final safeWindow = windowSize.clamp(3, nodes.length);
+    final start = (currentIndex - 1).clamp(0, nodes.length - safeWindow);
+    final end = (start + safeWindow).clamp(0, nodes.length);
+    return nodes.sublist(start, end);
+  }
 }
 
-class _ChapterMarker extends StatelessWidget {
-  const _ChapterMarker({
-    required this.title,
-    required this.subtitle,
+class _StopCard extends StatelessWidget {
+  const _StopCard({
+    required this.node,
+    required this.isCurrent,
+    required this.isNext,
     required this.accentColor,
     required this.onPrimary,
+    required this.mutedOnPrimary,
+    required this.subtleOnPrimary,
   });
 
-  final String title;
-  final String subtitle;
+  final StoryNode node;
+  final bool isCurrent;
+  final bool isNext;
   final Color accentColor;
   final Color onPrimary;
+  final Color mutedOnPrimary;
+  final Color subtleOnPrimary;
 
   @override
   Widget build(BuildContext context) {
+    final visual = _NodeVisual.forSceneTag(
+      node.sceneTag,
+      accentColor: accentColor,
+    );
+
+    final statusLabel = switch (node.state) {
+      StoryNodeState.completed => 'Klar',
+      StoryNodeState.current => 'Du ar har',
+      StoryNodeState.upcoming => isNext ? 'Nasta' : 'Senare',
+    };
+
+    final borderColor = switch (node.state) {
+      StoryNodeState.completed => const Color(0xFF7AAE3E),
+      StoryNodeState.current => const Color(0xFFD39A2F),
+      StoryNodeState.upcoming => mutedOnPrimary.withValues(alpha: 0.55),
+    };
+
+    final fillColor = switch (node.state) {
+      StoryNodeState.completed =>
+        const Color(0xFF7AAE3E).withValues(alpha: 0.18),
+      StoryNodeState.current => const Color(0xFFD39A2F).withValues(alpha: 0.18),
+      StoryNodeState.upcoming => onPrimary.withValues(alpha: 0.08),
+    };
+
+    final body = switch (node.state) {
+      StoryNodeState.completed => 'Du har redan klarat det har stoppet.',
+      StoryNodeState.current => 'Nu spelar du: ${node.title}',
+      StoryNodeState.upcoming => isNext
+          ? 'Sedan kommer: ${node.title}'
+          : 'Detta stopp kommer senare pa stigen.',
+    };
+
     return Container(
-      constraints: const BoxConstraints(maxWidth: 280),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppConstants.defaultPadding,
-        vertical: AppConstants.smallPadding,
-      ),
+      padding: const EdgeInsets.all(AppConstants.defaultPadding),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.24),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: accentColor.withValues(alpha: AppOpacities.borderSubtle),
-        ),
+        color: fillColor,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        border: Border.all(color: borderColor, width: isCurrent ? 2 : 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 12,
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: isCurrent ? 16 : 10,
             offset: const Offset(0, 6),
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: onPrimary,
-                  fontWeight: FontWeight.w900,
-                ),
-          ),
-          const SizedBox(height: AppConstants.microSpacing2),
-          Text(
-            subtitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: onPrimary.withValues(alpha: 0.80),
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StoryMapLegend extends StatelessWidget {
-  const _StoryMapLegend({
-    required this.accentColor,
-    required this.onPrimary,
-    required this.mutedOnPrimary,
-  });
-
-  final Color accentColor;
-  final Color onPrimary;
-  final Color mutedOnPrimary;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
-      decoration: BoxDecoration(
-        color: onPrimary.withValues(alpha: AppOpacities.panelFill),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        border: Border.all(
-          color: onPrimary.withValues(alpha: AppOpacities.borderSubtle),
-        ),
-      ),
-      child: Wrap(
-        spacing: AppConstants.defaultPadding,
-        runSpacing: AppConstants.smallPadding,
-        children: [
-          _LegendItem(
-            color: accentColor,
-            label: 'Klar checkpoint',
-            textColor: onPrimary,
-          ),
-          _LegendItem(
-            color: onPrimary,
-            label: 'Maskotens position',
-            textColor: onPrimary,
-            outlined: true,
-          ),
-          _LegendItem(
-            color: mutedOnPrimary,
-            label: 'Nästa plats',
-            textColor: onPrimary,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LegendItem extends StatelessWidget {
-  const _LegendItem({
-    required this.color,
-    required this.label,
-    required this.textColor,
-    this.outlined = false,
-  });
-
-  final Color color;
-  final String label;
-  final Color textColor;
-  final bool outlined;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 14,
-          height: 14,
-          decoration: BoxDecoration(
-            color: outlined ? Colors.transparent : color,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: color, width: 2),
-          ),
-        ),
-        const SizedBox(width: AppConstants.microSpacing6),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: textColor,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-      ],
-    );
-  }
-}
-
-class _MiniTag extends StatelessWidget {
-  const _MiniTag({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.fill,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-  final Color fill;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppConstants.microSpacing6,
-        vertical: AppConstants.microSpacing4,
-      ),
-      decoration: BoxDecoration(
-        color: fill,
-        borderRadius: BorderRadius.circular(999),
-      ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: AppConstants.microSpacing4),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 180),
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w800,
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: visual.color.withValues(alpha: 0.22),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(visual.icon, color: onPrimary),
+          ),
+          const SizedBox(width: AppConstants.defaultPadding),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Stopp ${node.stepIndex + 1}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
+                                  color: mutedOnPrimary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const SizedBox(height: AppConstants.microSpacing4),
+                          Text(
+                            node.landmark,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: onPrimary,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppConstants.smallPadding),
+                    _StatusChip(
+                      label: statusLabel,
+                      color: borderColor,
+                      onPrimary: onPrimary,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.smallPadding),
+                Text(
+                  body,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: onPrimary.withValues(alpha: 0.90),
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                if (isCurrent || isNext) ...[
+                  const SizedBox(height: AppConstants.microSpacing6),
+                  Text(
+                    node.landmarkHint,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: subtleOnPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
+                ],
+              ],
             ),
           ),
         ],
@@ -769,131 +800,118 @@ class _MiniTag extends StatelessWidget {
   }
 }
 
-class _NodeMotif {
-  const _NodeMotif({
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({
     required this.label,
-    required this.description,
-    required this.icon,
-    required this.tint,
-    required this.foreground,
+    required this.color,
+    required this.onPrimary,
   });
 
   final String label;
-  final String description;
-  final IconData icon;
-  final Color tint;
-  final Color foreground;
+  final Color color;
+  final Color onPrimary;
 
-  factory _NodeMotif.forSceneTag(
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.smallPadding,
+        vertical: AppConstants.microSpacing6,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: onPrimary,
+              fontWeight: FontWeight.w800,
+            ),
+      ),
+    );
+  }
+}
+
+class _NodeVisual {
+  const _NodeVisual({
+    required this.icon,
+    required this.color,
+  });
+
+  final IconData icon;
+  final Color color;
+
+  factory _NodeVisual.forSceneTag(
     String sceneTag, {
     required Color accentColor,
-    required Color onPrimary,
   }) {
     switch (sceneTag) {
       case 'baslager':
-        return _NodeMotif(
-          label: 'Basläger',
-          description: 'Packa mod, karta och första ledtråden.',
+        return const _NodeVisual(
           icon: Icons.cabin,
-          tint: const Color(0xFF7A5A34),
-          foreground: onPrimary,
+          color: Color(0xFF7A5A34),
         );
       case 'frukt':
-        return _NodeMotif(
-          label: 'Fruktzon',
-          description: 'Sifferfrukter lyser mellan grenarna.',
+        return const _NodeVisual(
           icon: Icons.apple,
-          tint: const Color(0xFF7AAE3E),
-          foreground: onPrimary,
+          color: Color(0xFF7AAE3E),
         );
       case 'skugga':
-        return _NodeMotif(
-          label: 'Skuggspår',
-          description: 'Följ de dolda markeringarna i dunklet.',
+        return const _NodeVisual(
           icon: Icons.dark_mode,
-          tint: const Color(0xFF49506A),
-          foreground: onPrimary,
+          color: Color(0xFF56607A),
         );
       case 'bro':
-        return _NodeMotif(
-          label: 'Brofäste',
-          description: 'Håll balansen över den höga passagen.',
+        return const _NodeVisual(
           icon: Icons.linear_scale,
-          tint: const Color(0xFF8A6C45),
-          foreground: onPrimary,
+          color: Color(0xFF8A6C45),
         );
       case 'karta':
-        return _NodeMotif(
-          label: 'Kartspår',
-          description: 'Gamla tecken visar rätt riktning.',
+        return const _NodeVisual(
           icon: Icons.map,
-          tint: const Color(0xFF3A8E8A),
-          foreground: onPrimary,
+          color: Color(0xFF3A8E8A),
         );
       case 'fors':
-        return _NodeMotif(
-          label: 'Forskant',
-          description: 'Fånga talen innan de sveps vidare.',
+        return const _NodeVisual(
           icon: Icons.water,
-          tint: const Color(0xFF3A7BC1),
-          foreground: onPrimary,
+          color: Color(0xFF3A7BC1),
         );
       case 'tempel':
-        return _NodeMotif(
-          label: 'Portvakt',
-          description: 'Stenporten öppnar sig steg för steg.',
+        return const _NodeVisual(
           icon: Icons.account_balance,
-          tint: const Color(0xFF8B6F42),
-          foreground: onPrimary,
+          color: Color(0xFF8B6F42),
         );
       case 'soltempel':
-        return _NodeMotif(
-          label: 'Solkammare',
-          description: 'Det sista ljuset markerar målet.',
+        return const _NodeVisual(
           icon: Icons.wb_sunny,
-          tint: const Color(0xFFD39A2F),
-          foreground: onPrimary,
+          color: Color(0xFFD39A2F),
         );
       case 'skog':
-        return _NodeMotif(
-          label: 'Vildskog',
-          description: 'Tät grönska gömmer nästa riktmärke.',
+        return const _NodeVisual(
           icon: Icons.park,
-          tint: const Color(0xFF4E8B52),
-          foreground: onPrimary,
+          color: Color(0xFF4E8B52),
         );
       case 'trumma':
-        return _NodeMotif(
-          label: 'Trumplats',
-          description: 'Rytmen visar att något viktigt är nära.',
+        return const _NodeVisual(
           icon: Icons.music_note,
-          tint: const Color(0xFF8C5632),
-          foreground: onPrimary,
+          color: Color(0xFF8C5632),
         );
       case 'port':
-        return _NodeMotif(
-          label: 'Stenport',
-          description: 'Passagen öppnar sig när du är redo.',
+        return const _NodeVisual(
           icon: Icons.door_front_door,
-          tint: const Color(0xFF6D667C),
-          foreground: onPrimary,
+          color: Color(0xFF6D667C),
         );
       case 'skatt':
-        return _NodeMotif(
-          label: 'Skattzon',
-          description: 'Gamla fynd visar hur långt du kommit.',
+        return const _NodeVisual(
           icon: Icons.workspace_premium,
-          tint: const Color(0xFFB88C2E),
-          foreground: onPrimary,
+          color: Color(0xFFB88C2E),
         );
     }
 
-    return _NodeMotif(
-      label: 'Expedition',
-      description: 'Fortsätt framåt genom djungeln.',
+    return _NodeVisual(
       icon: Icons.explore,
-      tint: accentColor,
-      foreground: onPrimary,
+      color: accentColor,
     );
   }
 }

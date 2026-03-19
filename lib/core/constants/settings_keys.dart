@@ -14,4 +14,10 @@ class SettingsKeys {
   static String questCurrent(String userId) => 'quest_current_$userId';
 
   static String questCompleted(String userId) => 'quest_completed_$userId';
+
+  static String spacedRepetitionSchedules(String userId) =>
+      'spaced_repetition_schedules_$userId';
+
+    static String spacedRepetitionEnabled(String userId) =>
+      'spaced_repetition_enabled_$userId';
 }

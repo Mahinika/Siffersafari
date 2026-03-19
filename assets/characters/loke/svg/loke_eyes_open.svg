@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="236" height="112" viewBox="0 0 236 112" xmlns="http://www.w3.org/2000/svg">
 
-  <ellipse cx="88" cy="54" rx="12" ry="16" fill="white" stroke="#926F5D" stroke-width="3"/>
-  <ellipse cx="148" cy="54" rx="12" ry="16" fill="white" stroke="#926F5D" stroke-width="3"/>
+  <ellipse cx="88" cy="54" rx="12" ry="16" fill="white" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="148" cy="54" rx="12" ry="16" fill="white" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
   <circle cx="88" cy="57" r="6" fill="#785B4C"/>
   <circle cx="148" cy="57" r="6" fill="#785B4C"/>
   <circle cx="91" cy="53" r="2" fill="white"/>
   <circle cx="151" cy="53" r="2" fill="white"/>
   
-  <rect x="70" y="44" width="36" height="24" rx="9" fill="none" stroke="#866656" stroke-width="4"/>
-  <rect x="130" y="44" width="36" height="24" rx="9" fill="none" stroke="#866656" stroke-width="4"/>
-  <line x1="106" y1="56" x2="130" y2="56" stroke="#866656" stroke-width="4" stroke-linecap="round"/>
-  <line x1="60" y1="56" x2="70" y2="54" stroke="#866656" stroke-width="4" stroke-linecap="round"/>
-  <line x1="166" y1="54" x2="176" y2="56" stroke="#866656" stroke-width="4" stroke-linecap="round"/>
+  <rect x="70" y="44" width="36" height="24" rx="9" fill="none" stroke="#866656" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="130" y="44" width="36" height="24" rx="9" fill="none" stroke="#866656" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="106" y1="56" x2="130" y2="56" stroke="#866656" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="60" y1="56" x2="70" y2="54" stroke="#866656" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="166" y1="54" x2="176" y2="56" stroke="#866656" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
 
 
 </svg>

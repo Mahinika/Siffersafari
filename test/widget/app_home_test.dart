@@ -101,6 +101,39 @@ void main() {
   );
 
   testWidgets(
+    '[Widget] App home – visar repetitionstatus for aktiv profil',
+    (WidgetTester tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(375, 812);
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await repository.clearAllData();
+
+      const userId = 'review-user';
+      const user = UserProgress(
+        userId: userId,
+        name: 'Nora',
+        ageGroup: AgeGroup.middle,
+      );
+      await repository.saveUserProgress(user);
+      await repository.saveSetting('onboarding_done_$userId', true);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MathGameApp(initFuture: Future.value(null)),
+        ),
+      );
+
+      await pumpUntilFound(tester, find.textContaining('Repetitioner redo:'));
+
+      expect(find.textContaining('Repetitioner redo:'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     '[Widget] App home – can open story map',
     (WidgetTester tester) async {
       tester.view.devicePixelRatio = 1.0;
@@ -140,7 +173,8 @@ void main() {
       );
 
       expect(find.text('Djungelkartan'), findsOneWidget);
-      expect(find.text('Hela expeditionen'), findsOneWidget);
+      expect(find.text('Vad hander nu?'), findsOneWidget);
+      expect(find.text('Stigen nara dig'), findsOneWidget);
     },
   );
 }

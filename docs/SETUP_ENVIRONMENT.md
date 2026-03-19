@@ -1,14 +1,14 @@
 # Environment Setup Reference
 
-Denna guide är för **detaljerad miljökonfiguration** när något inte funkar i `GETTING_STARTED.md` eller du behöver en från-scratch-installation.
+Denna guide ar for detaljerad miljokonfiguration nar nagot inte funkar i `GETTING_STARTED.md` eller du behover en fran-scratch-installation.
 
-Startklar snabbversion? Se [GETTING_STARTED.md](GETTING_STARTED.md) istället.
+Startklar snabbversion? Se [GETTING_STARTED.md](GETTING_STARTED.md) i stallet.
 
 ---
 
 ## 1. System Requirements
 
-| Komponent | Minimum | Rekommenderat | Testats på |
+| Komponent | Minimum | Rekommenderat | Testats pa |
 |-----------|---------|----------------|-----------|
 | Windows | 10 | 11 | Windows 11 |
 | RAM | 8 GB | 16 GB | 16 GB |
@@ -24,15 +24,15 @@ Startklar snabbversion? Se [GETTING_STARTED.md](GETTING_STARTED.md) istället.
 
 **Installation:**
 ```bash
-# 1. Ladda ned Flutter från https://flutter.dev/docs/get-started/install/windows
-# 2. Packa upp i lämplig plats (ex: C:\flutter)
-# 3. Lägg till i PATH:
-#    Control Panel → System → Environment Variables → Path → New: C:\flutter\bin
+# 1. Ladda ned Flutter fran https://flutter.dev/docs/get-started/install/windows
+# 2. Packa upp i lamplig plats (ex: C:\flutter)
+# 3. Lagg till i PATH:
+#    Control Panel -> System -> Environment Variables -> Path -> New: C:\flutter\bin
 
 # 4. Verifiera installation
 flutter doctor
 
-# Förväntat output (puede ha varierande versioner):
+# Forvantat output (versioner kan variera):
 # Doctor summary (to see all details, run flutter doctor -v):
 # [✓] Flutter
 # [✓] Android toolchain
@@ -42,12 +42,12 @@ flutter doctor
 **Troubleshooting:**
 ```bash
 # Om flutter doctor visar fel:
-flutter doctor --verbose  # Se vilket som fattas
+flutter doctor --verbose
 
 # Acceptera Android licenses
 flutter doctor --android-licenses
 
-# Uppdatera Flutter (om det behövs)
+# Uppdatera Flutter (om det behovs)
 flutter upgrade
 flutter pub get
 ```
@@ -58,11 +58,11 @@ flutter pub get
 
 Installera via Android Studio (enklast):
 
-1. **Ladda ned Android Studio** från https://developer.android.com/studio
-2. **Kör installationen** (acceptera defaults)
-3. **Öppna SDK Manager** (Tools → SDK Manager)
-4. **Installera:**
-   - Android SDK Platform API 34 (eller senaste)
+1. Ladda ned Android Studio fran https://developer.android.com/studio
+2. Kor installationen och acceptera defaults
+3. Oppna SDK Manager (Tools -> SDK Manager)
+4. Installera:
+   - Android SDK Platform API 34 eller senare
    - Android SDK Build-Tools 34.x
    - Android Emulator
    - Android SDK Platform-Tools
@@ -71,7 +71,7 @@ Verifiera:
 ```bash
 flutter doctor
 
-# Förväntat:
+# Forvantat:
 # [✓] Android toolchain - develop for Android devices (Android SDK version 34.x)
 ```
 
@@ -86,25 +86,25 @@ javac -version
 ```
 
 **Om inte:**
-1. Ladda ned **JDK 17** från https://www.oracle.com/java/technologies/downloads/
-2. Installera (acceptera defaults)
+1. Ladda ned JDK 17 fran https://www.oracle.com/java/technologies/downloads/
+2. Installera och acceptera defaults
 3. Verifiera:
    ```bash
-   java -version  # Ska visa Java 17.x
+   java -version
    ```
 
 ---
 
 ### D. Android Emulator (Pixel_6)
 
-Vi använder **Pixel_6** för all testning för konsistens.
+Vi anvander `Pixel_6` for all testning for konsistens.
 
 **Skapa emulatorn:**
 ```bash
 # Via Android Studio GUI:
-# 1. Tools → Device Manager
-# 2. Create Device → Pixel 6
-# 3. Select API 34 (eller senaste)
+# 1. Tools -> Device Manager
+# 2. Create Device -> Pixel 6
+# 3. Select API 34 (eller senare)
 # 4. Finish
 
 # Eller via kommandorad:
@@ -117,7 +117,7 @@ avdmanager create avd -n Pixel_6 -k "system-images;android-34;default;x86_64" -d
 # Via Android Studio GUI eller:
 emulator -avd Pixel_6 -wipe-data -gpu auto
 
-# Vänta tills:
+# Vanta tills:
 # - Boot-animation slutar
 # - "adb devices" visar enheten
 adb devices
@@ -130,9 +130,9 @@ adb devices
 ### Initial Checkout
 
 ```bash
-cd d:\Projects\Personal\Siffersafari  # eller din lokala projektmapp
-git clone <repo-url> .  # Om nytt clone
-git pull                 # Om redan klont
+cd d:\Projects\Personal\Siffersafari
+git clone <repo-url> .
+git pull
 ```
 
 ### Dependencies
@@ -141,74 +141,65 @@ git pull                 # Om redan klont
 flutter pub get
 ```
 
-Om du får dependency-fel:
+Om du far dependency-fel:
 ```bash
 flutter pub upgrade
-flutter pub cache repair  # Som sista resort
+flutter pub cache repair
 ```
 
 ### Code Generation
 
-Vissa filer genereras automatiskt (Hive TypeAdapters):
+Vissa filer genereras automatiskt, till exempel Hive TypeAdapters:
 
 ```bash
-flutter pub run build_runner build --delete-conflicting-outputs
-
-# Förväntat output:
-# [INFO] BuildContext: Building new asset graph...
-# [INFO] Building ...
+dart run build_runner build --delete-conflicting-outputs
 ```
 
-Genererade filer hamnar här:
+Genererade filer hamnar till exempel har:
 - `lib/domain/entities/user_progress.g.dart`
 
 ### Lint & Analysis
 
 ```bash
 flutter analyze
-
-# Förväntat: "No issues found! (ran in X.Xs)"
 ```
 
 ---
 
-## 4. Vanliga Fel & Lösningar
+## 4. Vanliga Fel & Losningar
 
 ### "flutter: command not found"
-- **Orsak:** Flutter är inte i PATH
-- **Lösning:** Se steg 2A ovan (lägg till PATH)
+- Orsak: Flutter ar inte i PATH
+- Losning: Se steg 2A ovan
 
 ### "Android SDK not found"
-- **Orsak:** Android SDK är inte installerad
-- **Lösning:** Se steg 2B (install via Android Studio)
+- Orsak: Android SDK ar inte installerad
+- Losning: Se steg 2B
 
 ### "java: command not found"
-- **Orsak:** Java/JDK är inte installerad
-- **Lösning:** Se steg 2C
+- Orsak: Java/JDK ar inte installerad
+- Losning: Se steg 2C
 
 ### "Emulator won't start"
-- **Orsak:** AMD/Intel virtualization inte aktiverad (BIOS)
-- **Lösning:** 
+- Orsak: AMD/Intel virtualization ar inte aktiverad i BIOS
+- Losning:
   ```bash
-  # Kontrollera virtualization status
   systeminfo | findstr Hyper-V
-  
-  # Om "Virtualization: Enabled" inte visas, aktivera i BIOS
   ```
 
 ### "adb device offline / unauthorized"
-- **Orsak:** Emulator inte fullt startad
-- **Lösning:**
+- Orsak: Emulatorn ar inte fullt startad
+- Losning:
   ```bash
   adb kill-server
   adb start-server
   adb wait-for-device
-  adb devices  # Bör visa enhetens ID
+  adb devices
   ```
 
 ### "Permission denied: build/apk..."
-- **Orsak:** Windows låser filer
-- **Lösning:**
+- Orsak: Windows laser filer
+- Losning:
   ```bash
   flutter clean
   flutter pub get
@@ -219,52 +210,60 @@ flutter analyze
 
 ## 5. Snabbtest
 
-Verifiera hela setup:
+Verifiera hela setupen:
 
 ```bash
 # 1. Starta emulator (terminal 1)
 emulator -avd Pixel_6 -wipe-data
 
-# 2. I annan terminal, projektet root:
-# Test 1: Analys
+# 2. I annan terminal, i projektets root:
 flutter analyze
-
-# Test 2: En liten test
 flutter test test/unit/audits/offline_only_audit_test.dart -v
-
-# Test 3: Build & deploy
 flutter run -d emulator-<id>
-
-# Expected: App startar på emulator, ingen fel
 ```
+
+Forvantat resultat: appen startar pa emulatorn utan fel.
 
 ---
 
 ## 6. IDE Setup (VS Code)
 
-Rekommenderat för detta projekt:
+Rekommenderat for detta projekt:
 
 **Extensions:**
-- Flutter (Darren Knowles)
-- Dart (Dart Code)
-- Android Emulator (Hieu Tran)
+- Flutter (`Dart-Code.flutter`)
+- Dart (`Dart-Code.dart-code`)
+- Error Lens (`usernamehw.errorlens`)
+- Mermaid-stod for docs (`bierner.markdown-mermaid`, `bpruitt-goddard.mermaid-markdown-syntax-highlighting`)
 
-**Settings** (`.vscode/settings.json`):
-```json
-{
-  "[dart]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "Dart-Code.dart-code"
-  },
-  "dart.flutterSdkPath": "C:\\flutter"  // Justera path
-}
-```
+**Workspace setup som redan finns i repot:**
+- `.vscode/settings.json` aktiverar Dart-formattering, hot reload on save, mindre brus i Explorer/Search och file nesting for genererade filer
+- `.vscode/extensions.json` rekommenderar projektets VS Code-tillagg
+- `.vscode/launch.json` innehaller fardiga Flutter-profiler for vanlig debug och `Pixel_6`
+- `.vscode/tasks.json` innehaller QA-, Pixel_6- och asset-pipeline-tasks
+
+**Rekommenderat arbetsflode i VS Code:**
+1. Oppna repo-roten i VS Code.
+2. Acceptera rekommenderade extensions nar VS Code fragar.
+3. Kor `Developer: Reload Window` efter forsta installationen av extensions.
+4. Anvand `Run and Debug` for:
+   - `Flutter: Debug`
+   - `Flutter: Debug (Pixel_6)`
+   - `Flutter: Profile (Pixel_6)`
+   - `Flutter: Release (Pixel_6)`
+5. Anvand `Tasks: Run Task` for:
+   - `QA: Analyze`
+   - `QA: Analyze + Test (valfri path)`
+   - `QA: Analyze + Full Test (stora andringar)`
+   - `Pixel_6: Sync + QA (valfri testpath)`
+
+Du behover normalt inte satta `dart.flutterSdkPath` i repo-settings. Om Flutter inte hittas, lagg det i dina personliga User Settings i stallet.
 
 ---
 
-## Nästa Steg
+## Nasta Steg
 
-✅ Setup klar? Då:
-- [GETTING_STARTED.md](GETTING_STARTED.md) — Kör första testningen
-- [ADD_FEATURE.md](ADD_FEATURE.md) — Lägg till en feature
-- [CONTRIBUTING.md](CONTRIBUTING.md) — QA-rutiner innan commit
+Setup klar? Da:
+- [GETTING_STARTED.md](GETTING_STARTED.md) - Kor forsta testningen
+- [ADD_FEATURE.md](ADD_FEATURE.md) - Lagg till en feature
+- [CONTRIBUTING.md](CONTRIBUTING.md) - QA-rutiner innan commit

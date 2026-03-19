@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="260" height="260" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
 
-  <rect x="74" y="48" width="112" height="148" rx="32" fill="#F2C94C" stroke="#926F5D" stroke-width="4"/>
+  <rect x="74" y="48" width="112" height="148" rx="32" fill="#F2C94C" stroke="#926F5D" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
   <rect x="96" y="74" width="68" height="20" rx="10" fill="#D0AD41"/>
-  <rect x="88" y="108" width="84" height="60" rx="22" fill="#F3CE5E" stroke="#926F5D" stroke-width="3"/>
+  <rect x="88" y="108" width="84" height="60" rx="22" fill="#F3CE5E" stroke="#926F5D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 
 </svg>
