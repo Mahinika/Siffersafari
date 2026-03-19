@@ -18,6 +18,6 @@ class SettingsKeys {
   static String spacedRepetitionSchedules(String userId) =>
       'spaced_repetition_schedules_$userId';
 
-    static String spacedRepetitionEnabled(String userId) =>
+  static String spacedRepetitionEnabled(String userId) =>
       'spaced_repetition_enabled_$userId';
 }

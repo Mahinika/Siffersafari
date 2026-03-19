@@ -83,7 +83,7 @@ Sätt install-mål med `-Action run|install|sync`.
 
 ## Kontext-hantering (sessionskontinuitet)
 
-Använd dessa filer som extern kontext i stallet for chat-historik:
+Använd dessa filer som extern kontext i stället för chat-historik:
 
 | Fil | Syfte |
 |---|---|

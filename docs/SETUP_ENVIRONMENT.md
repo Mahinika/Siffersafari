@@ -1,8 +1,8 @@
 # Environment Setup Reference
 
-Denna guide ar for detaljerad miljokonfiguration nar nagot inte funkar i `GETTING_STARTED.md` eller du behover en fran-scratch-installation.
+Denna guide är för detaljerad miljökonfiguration när något inte funkar i `GETTING_STARTED.md` eller du behöver en från-scratch-installation.
 
-Startklar snabbversion? Se [GETTING_STARTED.md](GETTING_STARTED.md) i stallet.
+Startklar snabbversion? Se [GETTING_STARTED.md](GETTING_STARTED.md) i stället.
 
 ---
 

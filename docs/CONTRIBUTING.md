@@ -1,10 +1,10 @@
 # Contributing (Siffersafari)
 
-Tack for att du vill bidra.
+Tack för att du vill bidra.
 
-## Snabb QA-rutin (fore commit/push)
+## Snabb QA-rutin (före commit/push)
 
-Kor detta som standard innan du committar eller pushar:
+Kör detta som standard innan du committar eller pushar:
 
 ```bash
 # 1) Statisk analys

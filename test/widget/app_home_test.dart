@@ -101,7 +101,7 @@ void main() {
   );
 
   testWidgets(
-    '[Widget] App home – visar repetitionstatus for aktiv profil',
+    '[Widget] App home – visar repetitionstatus för aktiv profil',
     (WidgetTester tester) async {
       tester.view.devicePixelRatio = 1.0;
       tester.view.physicalSize = const Size(375, 812);
@@ -173,8 +173,8 @@ void main() {
       );
 
       expect(find.text('Djungelkartan'), findsOneWidget);
-      expect(find.text('Vad hander nu?'), findsOneWidget);
-      expect(find.text('Stigen nara dig'), findsOneWidget);
+      expect(find.text('Vad händer nu?'), findsOneWidget);
+      expect(find.text('Stigen nära dig'), findsOneWidget);
     },
   );
 }
