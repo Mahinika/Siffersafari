@@ -1,6 +1,6 @@
 # Mascot Rive Rigging Guide
 
-Generated: 2026-03-13T08:39:46.405157
+Generated: 2026-03-20T21:37:17.835321
 
 ## Overview
 This guide provides step-by-step instructions for rigging the mascot character in Rive Editor.

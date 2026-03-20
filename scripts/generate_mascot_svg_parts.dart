@@ -26,7 +26,13 @@ void main() async {
   final spec = jsonDecode(await specFile.readAsString());
   final colors = spec['colors'] as Map<String, dynamic>;
   final proportions = spec['proportions'] as Map<String, dynamic>;
-  final style = spec['style'] as Map<String, dynamic>;
+  final styleSource = spec['styleSettings'] ?? spec['style'];
+  final style = styleSource is Map<String, dynamic>
+      ? styleSource
+      : <String, dynamic>{
+          'strokeWidth': 4,
+          'cornerRadius': 14,
+        };
 
   final outputDir = Directory('assets/characters/mascot/svg');
   if (!outputDir.existsSync()) {
@@ -391,8 +397,9 @@ $content
 
   String generateAntennas() {
     final cx = baseSize / 2;
-    final antennaLength =
-        headSize * (proportions['antennaLengthRelativeToHead'] as num);
+    final antennaRatio =
+      (proportions['antennaLengthRelativeToHead'] as num?) ?? 0.28;
+    final antennaLength = headSize * antennaRatio;
     final strokeW = style['strokeWidth'] as num;
     final ballSize = 14.0;
 

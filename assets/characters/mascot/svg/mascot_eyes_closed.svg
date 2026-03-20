@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="400.0" height="120.0" viewBox="0 0 400.0 120.0" xmlns="http://www.w3.org/2000/svg">
   <!-- Left eye closed -->
-  <path d="M 99.19999999999999 66.66666666666667 Q 135.2 71.66666666666667 171.2 66.66666666666667" 
+  <path d="M 149.6 66.66666666666667 Q 167.6 71.66666666666667 185.6 66.66666666666667" 
         stroke="#333333" 
         stroke-width="4" 
         stroke-linecap="round" 
         fill="none"/>
   
   <!-- Right eye closed -->
-  <path d="M 228.8 66.66666666666667 Q 264.8 71.66666666666667 300.8 66.66666666666667" 
+  <path d="M 214.4 66.66666666666667 Q 232.4 71.66666666666667 250.4 66.66666666666667" 
         stroke="#333333" 
         stroke-width="4" 
         stroke-linecap="round" 

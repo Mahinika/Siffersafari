@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="400.0" height="80.0" viewBox="0 0 400.0 80.0" xmlns="http://www.w3.org/2000/svg">
   <!-- Smile curve -->
-  <path d="M 130.0 130.0 Q 200.0 155.0 270.0 130.0" 
+  <path d="M 168.0 130.0 Q 200.0 155.0 232.0 130.0" 
         stroke="#333333" 
         stroke-width="4" 
         stroke-linecap="round" 

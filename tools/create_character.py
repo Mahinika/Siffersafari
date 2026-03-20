@@ -932,6 +932,8 @@ def generic_bind_mesh(bone_name: str) -> str:
 
 
 def build_blueprint(slug: str, name: str, brief: str, animation_spec: dict[str, Any]) -> dict[str, Any]:
+    artboard_name = animation_spec.get("artboard") or pascal_case(name)
+    state_machine_name = animation_spec.get("state_machine") or "MascotStateMachine"
     import_parts = [
         "shadow",
         "backpack",
@@ -959,8 +961,8 @@ def build_blueprint(slug: str, name: str, brief: str, animation_spec: dict[str, 
             "version": "1.0",
             "character": name,
             "description": f"Optional Rive rigging blueprint for {name}. Generated from brief: {brief.strip()}",
-            "target_artboard_name": animation_spec["artboard"],
-            "target_state_machine": animation_spec["state_machine"],
+            "target_artboard_name": artboard_name,
+            "target_state_machine": state_machine_name,
         },
         "import_assets": {
             "svg_parts": [
@@ -973,7 +975,7 @@ def build_blueprint(slug: str, name: str, brief: str, animation_spec: dict[str, 
             "import_order": import_parts,
         },
         "artboard": {
-            "name": animation_spec["artboard"],
+            "name": artboard_name,
             "width": 400,
             "height": 600,
             "origin": {"x": 200, "y": int(SCHOOL_AGE_CHILD_BONE_POSITIONS["root"]["y"])},
@@ -999,7 +1001,7 @@ def build_blueprint(slug: str, name: str, brief: str, animation_spec: dict[str, 
             {"name": "exit", "duration_seconds": 0.4, "notes": ["fade or slide out cleanly"]},
         ],
         "state_machine": {
-            "name": animation_spec["state_machine"],
+            "name": state_machine_name,
             "inputs": [
                 {"name": "answer_correct", "type": "Trigger"},
                 {"name": "answer_wrong", "type": "Trigger"},
@@ -1013,6 +1015,7 @@ def build_blueprint(slug: str, name: str, brief: str, animation_spec: dict[str, 
 
 
 def build_guide_markdown(slug: str, name: str, brief: str, animation_spec: dict[str, Any]) -> str:
+    state_machine_name = animation_spec.get("state_machine") or "MascotStateMachine"
     import_lines = "\n".join(
         f"{index}. `assets/characters/{slug}/svg/{slug}_{part}.svg`"
         for index, part in enumerate(
@@ -1062,7 +1065,7 @@ A `.riv` export is optional and not required for app integration.
 {import_lines}
 
 ## Suggested State Machine
-Name: `{animation_spec['state_machine']}`
+Name: `{state_machine_name}`
 
 Inputs:
 - `answer_correct`
@@ -1090,6 +1093,8 @@ Generated parts are stored in the same folder and match the rig-friendly segment
 
 
 def rive_readme(slug: str, name: str, animation_spec: dict[str, Any]) -> str:
+    artboard_name = animation_spec.get("artboard") or pascal_case(name)
+    state_machine_name = animation_spec.get("state_machine") or "MascotStateMachine"
     return f"""# {pascal_case(name)} Optional Rive Runtime
 
 This folder is intentionally kept lightweight. The default runtime character path is SVG-first and does not require a `.riv` file.
@@ -1099,10 +1104,10 @@ If a future optional Rive export is added, keep it here as:
 `assets/characters/{slug}/rive/{slug}_character.riv`
 
 Expected artboard:
-- `{animation_spec['artboard']}`
+- `{artboard_name}`
 
 Expected state machine:
-- `{animation_spec['state_machine']}`
+- `{state_machine_name}`
 
 Current rule:
 - blueprint and guide are generated automatically

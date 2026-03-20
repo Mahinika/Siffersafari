@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="400.0" height="120.0" viewBox="0 0 400.0 120.0" xmlns="http://www.w3.org/2000/svg">
   <!-- Left eye -->
-  <circle cx="135.2" cy="66.66666666666667" r="36.0" 
+  <circle cx="167.6" cy="66.66666666666667" r="18.0" 
           fill="white" 
           stroke="#2E2E2E" 
           stroke-width="2.4"/>
-  <circle cx="135.2" cy="66.66666666666667" r="18.0" 
+  <circle cx="167.6" cy="66.66666666666667" r="9.0" 
           fill="#333333"/>
-  <circle cx="142.39999999999998" cy="59.46666666666667" r="9.0" 
+  <circle cx="171.2" cy="63.06666666666667" r="4.5" 
           fill="white" opacity="0.9"/>
   
   <!-- Right eye -->
-  <circle cx="264.8" cy="66.66666666666667" r="36.0" 
+  <circle cx="232.4" cy="66.66666666666667" r="18.0" 
           fill="white" 
           stroke="#2E2E2E" 
           stroke-width="2.4"/>
-  <circle cx="264.8" cy="66.66666666666667" r="18.0" 
+  <circle cx="232.4" cy="66.66666666666667" r="9.0" 
           fill="#333333"/>
-  <circle cx="272.0" cy="59.46666666666667" r="9.0" 
+  <circle cx="236.0" cy="63.06666666666667" r="4.5" 
           fill="white" opacity="0.9"/>
 
 </svg>

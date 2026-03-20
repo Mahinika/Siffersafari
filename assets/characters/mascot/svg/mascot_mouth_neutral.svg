@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="400.0" height="80.0" viewBox="0 0 400.0 80.0" xmlns="http://www.w3.org/2000/svg">
   <!-- Neutral line -->
-  <line x1="130.0" y1="136.0" x2="270.0" y2="136.0" 
+  <line x1="168.0" y1="136.0" x2="232.0" y2="136.0" 
         stroke="#333333" 
         stroke-width="4" 
         stroke-linecap="round"/>

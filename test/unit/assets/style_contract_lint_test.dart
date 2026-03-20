@@ -4,8 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<ProcessResult> _runAssetLint() async {
   final commands = Platform.isWindows
-      ? <String>["python", "py"]
-      : <String>["python3", "python"];
+  ? <String>['python', 'py']
+  : <String>['python3', 'python'];
 
   ProcessException? lastError;
 
@@ -13,7 +13,7 @@ Future<ProcessResult> _runAssetLint() async {
     try {
       final result = await Process.run(
         command,
-        const ["tools/pipeline.py", "lint-assets", "--strict"],
+        const ['tools/pipeline.py', 'lint-assets', '--strict'],
       );
       if (result.exitCode == 0) {
         return result;
@@ -24,13 +24,13 @@ Future<ProcessResult> _runAssetLint() async {
     }
   }
 
-  throw lastError ?? ProcessException("python", const ["tools/pipeline.py"]);
+  throw lastError ?? const ProcessException('python', ['tools/pipeline.py']);
 }
 
 Future<ProcessResult> _runAssetLintWarnOnlyWithReport() async {
   final commands = Platform.isWindows
-      ? <String>["python", "py"]
-      : <String>["python3", "python"];
+  ? <String>['python', 'py']
+  : <String>['python3', 'python'];
 
   ProcessException? lastError;
 
@@ -39,12 +39,12 @@ Future<ProcessResult> _runAssetLintWarnOnlyWithReport() async {
       final result = await Process.run(
         command,
         const [
-          "tools/pipeline.py",
-          "lint-assets",
-          "--strict",
-          "--warn-only",
-          "--report-path",
-          "artifacts/asset_lint_report_test.json",
+          'tools/pipeline.py',
+          'lint-assets',
+          '--strict',
+          '--warn-only',
+          '--report-path',
+          'artifacts/asset_lint_report_test.json',
         ],
       );
       return result;
@@ -53,7 +53,7 @@ Future<ProcessResult> _runAssetLintWarnOnlyWithReport() async {
     }
   }
 
-  throw lastError ?? ProcessException("python", const ["tools/pipeline.py"]);
+  throw lastError ?? const ProcessException('python', ['tools/pipeline.py']);
 }
 
 void main() {

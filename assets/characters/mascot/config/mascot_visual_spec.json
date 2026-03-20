@@ -9,19 +9,74 @@
     "antenna": "#FF6F61",
     "eyes": "#333333",
     "mouth": "#333333",
-    "outline": "#2E2E2E"
+    "outline": "#2E2E2E",
+    "hair": "#5C3B2E",
+    "hat": "#F4E4BB",
+    "shirt": "#F7DC29",
+    "overallsPrimary": "#73E9CA",
+    "backpack": "#17A984",
+    "shoe": "#F4C835",
+    "hatShadow": "#C8BB99",
+    "hatBand": "#D65033",
+    "overallsSecondary": "#5AB69E",
+    "strap": "#118064",
+    "lace": "#D65033",
+    "sole": "#FDF3D3",
+    "blush": "#F7BFA1",
+    "shadow": "#0000001A"
   },
   "proportions": {
-    "headToBodyRatio": 0.55,
-    "eyeSizeRelativeToHead": 0.18,
-    "mouthWidthRelativeToHead": 0.35,
-    "antennaLengthRelativeToHead": 0.6,
-    "armLengthRelativeToBody": 0.8,
-    "legLengthRelativeToBody": 0.9
+    "headToBodyRatio": 0.24,
+    "eyeSizeRelativeToHead": 0.09,
+    "mouthWidthRelativeToHead": 0.16,
+    "armLengthRelativeToBody": 0.44,
+    "legLengthRelativeToBody": 0.47,
+    "hatWidthRelativeToHead": 1.0,
+    "shoeWidthRelativeToLeg": 0.82
   },
-  "style": {
+  "style": "cartoon_adventure_child",
+  "inspiration": "Maskoten",
+  "styleSettings": {
     "strokeWidth": 4,
-    "cornerRadius": 12,
-    "shadowEnabled": true
+    "cornerRadius": 14,
+    "useGradients": false,
+    "useTextures": false,
+    "rigFriendly": true,
+    "strokeLinecap": "round",
+    "strokeLinejoin": "round"
+  },
+  "tPosePreviewAlignment": {
+    "armUpperTranslateY": {
+      "left": 10,
+      "right": 10
+    },
+    "armLowerTranslateY": {
+      "left": -1,
+      "right": -1
+    },
+    "alignmentRule": "relaxed_shoulders_with_wrists_resting_near_mid_thigh"
+  },
+  "parts": {
+    "head": "svg/mascot_head.svg",
+    "eyes_open": "svg/mascot_eyes_open.svg",
+    "eyes_blink": "svg/mascot_eyes_blink.svg",
+    "mouth_neutral": "svg/mascot_mouth_neutral.svg",
+    "mouth_happy": "svg/mascot_mouth_happy.svg",
+    "mouth_sad": "svg/mascot_mouth_sad.svg",
+    "torso": "svg/mascot_torso.svg",
+    "arm_upper_left": "svg/mascot_arm_upper_left.svg",
+    "arm_lower_left": "svg/mascot_arm_lower_left.svg",
+    "arm_upper_right": "svg/mascot_arm_upper_right.svg",
+    "arm_lower_right": "svg/mascot_arm_lower_right.svg",
+    "leg_upper_left": "svg/mascot_leg_upper_left.svg",
+    "leg_lower_left": "svg/mascot_leg_lower_left.svg",
+    "leg_upper_right": "svg/mascot_leg_upper_right.svg",
+    "leg_lower_right": "svg/mascot_leg_lower_right.svg",
+    "shoe_left": "svg/mascot_shoe_left.svg",
+    "shoe_right": "svg/mascot_shoe_right.svg",
+    "hat": "svg/mascot_hat.svg",
+    "backpack": "svg/mascot_backpack.svg",
+    "shadow": "svg/mascot_shadow.svg",
+    "composite": "svg/mascot_composite.svg"
   }
 }

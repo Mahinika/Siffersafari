@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="400.0" height="160.0" viewBox="0 0 400.0 160.0" xmlns="http://www.w3.org/2000/svg">
+<svg width="400.0" height="96.0" viewBox="0 0 400.0 96.0" xmlns="http://www.w3.org/2000/svg">
   <!-- Left antenna -->
-  <line x1="160.0" y1="20" x2="140.0" y2="-100.0" 
+  <line x1="160.0" y1="20" x2="140.0" y2="-36.00000000000001" 
         stroke="#4CAF50" 
         stroke-width="3.2" 
         stroke-linecap="round"/>
-  <circle cx="140.0" cy="-100.0" 
+  <circle cx="140.0" cy="-36.00000000000001" 
           r="14.0" 
           fill="#FF6F61" 
           stroke="#2E2E2E" 
           stroke-width="2.4"/>
   
   <!-- Right antenna -->
-  <line x1="240.0" y1="20" x2="260.0" y2="-100.0" 
+  <line x1="240.0" y1="20" x2="260.0" y2="-36.00000000000001" 
         stroke="#4CAF50" 
         stroke-width="3.2" 
         stroke-linecap="round"/>
-  <circle cx="260.0" cy="-100.0" 
+  <circle cx="260.0" cy="-36.00000000000001" 
           r="14.0" 
           fill="#FF6F61" 
           stroke="#2E2E2E" 

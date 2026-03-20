@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="400.0" height="387.27272727272725" viewBox="0 0 400.0 387.27272727272725" xmlns="http://www.w3.org/2000/svg">
+<svg width="400.0" height="451.6666666666667" viewBox="0 0 400.0 451.6666666666667" xmlns="http://www.w3.org/2000/svg">
   <!-- Left leg -->
   <rect x="140" y="20" 
-        width="40.0" height="327.27272727272725" 
-        rx="8.399999999999999" ry="8.399999999999999"
+        width="40.0" height="391.6666666666667" 
+        rx="9.799999999999999" ry="9.799999999999999"
         fill="#4CAF50" 
         stroke="#2E2E2E" 
         stroke-width="4"/>
   
   <!-- Foot -->
-  <ellipse cx="160.0" cy="359.27272727272725" 
+  <ellipse cx="160.0" cy="423.6666666666667" 
            rx="32" ry="20" 
            fill="#F2D3A0" 
            stroke="#2E2E2E" 
