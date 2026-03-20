@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:siffersafari/presentation/widgets/loke_walk_character.dart';
+
+import '../support/widgets/loke_walk_preview_widget.dart';
 
 void main() {
   testWidgets('[Widget] Loke walk character renders svg parts', (
@@ -11,7 +12,7 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           body: Center(
-            child: LokeWalkCharacter(height: 120),
+            child: LokeWalkPreviewWidget(height: 120),
           ),
         ),
       ),
@@ -19,7 +20,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.byType(LokeWalkCharacter), findsOneWidget);
+    expect(find.byType(LokeWalkPreviewWidget), findsOneWidget);
     expect(find.byType(SvgPicture), findsWidgets);
     expect(
       find.byWidgetPredicate(

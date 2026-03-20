@@ -1,5 +1,6 @@
 import 'package:bcrypt/bcrypt.dart';
 
+import '../../core/constants/settings_keys.dart';
 import '../../data/repositories/local_storage_repository.dart';
 import '../entities/pin_recovery_config.dart';
 
@@ -8,11 +9,6 @@ class ParentPinService {
   ParentPinService(this._storage);
 
   final LocalStorageRepository _storage;
-
-  static const String _pinHashKey = 'parent_pin_hash';
-  static const String _failedAttemptsKey = 'pin_failed_attempts';
-  static const String _lockoutUntilKey = 'pin_lockout_until';
-  static const String _recoveryConfigKey = 'pin_recovery_config';
 
   static const int _maxFailedAttempts = 5;
   static const Duration _lockoutDuration = Duration(minutes: 5);
@@ -25,17 +21,17 @@ class ParentPinService {
 
   /// Check if PIN exists (has been set).
   bool hasPinSet() {
-    final hash = _storage.getSetting(_pinHashKey) as String?;
+    final hash = _storage.getSetting(SettingsKeys.parentPinHash) as String?;
     return hash != null && hash.isNotEmpty;
   }
 
   /// Save a new PIN (hashed).
   Future<void> setPin(String pin) async {
     final hash = _hashPin(pin);
-    await _storage.saveSetting(_pinHashKey, hash);
+    await _storage.saveSetting(SettingsKeys.parentPinHash, hash);
     // Reset failed attempts when setting new PIN
-    await _storage.saveSetting(_failedAttemptsKey, 0);
-    await _storage.deleteSetting(_lockoutUntilKey);
+    await _storage.saveSetting(SettingsKeys.parentPinFailedAttempts, 0);
+    await _storage.deleteSetting(SettingsKeys.parentPinLockoutUntil);
   }
 
   /// Verify if provided PIN matches stored hash.
@@ -43,7 +39,8 @@ class ParentPinService {
   /// Throws [PinLockoutException] if currently locked out.
   Future<bool> verifyPin(String pin) async {
     // Check lockout
-    final lockoutUntil = _storage.getSetting(_lockoutUntilKey) as int?;
+    final lockoutUntil =
+        _storage.getSetting(SettingsKeys.parentPinLockoutUntil) as int?;
     if (lockoutUntil != null) {
       final now = DateTime.now().millisecondsSinceEpoch;
       if (now < lockoutUntil) {
@@ -51,12 +48,13 @@ class ParentPinService {
         throw PinLockoutException(remainingMinutes);
       } else {
         // Lockout expired, clear it
-        await _storage.deleteSetting(_lockoutUntilKey);
-        await _storage.saveSetting(_failedAttemptsKey, 0);
+        await _storage.deleteSetting(SettingsKeys.parentPinLockoutUntil);
+        await _storage.saveSetting(SettingsKeys.parentPinFailedAttempts, 0);
       }
     }
 
-    final storedHash = _storage.getSetting(_pinHashKey) as String?;
+    final storedHash =
+        _storage.getSetting(SettingsKeys.parentPinHash) as String?;
     if (storedHash == null || storedHash.isEmpty) {
       return false;
     }
@@ -66,20 +64,28 @@ class ParentPinService {
 
     if (isCorrect) {
       // Reset failed attempts on successful login
-      await _storage.saveSetting(_failedAttemptsKey, 0);
-      await _storage.deleteSetting(_lockoutUntilKey);
+      await _storage.saveSetting(SettingsKeys.parentPinFailedAttempts, 0);
+      await _storage.deleteSetting(SettingsKeys.parentPinLockoutUntil);
       return true;
     } else {
       // Increment failed attempts
       final failedAttempts =
-          (_storage.getSetting(_failedAttemptsKey) as int? ?? 0) + 1;
-      await _storage.saveSetting(_failedAttemptsKey, failedAttempts);
+          (_storage.getSetting(SettingsKeys.parentPinFailedAttempts) as int? ??
+                  0) +
+              1;
+      await _storage.saveSetting(
+        SettingsKeys.parentPinFailedAttempts,
+        failedAttempts,
+      );
 
       if (failedAttempts >= _maxFailedAttempts) {
         // Lock out
         final lockoutUntil =
             DateTime.now().add(_lockoutDuration).millisecondsSinceEpoch;
-        await _storage.saveSetting(_lockoutUntilKey, lockoutUntil);
+        await _storage.saveSetting(
+          SettingsKeys.parentPinLockoutUntil,
+          lockoutUntil,
+        );
         throw PinLockoutException(_lockoutDuration.inMinutes);
       }
 
@@ -89,14 +95,16 @@ class ParentPinService {
 
   /// Get remaining failed attempts before lockout.
   int getRemainingAttempts() {
-    final failedAttempts = _storage.getSetting(_failedAttemptsKey) as int? ?? 0;
+    final failedAttempts =
+        _storage.getSetting(SettingsKeys.parentPinFailedAttempts) as int? ?? 0;
     final remaining = _maxFailedAttempts - failedAttempts;
     return remaining > 0 ? remaining : 0;
   }
 
   /// Check if currently locked out and return remaining minutes.
   int? getLockoutRemainingMinutes() {
-    final lockoutUntil = _storage.getSetting(_lockoutUntilKey) as int?;
+    final lockoutUntil =
+        _storage.getSetting(SettingsKeys.parentPinLockoutUntil) as int?;
     if (lockoutUntil == null) return null;
 
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -117,7 +125,7 @@ class ParentPinService {
 
   /// Get the stored recovery config (or null if not set)
   PinRecoveryConfig? _getRecoveryConfig() {
-    final raw = _storage.getSetting(_recoveryConfigKey);
+    final raw = _storage.getSetting(SettingsKeys.parentPinRecoveryConfig);
     if (raw is! Map) return null;
 
     try {
@@ -135,7 +143,7 @@ class ParentPinService {
 
   /// Save recovery config to storage
   Future<void> _saveRecoveryConfig(PinRecoveryConfig config) async {
-    await _storage.saveSetting(_recoveryConfigKey, {
+    await _storage.saveSetting(SettingsKeys.parentPinRecoveryConfig, {
       'securityQuestion': config.securityQuestion,
       'securityAnswerHash': config.securityAnswerHash,
       'createdAt': config.createdAt?.toIso8601String(),
@@ -179,7 +187,7 @@ class ParentPinService {
 
   /// Clear recovery config (e.g., when user deletes profile)
   Future<void> clearRecoveryConfig() async {
-    await _storage.deleteSetting(_recoveryConfigKey);
+    await _storage.deleteSetting(SettingsKeys.parentPinRecoveryConfig);
   }
 }
 

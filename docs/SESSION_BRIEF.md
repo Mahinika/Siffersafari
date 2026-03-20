@@ -193,7 +193,7 @@ Status: historisk, ersatt av senare riktning. Detta avsnitt beskriver ett tidiga
 - Bytt produktkoden från sprite/procedural mascot-animation till ett Lottie-only-widgetlager via `ThemeMascot`.
 - Tagit bort idle-frame-assets, mascot-generator-skript och lokala preview-/experimentmappar för mascot-animationer.
 - Synkat README, docs, `.gitignore` och repo-beslut till en tydlig Lottie-riktning.
-- Levererat en första lokal konceptfil `assets/animations/mascot_walk_cycle.json` samt en HTML-preview som laddar exakt samma JSON utanför emulatorn.
+- Levererat en första lokal konceptfil `artifacts/animation_reference/mascot_walk_cycle.json` samt en HTML-preview som laddar exakt samma JSON utanför emulatorn.
 
 ### Verifiering
 - Berörda Flutter-filer är fria från editorfel.

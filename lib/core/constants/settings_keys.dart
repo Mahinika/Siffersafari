@@ -6,6 +6,10 @@ class SettingsKeys {
   SettingsKeys._();
 
   static const String activeUserId = 'active_user_id';
+  static const String parentPinHash = 'parent_pin_hash';
+  static const String parentPinFailedAttempts = 'pin_failed_attempts';
+  static const String parentPinLockoutUntil = 'pin_lockout_until';
+  static const String parentPinRecoveryConfig = 'pin_recovery_config';
 
   static String onboardingDone(String userId) => 'onboarding_done_$userId';
 
@@ -14,6 +18,12 @@ class SettingsKeys {
   static String questCurrent(String userId) => 'quest_current_$userId';
 
   static String questCompleted(String userId) => 'quest_completed_$userId';
+
+  static String wordProblemsEnabled(String userId) =>
+      'word_problems_enabled_$userId';
+
+  static String missingNumberEnabled(String userId) =>
+      'missing_number_enabled_$userId';
 
   static String spacedRepetitionSchedules(String userId) =>
       'spaced_repetition_schedules_$userId';

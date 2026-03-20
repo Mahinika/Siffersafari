@@ -18,6 +18,8 @@ import '../../domain/enums/operation_type.dart';
 import '../../domain/services/adaptive_difficulty_service.dart';
 import '../../domain/services/feedback_service.dart';
 import '../../domain/services/spaced_repetition_service.dart';
+import '../../shared/settings/quiz_feature_settings.dart';
+import 'adaptive_difficulty_service_provider.dart';
 import '../services/audio_service.dart';
 import '../services/question_generator_service.dart';
 import 'audio_service_provider.dart';
@@ -214,11 +216,10 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
   bool _isSpacedRepetitionEnabled(String userId) {
     try {
-      final raw = _repository.getSetting(
-        SettingsKeys.spacedRepetitionEnabled(userId),
-        defaultValue: AppFeatures.spacedRepetitionEnabled,
+      return QuizFeatureSettings.readSpacedRepetitionEnabled(
+        repository: _repository,
+        userId: userId,
       );
-      return raw is bool ? raw : AppFeatures.spacedRepetitionEnabled;
     } catch (_) {
       return AppFeatures.spacedRepetitionEnabled;
     }
@@ -228,8 +229,9 @@ class QuizNotifier extends StateNotifier<QuizState> {
     if (userId.isEmpty) return;
 
     final isEnabled = _isSpacedRepetitionEnabled(userId);
-    final reviewSchedules =
-        isEnabled ? _loadReviewSchedules(userId) : const <String, ReviewSchedule>{};
+    final reviewSchedules = isEnabled
+        ? _loadReviewSchedules(userId)
+        : const <String, ReviewSchedule>{};
     final dueCount =
         isEnabled ? _countDueReviews(reviewSchedules, DateTime.now()) : 0;
 
@@ -359,8 +361,16 @@ class QuizNotifier extends StateNotifier<QuizState> {
           ),
     );
 
-    final effectiveWordProblemsEnabled = wordProblemsEnabled ?? true;
-    final effectiveMissingNumberEnabled = missingNumberEnabled ?? true;
+    final effectiveWordProblemsEnabled = wordProblemsEnabled ??
+        QuizFeatureSettings.readWordProblemsEnabled(
+          repository: _repository,
+          userId: userId,
+        );
+    final effectiveMissingNumberEnabled = missingNumberEnabled ??
+        QuizFeatureSettings.readMissingNumberEnabled(
+          repository: _repository,
+          userId: userId,
+        );
 
     final firstQuestion = _questionGenerator.generateQuestion(
       ageGroup: ageGroup,
@@ -388,11 +398,11 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
     final isSpacedRepetitionEnabled = _isSpacedRepetitionEnabled(userId);
     final reviewSchedules = isSpacedRepetitionEnabled
-      ? _loadReviewSchedules(userId)
-      : const <String, ReviewSchedule>{};
+        ? _loadReviewSchedules(userId)
+        : const <String, ReviewSchedule>{};
     final dueCount = isSpacedRepetitionEnabled
-      ? _countDueReviews(reviewSchedules, DateTime.now())
-      : 0;
+        ? _countDueReviews(reviewSchedules, DateTime.now())
+        : 0;
 
     state = state.copyWith(
       userId: userId,
@@ -464,8 +474,16 @@ class QuizNotifier extends StateNotifier<QuizState> {
       ),
     );
 
-    final effectiveWordProblemsEnabled = wordProblemsEnabled ?? true;
-    final effectiveMissingNumberEnabled = missingNumberEnabled ?? true;
+    final effectiveWordProblemsEnabled = wordProblemsEnabled ??
+        QuizFeatureSettings.readWordProblemsEnabled(
+          repository: _repository,
+          userId: userId,
+        );
+    final effectiveMissingNumberEnabled = missingNumberEnabled ??
+        QuizFeatureSettings.readMissingNumberEnabled(
+          repository: _repository,
+          userId: userId,
+        );
 
     final steps = Map<OperationType, int>.unmodifiable(
       initialDifficultyStepsByOperation ??
@@ -492,11 +510,11 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
     final isSpacedRepetitionEnabled = _isSpacedRepetitionEnabled(userId);
     final reviewSchedules = isSpacedRepetitionEnabled
-      ? _loadReviewSchedules(userId)
-      : const <String, ReviewSchedule>{};
+        ? _loadReviewSchedules(userId)
+        : const <String, ReviewSchedule>{};
     final dueCount = isSpacedRepetitionEnabled
-      ? _countDueReviews(reviewSchedules, DateTime.now())
-      : 0;
+        ? _countDueReviews(reviewSchedules, DateTime.now())
+        : 0;
 
     state = state.copyWith(
       userId: userId,
@@ -620,8 +638,9 @@ class QuizNotifier extends StateNotifier<QuizState> {
     );
 
     final userId = state.userId;
-    final isSpacedRepetitionEnabled =
-        userId != null && userId.isNotEmpty && _isSpacedRepetitionEnabled(userId);
+    final isSpacedRepetitionEnabled = userId != null &&
+        userId.isNotEmpty &&
+        _isSpacedRepetitionEnabled(userId);
 
     final updatedReviewSchedules = isSpacedRepetitionEnabled
         ? (() {
@@ -745,6 +764,7 @@ final quizProvider = StateNotifierProvider<QuizNotifier, QuizState>((ref) {
   final feedback = ref.watch(feedbackServiceProvider);
   final audio = ref.watch(audioServiceProvider);
   final repo = ref.watch(localStorageRepositoryProvider);
+  final adaptiveDifficulty = ref.watch(adaptiveDifficultyServiceProvider);
   final spacedRepetition = ref.watch(spacedRepetitionServiceProvider);
 
   return QuizNotifier(
@@ -752,6 +772,7 @@ final quizProvider = StateNotifierProvider<QuizNotifier, QuizState>((ref) {
     feedback,
     audio,
     repo,
+    adaptiveDifficultyService: adaptiveDifficulty,
     spacedRepetitionService: spacedRepetition,
   );
 });

@@ -17,7 +17,7 @@ images/
 │   │   └── quest_hero.png
 │   └── jungle/         # Djungeltema-bilder
 │       ├── background.png
-│       ├── character_v2.png
+│       ├── character.png
 │       └── quest_hero.png
 └── generated/          # Tillfälliga genererade bilder (ej för permanent asset-användning)
 ```
@@ -26,7 +26,7 @@ images/
 
 - `themes/jungle/background.png`
 - `themes/jungle/quest_hero.png`
-- `themes/jungle/character_v2.png`
+- `themes/jungle/character.png`
 - `themes/space/background.png`
 - `themes/space/quest_hero.png`
 - `themes/space/character.png`

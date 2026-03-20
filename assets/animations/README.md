@@ -7,7 +7,6 @@ Denna mapp innehåller Lottie-animationer (.json) för appen.
 Just nu används minst en Lottie-fil i appen:
 
 1. **celebration.json** - visad på resultatskärmen vid bra resultat / upplåsning
-2. **mascot_walk_cycle.json** - lokal preview/konceptfil för en mjuk, loopande mascot-gångcykel
 
 Nya mascot- eller karaktärsanimationer ska också läggas här som Lottie-filer när de är godkända.
 
@@ -18,7 +17,7 @@ Planerade mascot-paths i temat just nu:
 
 Om dessa filer ännu inte finns visar mascot-ytorna placeholder tills de riktiga animationerna är levererade.
 
-För snabb visuell kontroll utanför emulatorn finns även en lokal HTML-preview i `artifacts/animation_preview/mascot_walk_preview/` som laddar just `mascot_walk_cycle.json`. Previewn är bara ett valideringsskal runt samma JSON-fil, inte ett separat animationsspår.
+För snabb visuell kontroll utanför emulatorn finns även en lokal HTML-preview i `artifacts/animation_preview/mascot_walk_preview/` som laddar referensfilen `artifacts/animation_reference/mascot_walk_cycle.json`. Referensen är inte en shipad runtime-asset.
 
 ## Format:
 

@@ -5,7 +5,7 @@ Detta dokument beskriver aktuell implementation i repo:t (uppdaterad 2026-03-18)
 ## Snabboversikt
 
 - Plattform: Flutter (Android-first)
-- Arkitektur: lagerindelad (`presentation`, `core`, `domain`, `data`)
+- Arkitektur: hybrid (`app`, `features`, kvarvarande `presentation`, `core`, `domain`, `data`)
 - State: Riverpod (`StateNotifierProvider` + `Provider`)
 - DI: GetIt
 - Persistens: Hive (`user_progress`, `settings`, `quiz_history`)
@@ -25,18 +25,21 @@ Detta dokument beskriver aktuell implementation i repo:t (uppdaterad 2026-03-18)
    - `initializeDependencies(openQuizHistoryBox: false)`
    - `quiz_history` oppnas i bakgrunden
 5. `ProviderScope` + `MathGameApp`
-6. `LaunchSplashGate` -> `AppEntryScreen`
+6. `StartupSplashGate` -> `StartupRouterScreen`
 
 ## Lager och ansvar
 
-### presentation/
+### app/ + features/ + presentation/
 
-Skarmar, dialoger och widgets.
+UI-lagret ar nu hybrid under overgangen till feature-first struktur:
+- `lib/app/bootstrap/` for startup och routing in i appen
+- `lib/features/` for featureagda skarmar, dialoger och widgets
+- `lib/presentation/` for kvarvarande legacy-UI som inte flyttats an
 
 Viktiga skarmar:
-- `app_entry_screen.dart`
+- `app/bootstrap/presentation/startup_router_screen.dart`
 - `onboarding_screen.dart`
-- `profile_picker_screen.dart`
+- `features/profiles/presentation/screens/profile_selection_screen.dart`
 - `home_screen.dart`
 - `quiz_screen.dart`
 - `results_screen.dart`
@@ -66,9 +69,8 @@ Viktiga tjanster:
 - `AdaptiveDifficultyService`
 - `FeedbackService`
 - `ParentPinService`
-- `SpacedRepetitionService` (implementerad och testad, ej inkopplad i quizflodet an)
+- `SpacedRepetitionService`
 - `DataExportService`
-- `ProfileBackupService`
 
 ### data/
 
@@ -83,8 +85,9 @@ Repository-implementation for lokal lagring:
 4. Svar hanteras i `QuizNotifier.submitAnswer(...)`
    - ljudfeedback
    - poang/streak
-   - adaptiv difficulty step per raknesatt
-   - in-progress persistens
+- adaptiv difficulty step per raknesatt
+- spaced repetition-review per fraga nar funktionen ar aktiverad
+- in-progress persistens
 5. Resultat visas i `ResultsScreen`
 6. `UserNotifier.applyQuizResult(...)` uppdaterar:
    - user stats

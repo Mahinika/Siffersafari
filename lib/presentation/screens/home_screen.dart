@@ -19,10 +19,10 @@ import '../../core/utils/page_transitions.dart';
 import '../../domain/entities/user_progress.dart';
 import '../../domain/enums/difficulty_level.dart';
 import '../../domain/enums/operation_type.dart';
-import '../dialogs/create_user_dialog.dart';
+import 'package:siffersafari/features/home/presentation/widgets/home_story_progress_card.dart';
+import 'package:siffersafari/features/profiles/presentation/dialogs/create_user_dialog.dart';
 import '../screens/story_map_screen.dart';
 import '../widgets/mascot_character.dart';
-import '../widgets/story_progress_card.dart';
 import '../widgets/themed_background_scaffold.dart';
 import 'onboarding_screen.dart';
 import 'parent_pin_screen.dart';
@@ -159,8 +159,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final user = userState.activeUser;
     final quizState = ref.watch(quizProvider);
     final spacedRepetitionEnabled = user == null
-      ? false
-      : ref.watch(spacedRepetitionEnabledProvider(user.userId));
+        ? false
+        : ref.watch(spacedRepetitionEnabledProvider(user.userId));
     final storyProgress = ref.watch(storyProgressProvider);
 
     final themeCfg = ref.watch(appThemeConfigProvider);
@@ -635,10 +635,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   Expanded(
                                     child: Text(
                                       !spacedRepetitionEnabled
-                                        ? 'Repetitioner av: aktivera i Föräldraläge'
-                                        : quizState.dueReviewCount == 0
-                                          ? 'Repetitioner redo: inga just nu'
-                                          : 'Repetitioner redo: ${quizState.dueReviewCount}',
+                                          ? 'Repetitioner av: aktivera i Föräldraläge'
+                                          : quizState.dueReviewCount == 0
+                                              ? 'Repetitioner redo: inga just nu'
+                                              : 'Repetitioner redo: ${quizState.dueReviewCount}',
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall
@@ -656,7 +656,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
 
                     if (hasStoryQuest)
-                      StoryProgressCard(
+                      HomeStoryProgressCard(
                         story: storyProgress,
                         heroAsset: questHeroAsset,
                         backgroundAsset: backgroundAsset,

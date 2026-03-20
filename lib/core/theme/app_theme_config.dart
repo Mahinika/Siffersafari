@@ -55,7 +55,7 @@ class AppThemeConfig {
           theme: AppTheme.jungle,
           backgroundAsset: 'assets/images/themes/jungle/background.png',
           questHeroAsset: 'assets/images/themes/jungle/quest_hero.png',
-          characterAsset: 'assets/images/themes/jungle/character_v2.png',
+          characterAsset: 'assets/images/themes/jungle/character.png',
           baseBackgroundColor: AppColors.jungleBackground,
           primaryActionColor: AppColors.junglePrimary,
           secondaryActionColor: AppColors.jungleSecondary,

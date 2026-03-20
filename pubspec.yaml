@@ -77,7 +77,6 @@ flutter:
     - assets/characters/skogshjalte/config/
     - assets/characters/skogshjalte/rive/
     - assets/characters/skogshjalte/svg/
-    - assets/characters/ville/config/
     - assets/ui/lottie/confetti.json
     - assets/ui/lottie/stars.json
     - assets/ui/lottie/success_pulse.json

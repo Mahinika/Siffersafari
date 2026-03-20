@@ -6,7 +6,7 @@ import '../../core/providers/app_theme_provider.dart';
 import '../../core/providers/user_provider.dart';
 import '../../core/utils/adaptive_layout.dart';
 import '../../domain/enums/app_theme.dart';
-import '../dialogs/create_user_dialog.dart';
+import 'package:siffersafari/features/profiles/presentation/dialogs/create_user_dialog.dart';
 import '../widgets/themed_background_scaffold.dart';
 import 'privacy_policy_screen.dart';
 
@@ -424,10 +424,7 @@ class _AdaptiveDropdownTile<T> extends StatelessWidget {
       value: value,
       isExpanded: isCompact,
       dropdownColor: dropdownColor,
-      style: Theme.of(context)
-          .textTheme
-          .bodyMedium
-          ?.copyWith(color: textColor),
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: textColor),
       underline: const SizedBox.shrink(),
       items: items,
       onChanged: onChanged,

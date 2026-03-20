@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:siffersafari/core/constants/settings_keys.dart';
 import 'package:siffersafari/data/repositories/local_storage_repository.dart';
 import 'package:siffersafari/domain/services/parent_pin_service.dart';
 
@@ -89,12 +90,12 @@ void main() {
 
       // Simulate a past lockout.
       await storage.saveSetting(
-        'pin_lockout_until',
+        SettingsKeys.parentPinLockoutUntil,
         DateTime.now()
             .subtract(const Duration(seconds: 1))
             .millisecondsSinceEpoch,
       );
-      await storage.saveSetting('pin_failed_attempts', 5);
+      await storage.saveSetting(SettingsKeys.parentPinFailedAttempts, 5);
 
       final ok = await service.verifyPin('0000');
       expect(ok, isFalse);
@@ -118,7 +119,7 @@ void main() {
       expect(service.hasRecoveryConfigured(), isTrue);
       expect(service.getSecurityQuestion(), 'Q');
 
-      final raw = storage.getSetting('pin_recovery_config');
+      final raw = storage.getSetting(SettingsKeys.parentPinRecoveryConfig);
       expect(raw, isA<Map>());
       final rawMap = raw as Map;
       expect(rawMap['securityQuestion'], 'Q');

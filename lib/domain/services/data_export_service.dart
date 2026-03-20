@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/constants/settings_keys.dart';
 import '../../data/repositories/local_storage_repository.dart';
 
 /// Service for exporting user data in GDPR-compliant JSON format
@@ -22,7 +23,9 @@ class DataExportService {
     }
 
     final quizHistory = _repository.getQuizHistory(userId);
-    final pinSet = _repository.getSetting('pin_${userId}_set') ?? false;
+    final pinHash = _repository.getSetting(SettingsKeys.parentPinHash);
+    final recoveryConfig =
+        _repository.getSetting(SettingsKeys.parentPinRecoveryConfig);
 
     // Build export payload (no sensitive data like PIN hashes)
     final exportData = {
@@ -44,18 +47,21 @@ class DataExportService {
         return {
           'sessionId': session['sessionId'],
           'operationType': session['operationType'],
+          'difficulty': session['difficulty'],
           'startTime': session['startTime'],
           'endTime': session['endTime'],
           'isComplete': session['isComplete'],
-          'score': session['score'],
+          'successRate': session['successRate'],
           'totalQuestions': session['totalQuestions'],
           'correctAnswers': session['correctAnswers'],
+          'points': session['points'],
+          'bonusPoints': session['bonusPoints'],
+          'pointsWithBonus': session['pointsWithBonus'],
         };
       }).toList(),
       'settings': {
-        'pinConfigured': pinSet,
-        'recoveryConfigured':
-            _repository.getSetting('pin_${userId}_recovery') ?? false,
+        'pinConfigured': pinHash is String && pinHash.isNotEmpty,
+        'recoveryConfigured': recoveryConfig is Map,
       },
       'note': 'This export contains your profile and quiz history. '
           'Sensitive information like PIN hashes and security answers are not included '

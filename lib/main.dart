@@ -7,14 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:siffersafari/app/bootstrap/presentation/startup_router_screen.dart';
+import 'package:siffersafari/app/bootstrap/presentation/startup_splash_gate.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/di/injection.dart';
 import 'core/providers/app_theme_provider.dart';
 import 'core/theme/app_theme_config.dart';
 import 'domain/enums/app_theme.dart';
-import 'presentation/screens/app_entry_screen.dart';
-import 'presentation/screens/launch_splash_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -149,7 +149,7 @@ class MathGameApp extends ConsumerWidget {
             } else if (initError != null) {
               home = _BootstrapErrorScreen(error: initError);
             } else {
-              home = const LaunchSplashGate(child: AppEntryScreen());
+              home = const StartupSplashGate(child: StartupRouterScreen());
             }
 
             return MaterialApp(

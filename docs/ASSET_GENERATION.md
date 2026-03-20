@@ -51,23 +51,14 @@ python tools/refresh_character.py --slug loke
 # -> updates artifacts/asset_pipeline_manifest.json
 # -> updates lib/gen/assets.g.dart
 
-# Generate mascot SVG parts
-dart run scripts/generate_mascot_svg_parts.dart
-# -> assets/characters/mascot/svg/*.svg
-
-# Generate approved UI effects
-dart run scripts/generate_lottie_effects.dart
-# -> assets/ui/lottie/*.json
-
-# Generate Rive rigging blueprint
-dart run scripts/generate_rive_blueprint.dart
-# -> artifacts/mascot_rive_blueprint.json
-# -> artifacts/MASCOT_RIVE_GUIDE.md
-
-# Orchestrate current asset pipeline + manifest + typed asset access
+# Orchestrate mascot/UI pipeline + manifest + typed asset access
 python tools/pipeline.py build-all
 # -> artifacts/asset_pipeline_manifest.json
 # -> lib/gen/assets.g.dart
+
+# Build only approved UI effects
+python tools/pipeline.py build-lottie
+# -> assets/ui/lottie/*.json
 
 # Validate generated asset content against style contract
 python tools/pipeline.py lint-assets --strict
@@ -80,9 +71,8 @@ python tools/pipeline.py lint-assets --strict
 | --- | --- | --- | --- |
 | New SVG-first character | `tools/create_character.py` | character folder + specs + blueprint + codegen | Fully automated |
 | Refresh existing SVG-first character | `tools/refresh_character.py` | regenerated visual spec + SVG assets + blueprint + codegen | Safe refresh, preserves animation spec |
-| SVG parts | `generate_mascot_svg_parts.dart` | `assets/characters/mascot/svg/*.svg` | Approved generated runtime/source assets |
-| Lottie UI effects | `generate_lottie_effects.dart` | confetti, stars, success_pulse, error_shake | Approved runtime UI effects |
-| Rive blueprint | `generate_rive_blueprint.dart` | JSON + guide for optional rigging | Optional blueprint only |
+| Mascot + UI pipeline | `tools/pipeline.py build-all` | mascot SVG/Lottie/Rive blueprint + manifest/codegen | Canonical repo pipeline |
+| Lottie UI effects | `tools/pipeline.py build-lottie` | confetti, stars, success_pulse, error_shake | Approved runtime UI effects |
 
 Important limitation:
 - no script in this repo produces a production-ready `.riv` automatically
@@ -92,8 +82,8 @@ Important limitation:
 
 1. Create a new character from a short brief, or generate/update candidate assets
 2. Review them in `artifacts/` or in dedicated preview surfaces
-3. Run `python tools/pipeline.py validate --strict`, `python tools/pipeline.py lint-assets --strict` and `python tools/pipeline.py manifest`
-4. Promote only approved runtime files into `assets/`
+3. Run `python tools/pipeline.py build-all` when mascot/UI generated outputs are part of the change
+4. Run `python tools/pipeline.py validate --strict`, `python tools/pipeline.py lint-assets --strict` and `python tools/pipeline.py manifest`
 5. Verify in app
 6. Commit only the approved runtime artifacts and their source specs/scripts
 
@@ -157,10 +147,10 @@ Use the **promotion script** for end-to-end automation:
 ```
 
 The script runs all phases automatically:
-1. **Generate** - SVG/Lottie/Rive in stable order
+1. **Generate** - character source files plus canonical pipeline steps
 2. **Validate** - spec contract checks + manifest update
 3. **Quality Gates** - analyze + targeted tests + full test suite
-4. **Promote** - copy approved assets from `artifacts/` → `assets/`
+4. **Promote** - confirm expected runtime outputs already landed in canonical asset paths
 5. **Report** - show next manual steps
 
 ### Options
@@ -189,18 +179,13 @@ Use the matching checklist below for reference or when not using the automated s
 1. Generate candidate character:
 
 ```bash
-python tools/create_character.py --name "<Name>" --brief "<brief>"
-python tools/pipeline.py validate --strict
-python tools/pipeline.py manifest
+python tools/create_character.py --name "<Name>" --brief "<brief>" --skip-pipeline
 ```
 
-2. Regenerate dependent assets in stable order:
+2. Regenerate dependent mascot/UI assets through the canonical pipeline:
 
 ```bash
-dart run scripts/generate_mascot_svg_parts.dart
-dart run scripts/generate_mascot_composite.dart
-dart run scripts/generate_lottie_effects.dart
-dart run scripts/generate_rive_blueprint.dart
+python tools/pipeline.py build-all
 ```
 
 3. Validate runtime paths and mascot integration:
@@ -227,17 +212,13 @@ flutter test
 1. Refresh from current config:
 
 ```bash
-python tools/refresh_character.py --slug <slug>
-python tools/pipeline.py validate --strict
-python tools/pipeline.py manifest
+python tools/refresh_character.py --slug <slug> --skip-pipeline
 ```
 
-2. Rebuild mascot outputs:
+2. Rebuild mascot/UI outputs through the canonical pipeline:
 
 ```bash
-dart run scripts/generate_mascot_svg_parts.dart
-dart run scripts/generate_mascot_composite.dart
-dart run scripts/generate_rive_blueprint.dart
+python tools/pipeline.py build-all
 ```
 
 3. Verify gates:
@@ -261,10 +242,8 @@ scripts/verify_mascot_rive_runtime.ps1
 1. Regenerate changed asset class:
 
 ```bash
-dart run scripts/generate_lottie_effects.dart
+python tools/pipeline.py build-lottie
 dart run scripts/generate_sfx_wav.dart --out assets/sounds
-python tools/pipeline.py validate --strict
-python tools/pipeline.py manifest
 ```
 
 2. Validate app behavior and no path regressions:

@@ -27,10 +27,8 @@ final audioServiceProvider = Provider<AudioService>((ref) {
 Enkel mutable state som ägs av UI:t (t.ex. filterval, temporär UI-state).
 
 ```dart
-// lib/core/providers/difficulty_provider.dart
-final ageGroupProvider = StateProvider<AgeGroup>((ref) => AgeGroup.young);
-final operationTypeProvider = StateProvider<OperationType>((ref) => OperationType.addition);
-final difficultyLevelProvider = StateProvider<DifficultyLevel>((ref) => DifficultyLevel.easy);
+// Example-only snippet
+final selectedTabProvider = StateProvider<int>((ref) => 0);
 ```
 
 **När ska jag använda denna:** För UI-transient state som inte kräver persisterad logik.  
@@ -135,7 +133,7 @@ final userProvider = StateNotifierProvider<UserNotifier, UserState>((ref) {
 | Mönster | Exempel | Kommentar |
 |---------|---------|----------|
 | Service provider | `audioServiceProvider` | Inte `audioProvider` |
-| State provider | `ageGroupProvider` | Namnge staten, inte providern |
+| State provider | `selectedTabProvider` | Namnge staten, inte providern |
 | Computed provider | `appThemeConfigProvider` | Beskrivande namn för härledd värde |
 | StateNotifier | `UserNotifier` | Suffix med `Notifier` |
 | StateNotifier provider | `userProvider` | Inte `userNotifierProvider` |
@@ -196,7 +194,6 @@ lib/core/providers/
   user_provider.dart           (inkluderar UserState + UserNotifier)
   quiz_provider.dart           (inkluderar QuizState + QuizNotifier)
   app_theme_provider.dart      (flera beräknade providers)
-  difficulty_provider.dart     (flera StateProviders)
 ```
 
 ---
@@ -221,7 +218,6 @@ lib/core/providers/
 | `appThemeProvider` | Computed | ✓ Ren |
 | `userProvider` | StateNotifier | ✓ Följer mönster |
 | `quizProvider` | StateNotifier | ✓ Följer mönster |
-| `ageGroupProvider` | State | ✓ Ren |
 | `parentSettingsProvider` | StateNotifier | ✓ Följer mönster |
 
 ---

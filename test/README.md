@@ -12,6 +12,8 @@ Note: Håll inte hårdkodade test-antal i dokumentation (de blir snabbt stale). 
 
 ```
 test/
+├── support/                       # Shared non-runtime test support widgets/files
+│   └── widgets/
 ├── test_utils.dart                # Shared helpers/mocks for widget tests
 ├── unit/                          # Unit tests
 │   ├── logic/                     # Business logic
@@ -26,7 +28,6 @@ test/
 │   ├── services/                  # Service layer
 │   │   ├── achievement_service_test.dart
 │   │   ├── parent_pin_service_test.dart
-│   │   ├── profile_backup_service_test.dart
 │   │   └── quest_progression_service_test.dart
 │   └── audits/                    # Verification/audit tests
 │       ├── mix_distribution_audit_test.dart

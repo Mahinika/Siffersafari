@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:siffersafari/core/constants/app_constants.dart';
+import 'package:siffersafari/core/constants/settings_keys.dart';
 import 'package:siffersafari/core/di/injection.dart';
 import 'package:siffersafari/domain/entities/user_progress.dart';
 import 'package:siffersafari/domain/enums/age_group.dart';
@@ -38,7 +39,7 @@ void main() {
         ageGroup: AgeGroup.middle,
       );
       await repository.saveUserProgress(user);
-      await repository.saveSetting('onboarding_done_$userId', true);
+      await repository.saveSetting(SettingsKeys.onboardingDone(userId), true);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -89,7 +90,7 @@ void main() {
         ageGroup: AgeGroup.middle,
       );
       await repository.saveUserProgress(user);
-      await repository.saveSetting('onboarding_done_$userId', true);
+      await repository.saveSetting(SettingsKeys.onboardingDone(userId), true);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -144,7 +145,7 @@ void main() {
         ageGroup: AgeGroup.middle,
       );
       await repository.saveUserProgress(user);
-      await repository.saveSetting('onboarding_done_$userId', true);
+      await repository.saveSetting(SettingsKeys.onboardingDone(userId), true);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -216,7 +217,7 @@ void main() {
         ageGroup: AgeGroup.middle,
       );
       await repository.saveUserProgress(user);
-      await repository.saveSetting('onboarding_done_$userId', true);
+      await repository.saveSetting(SettingsKeys.onboardingDone(userId), true);
       final pinService = getIt<ParentPinService>();
       await pinService.setPin('1234');
 

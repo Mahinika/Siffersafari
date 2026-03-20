@@ -32,7 +32,7 @@ class StoryMapScreen extends ConsumerWidget {
         ),
         body: Center(
           child: Text(
-            'Ingen karta finns an.',
+            'Ingen karta finns än.',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: mutedOnPrimary,
                   fontWeight: FontWeight.w600,
@@ -200,7 +200,7 @@ class _MapHeroCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        'Folj stigen steg for steg',
+                        'Följ stigen steg för steg',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                               color: onPrimary,
                               fontWeight: FontWeight.w800,
@@ -222,7 +222,7 @@ class _MapHeroCard extends StatelessWidget {
           ),
           const SizedBox(height: AppConstants.microSpacing6),
           Text(
-            'Du ser bara det viktigaste: var du ar och vart du ska nu.',
+            'Du ser bara det viktigaste: var du är och vart du ska nu.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: subtleOnPrimary,
                   fontWeight: FontWeight.w600,
@@ -246,7 +246,7 @@ class _MapHeroCard extends StatelessWidget {
                 mutedOnPrimary: mutedOnPrimary,
               ),
               _HeaderChip(
-                label: 'Nasta mattegrej',
+                label: 'Nästa mattegrej',
                 value: story.currentObjectiveTitle,
                 onPrimary: onPrimary,
                 mutedOnPrimary: mutedOnPrimary,
@@ -258,7 +258,7 @@ class _MapHeroCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Hur langt du har kommit',
+                  'Hur långt du har kommit',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -373,10 +373,10 @@ class _NowAndNextPanel extends StatelessWidget {
       builder: (context, constraints) {
         final useColumns = constraints.maxWidth < 620;
         final actionBody = nextNode == null
-            ? 'Ga tillbaka och spela sista stoppet pa stigen.'
-            : 'Ga tillbaka och tryck pa Spela nasta stopp for att resa mot ${nextNode!.landmark}.';
+            ? 'Gå tillbaka och spela sista stoppet på stigen.'
+            : 'Gå tillbaka och tryck på Spela nästa stopp för att resa mot ${nextNode!.landmark}.';
         final currentCard = _FocusCard(
-          label: 'Du ar har',
+          label: 'Du är här',
           title: currentNode?.landmark ?? 'Starten',
           body: 'Nu: ${story.currentObjectiveTitle}',
           icon: Icons.place_rounded,
@@ -384,10 +384,10 @@ class _NowAndNextPanel extends StatelessWidget {
           onPrimary: onPrimary,
         );
         final nextCard = _FocusCard(
-          label: nextNode == null ? 'Mallet ar nara' : 'Nasta stopp',
+          label: nextNode == null ? 'Målet är nära' : 'Nästa stopp',
           title: nextNode?.landmark ?? 'Sista stoppet',
           body: nextNode == null
-              ? 'Du ar snart framme vid slutet av stigen.'
+              ? 'Du är snart framme vid slutet av stigen.'
               : 'Sedan: ${nextNode!.title}',
           icon: nextNode == null ? Icons.emoji_events : Icons.flag_rounded,
           color: nextNode == null
@@ -400,7 +400,7 @@ class _NowAndNextPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Vad hander nu?',
+              'Vad händer nu?',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: onPrimary,
                     fontWeight: FontWeight.w800,
@@ -408,7 +408,7 @@ class _NowAndNextPanel extends StatelessWidget {
             ),
             const SizedBox(height: AppConstants.microSpacing6),
             Text(
-              'Titta pa de tva stora rutorna for att se var du ar och vart du ska.',
+              'Titta på de två stora rutorna för att se var du är och vart du ska.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: mutedOnPrimary,
                     fontWeight: FontWeight.w600,
@@ -601,7 +601,7 @@ class _NearbyStopsPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Stigen nara dig',
+            'Stigen nära dig',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: onPrimary,
                   fontWeight: FontWeight.w800,
@@ -609,7 +609,7 @@ class _NearbyStopsPanel extends StatelessWidget {
           ),
           const SizedBox(height: AppConstants.microSpacing6),
           Text(
-            'Las uppifran och nedat. Gront ar klart, gult ar du, gratt kommer senare.',
+            'Läs uppifrån och nedåt. Grönt är klart, gult är du, grått kommer senare.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: mutedOnPrimary,
                   fontWeight: FontWeight.w600,
@@ -678,8 +678,8 @@ class _StopCard extends StatelessWidget {
 
     final statusLabel = switch (node.state) {
       StoryNodeState.completed => 'Klar',
-      StoryNodeState.current => 'Du ar har',
-      StoryNodeState.upcoming => isNext ? 'Nasta' : 'Senare',
+      StoryNodeState.current => 'Du är här',
+      StoryNodeState.upcoming => isNext ? 'Nästa' : 'Senare',
     };
 
     final borderColor = switch (node.state) {
@@ -696,11 +696,11 @@ class _StopCard extends StatelessWidget {
     };
 
     final body = switch (node.state) {
-      StoryNodeState.completed => 'Du har redan klarat det har stoppet.',
+      StoryNodeState.completed => 'Du har redan klarat det här stoppet.',
       StoryNodeState.current => 'Nu spelar du: ${node.title}',
       StoryNodeState.upcoming => isNext
           ? 'Sedan kommer: ${node.title}'
-          : 'Detta stopp kommer senare pa stigen.',
+          : 'Detta stopp kommer senare på stigen.',
     };
 
     return Container(

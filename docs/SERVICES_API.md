@@ -120,26 +120,16 @@ Ansvar:
 Anvands av:
 - `ParentDashboardScreen`
 
-### ProfileBackupService
-Fil: `lib/domain/services/profile_backup_service.dart`
-
-Ansvar:
-- encode/decode av backup payload
-- schema-validering och defensiv parse
-
-Anvands av:
-- testat och klar for vidare integration
-
 ### SpacedRepetitionService
 Fil: `lib/domain/services/spaced_repetition_service.dart`
 
 Ansvar:
 - repetitionsintervall och due-berakning
 
-Status:
-- implementerad och unit-testad
-- registrerad i DI
-- ej aktivt inkopplad i quiz-notifierflodet an
+Anvands av:
+- `QuizNotifier.startSession(...)`
+- `QuizNotifier.startCustomSession(...)`
+- `QuizNotifier.submitAnswer(...)`
 
 ## Repository-kontrakt
 

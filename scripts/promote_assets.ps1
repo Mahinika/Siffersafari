@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Automate asset promotion workflow: generate, validate, test, promote
+    Thin operator wrapper around the canonical asset pipeline
     
 .DESCRIPTION
     Handles three workflows:
@@ -9,7 +9,8 @@
     B) Update Existing Character (by slug)
     C) Lottie/SFX Only
     
-    Runs generators in stable order, validates, tests, and promotes to assets/
+    Delegates generation to the repo's canonical tools (`create_character.py`,
+    `refresh_character.py`, and `tools/pipeline.py`), then runs validation and QA.
 
 .PARAMETER Workflow
     One of: NewCharacter, UpdateCharacter, LottieSFX
@@ -87,36 +88,24 @@ function Phase-Generate {
     
     if ($Workflow -eq 'NewCharacter') {
         Invoke-CheckedCommand `
-            "python tools/create_character.py --name `"$CharacterName`" --brief `"$CharacterBrief`"" `
+            "python tools/create_character.py --name `"$CharacterName`" --brief `"$CharacterBrief`" --skip-pipeline" `
             "Create new character from brief"
     }
     elseif ($Workflow -eq 'UpdateCharacter') {
         Invoke-CheckedCommand `
-            "python tools/refresh_character.py --slug $CharacterSlug" `
+            "python tools/refresh_character.py --slug $CharacterSlug --skip-pipeline" `
             "Refresh existing character: $CharacterSlug"
     }
     
     if ($Workflow -in 'NewCharacter', 'UpdateCharacter') {
         Invoke-CheckedCommand `
-            "dart run scripts/generate_mascot_svg_parts.dart" `
-            "Generate mascot SVG parts"
-        
-        Invoke-CheckedCommand `
-            "dart run scripts/generate_mascot_composite.dart" `
-            "Generate mascot composite"
-        
-        Invoke-CheckedCommand `
-            "dart run scripts/generate_lottie_effects.dart" `
-            "Generate Lottie effects"
-        
-        Invoke-CheckedCommand `
-            "dart run scripts/generate_rive_blueprint.dart" `
-            "Generate Rive blueprint"
+            "python tools/pipeline.py build-all" `
+            "Run canonical mascot/UI pipeline"
     }
     elseif ($Workflow -eq 'LottieSFX') {
         Invoke-CheckedCommand `
-            "dart run scripts/generate_lottie_effects.dart" `
-            "Generate Lottie effects"
+            "python tools/pipeline.py build-lottie" `
+            "Run canonical Lottie pipeline"
         
         Invoke-CheckedCommand `
             "dart run scripts/generate_sfx_wav.dart --out assets/sounds" `
@@ -179,75 +168,43 @@ function Phase-QA {
         "Full test suite"
 }
 
-# Phase 4: Promote
+# Phase 4: Confirm Outputs
 function Phase-Promote {
     Write-Host ""
-    Write-Host "[PHASE 4] Promote artifacts to assets/" -ForegroundColor Magenta
+    Write-Host "[PHASE 4] Confirm runtime outputs" -ForegroundColor Magenta
     Write-Host "================================================================================" -ForegroundColor Gray
     
-    # Character composite SVG
     if ($Workflow -eq 'NewCharacter' -or $Workflow -eq 'UpdateCharacter') {
         $slug = if ($Workflow -eq 'NewCharacter') { 
             $CharacterName.ToLower() 
         } else { 
             $CharacterSlug 
         }
-        
-        # Ensure target directory exists
-        $targetDir = "assets/characters/$slug/svg"
-        if (-not (Test-Path $targetDir)) {
-            New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-        }
-        
-        $source = "artifacts/${slug}_composite.svg"
-        $target = "$targetDir/${slug}_composite.svg"
-        
-        if (Test-Path $source) {
-            Write-Host "[+] Promote composite SVG: $source -> $target" -ForegroundColor Yellow
-            if (-not $DryRun) {
-                Copy-Item $source $target -Force
-                Write-Host "    [OK] Done" -ForegroundColor Green
-            }
+        $runtimeComposite = "assets/characters/$slug/svg/${slug}_composite.svg"
+        if (Test-Path $runtimeComposite) {
+            Write-Host "[+] Runtime composite available: $runtimeComposite" -ForegroundColor Yellow
+            Write-Host "    [OK] Done" -ForegroundColor Green
         } else {
-            Write-Host "    [*] No composite found at $source (may be normal for preview)" -ForegroundColor Yellow
+            Write-Host "    [!] Missing expected runtime composite: $runtimeComposite" -ForegroundColor Red
+            exit 1
         }
     }
     
-    # Lottie effects
     if ($Workflow -in 'NewCharacter', 'UpdateCharacter', 'LottieSFX') {
-        $sourceDir = "artifacts/ui/lottie"
         $targetDir = "assets/ui/lottie"
         
-        if (Test-Path $sourceDir) {
-            Write-Host "[+] Promote Lottie effects: $sourceDir -> $targetDir" -ForegroundColor Yellow
-            if (-not $DryRun) {
-                if (-not (Test-Path $targetDir)) {
-                    New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-                }
-                Get-ChildItem $sourceDir -Filter "*.json" | ForEach-Object {
-                    Copy-Item $_.FullName "$targetDir/$($_.Name)" -Force
-                }
-                Write-Host "    [OK] Done" -ForegroundColor Green
-            }
+        if (Test-Path $targetDir) {
+            Write-Host "[+] Runtime Lottie directory available: $targetDir" -ForegroundColor Yellow
+            Write-Host "    [OK] Done" -ForegroundColor Green
         }
     }
     
-    # SFX
     if ($Workflow -eq 'LottieSFX') {
-        $sourceDir = "artifacts/sounds"
         $targetDir = "assets/sounds"
         
-        if (Test-Path $sourceDir) {
-            Write-Host "[+] Promote SFX: $sourceDir -> $targetDir" -ForegroundColor Yellow
-            if (-not $DryRun) {
-                if (-not (Test-Path $targetDir)) {
-                    New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-                }
-                Get-ChildItem $sourceDir -Filter "*.wav" | ForEach-Object {
-                    Copy-Item $_.FullName "$targetDir/$($_.Name)" -Force
-                }
-                Write-Host "    [OK] Done" -ForegroundColor Green
-            }
+        if (Test-Path $targetDir) {
+            Write-Host "[+] Runtime SFX directory available: $targetDir" -ForegroundColor Yellow
+            Write-Host "    [OK] Done" -ForegroundColor Green
         }
     }
 }

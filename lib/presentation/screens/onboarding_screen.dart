@@ -8,6 +8,7 @@ import '../../core/providers/user_provider.dart';
 import '../../core/providers/word_problems_settings_provider.dart';
 import '../../core/utils/adaptive_layout.dart';
 import '../../domain/enums/operation_type.dart';
+import '../../shared/settings/quiz_feature_settings.dart';
 import '../widgets/themed_background_scaffold.dart';
 
 // region OnboardingScreen Widget
@@ -50,8 +51,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final repo = ref.read(localStorageRepositoryProvider);
 
-      final existingReadingSetting =
-          repo.getSetting(wordProblemsEnabledKey(widget.userId));
+      final hasStoredReadingSetting =
+          QuizFeatureSettings.hasStoredWordProblemsEnabled(
+        repository: repo,
+        userId: widget.userId,
+      );
 
       final activeUser = ref.read(userProvider).activeUser;
       final user = activeUser?.userId == widget.userId
@@ -69,7 +73,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       setState(() {
         _gradeLevel = user?.gradeLevel;
         _allowedOps = allowedOps;
-        _needsReadingSetup = existingReadingSetting is! bool;
+        _needsReadingSetup = !hasStoredReadingSetting;
       });
 
       // If grade is already set (often chosen during user creation), start on
