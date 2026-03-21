@@ -143,7 +143,7 @@ flutter build apk --release
 ### Upload APK
 4. **Upload APK:** Välj `build/app/outputs/flutter-apk/app-release.apk`
    ```
-   Version 1.0.2 - March 5, 2026
+   Version 1.3.1 - March 21, 2026
    
    - Uppdaterade dependencies (Riverpod, audioplayers, etc.)
    - Förbättrad offline-stabilitet
@@ -161,7 +161,7 @@ flutter build apk --release
 Version är definierad i `pubspec.yaml`:
 
 ```yaml
-version: 1.0.0+1
+version: 1.3.1+9
 ```
 
 **Namnkonvention:**
@@ -171,14 +171,14 @@ version: 1.0.0+1
 **Innan release:**
 ```yaml
 # Uppdatera:
-version: 1.0.2+5
+version: 1.3.1+9
 
 # Commit message:
-"chore: bump version to 1.0.2 (Google Play release)"
+"chore: bump version to 1.3.1 (Google Play release)"
 
 # Git tag:
-git tag v1.0.2
-git push origin v1.0.2
+git tag v1.3.1
+git push origin v1.3.1
 ```
 
 ---

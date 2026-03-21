@@ -219,10 +219,10 @@ Se [DEPLOY_ANDROID.md](DEPLOY_ANDROID.md) för full process.
 Kort:
 ```bash
 # Uppdatera version i pubspec.yaml
-version: 1.0.3+6  # Var 1.0.2+5 innan
+version: 1.3.1+9  # Var 1.3.0+8 innan
 
 # Commit
-git commit -m "chore: bump version to 1.0.3"
+git commit -m "chore: bump version to 1.3.1"
 
 # Build release APK
 flutter build apk --release
